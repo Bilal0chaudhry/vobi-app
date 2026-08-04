@@ -5,9 +5,11 @@ import CallHistory from './components/CallHistory';
 import Settings from './components/Settings';
 import LiveView from './components/LiveView';
 import NewVobModal from './components/NewVobModal';
+import SplashScreen from './components/SplashScreen';
 import { initialJobs } from './data/seedData';
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('dashboard');
   const [showNewVobModal, setShowNewVobModal] = useState(false);
   const [jobs, setJobs] = useState(initialJobs);
@@ -59,19 +61,25 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar currentView={currentView} onNavigate={handleNavigate} />
-
-      <main className="ml-[200px] flex-1 p-6">
-        {renderView()}
-      </main>
-
-      {showNewVobModal && (
-        <NewVobModal
-          onClose={() => setShowNewVobModal(false)}
-          onSubmit={handleSubmitNewVob}
-        />
+    <>
+      {isLoading && (
+        <SplashScreen onFinish={() => setIsLoading(false)} />
       )}
-    </div>
+
+      <div className="flex min-h-screen bg-slate-50">
+        <Sidebar currentView={currentView} onNavigate={handleNavigate} />
+
+        <main className="ml-[200px] flex-1 p-6">
+          {renderView()}
+        </main>
+
+        {showNewVobModal && (
+          <NewVobModal
+            onClose={() => setShowNewVobModal(false)}
+            onSubmit={handleSubmitNewVob}
+          />
+        )}
+      </div>
+    </>
   );
 }

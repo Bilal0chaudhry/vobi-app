@@ -1,27 +1,17 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
-import { IconPlus } from './icons';
+import PageHeader from './PageHeader';
 
 export default function CallHistory({ jobs, onNewVerification }) {
   return (
     <div className="animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Call history</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Completed and archived verifications</p>
-        </div>
-        <button
-          id="btn-new-verification-history"
-          onClick={onNewVerification}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-600/25 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 transition-all duration-200 active:scale-[0.97]"
-        >
-          <IconPlus />
-          New Verification
-        </button>
-      </div>
+      <PageHeader
+        title="Call history"
+        subtitle="Completed and archived verifications"
+        onNewVerification={onNewVerification}
+        buttonId="btn-new-verification-history"
+      />
 
-      {/* Job cards */}
       <div className="space-y-2">
         {jobs.map((job, idx) => (
           <div

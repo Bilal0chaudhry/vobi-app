@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { IconPlus } from './icons';
+import PageHeader from './PageHeader';
+import InputField from './InputField';
 
-/** Reusable toggle switch */
 function Toggle({ id, defaultOn }) {
   const [on, setOn] = useState(defaultOn);
   return (
@@ -18,23 +18,6 @@ function Toggle({ id, defaultOn }) {
   );
 }
 
-/** Single labeled input field */
-function SettingsField({ id, label, value, onChange }) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1.5">{label}</label>
-      <input
-        id={id}
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all"
-      />
-    </div>
-  );
-}
-
-/** Single labeled toggle row */
 function ToggleRow({ id, label, description, defaultOn }) {
   return (
     <>
@@ -58,34 +41,23 @@ export default function Settings({ onNewVerification }) {
 
   return (
     <div className="animate-fade-in max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Practice profile and agent behavior</p>
-        </div>
-        <button
-          id="btn-new-verification-settings"
-          onClick={onNewVerification}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-600/25 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 transition-all duration-200 active:scale-[0.97]"
-        >
-          <IconPlus />
-          New Verification
-        </button>
-      </div>
+      <PageHeader
+        title="Settings"
+        subtitle="Practice profile and agent behavior"
+        onNewVerification={onNewVerification}
+        buttonId="btn-new-verification-settings"
+      />
 
-      {/* Practice */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
         <h2 className="text-sm font-bold text-gray-900 mb-4">Practice</h2>
         <div className="grid grid-cols-2 gap-4">
-          <SettingsField id="settings-practiceName" label="Practice name"       value={practiceName}    onChange={setPracticeName} />
-          <SettingsField id="settings-npi"          label="Default provider NPI" value={defaultNpi}    onChange={setDefaultNpi} />
-          <SettingsField id="settings-taxId"        label="Tax ID"              value={taxId}           onChange={setTaxId} />
-          <SettingsField id="settings-callback"     label="Callback number"     value={callbackNumber}  onChange={setCallbackNumber} />
+          <InputField id="settings-practiceName" label="Practice name"       value={practiceName}   onChange={setPracticeName} />
+          <InputField id="settings-npi"          label="Default provider NPI" value={defaultNpi}      onChange={setDefaultNpi} />
+          <InputField id="settings-taxId"        label="Tax ID"              value={taxId}           onChange={setTaxId} />
+          <InputField id="settings-callback"     label="Callback number"     value={callbackNumber}  onChange={setCallbackNumber} />
         </div>
       </div>
 
-      {/* Agent behavior */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="text-sm font-bold text-gray-900 mb-5">Agent behavior</h2>
         <div className="space-y-5">

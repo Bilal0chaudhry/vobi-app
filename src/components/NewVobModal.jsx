@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { PAYERS } from '../data/seedData';
 import { IconX } from './icons';
+import InputField from './InputField';
 
 export default function NewVobModal({ onClose, onSubmit }) {
   const [firstName, setFirstName] = useState('');
@@ -32,7 +33,7 @@ export default function NewVobModal({ onClose, onSubmit }) {
     e.preventDefault();
     if (!firstName || !lastName || !memberId || cptCodes.length === 0) return;
 
-    const newJob = {
+    onSubmit({
       id: `VOB-${Date.now()}`,
       patientFirstName: firstName,
       patientLastName: lastName,
@@ -43,23 +44,19 @@ export default function NewVobModal({ onClose, onSubmit }) {
       cptCodes,
       submitted: 'Just now',
       status: 'Agent on Call',
-    };
-    onSubmit(newJob);
+    });
   };
 
   const isValid = firstName && lastName && memberId && cptCodes.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end modal-overlay" onClick={onClose}>
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
 
-      {/* Panel */}
       <div
         className="relative w-full max-w-md bg-white shadow-2xl border-l border-gray-200 flex flex-col modal-panel"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
         <button
           id="close-modal"
           onClick={onClose}
@@ -68,7 +65,6 @@ export default function NewVobModal({ onClose, onSubmit }) {
           <IconX className="w-4 h-4 text-gray-500" />
         </button>
 
-        {/* Content */}
         <div className="p-6 flex-1 overflow-y-auto">
           <h2 className="text-lg font-bold text-gray-900 mb-1">New VOB request</h2>
           <p className="text-sm text-gray-500 mb-6">
@@ -76,45 +72,13 @@ export default function NewVobModal({ onClose, onSubmit }) {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Patient Name */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">Patient first name</label>
-                <input
-                  id="input-firstName"
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="John"
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">Patient last name</label>
-                <input
-                  id="input-lastName"
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Doe"
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all"
-                />
-              </div>
+              <InputField id="input-firstName" label="Patient first name" value={firstName} onChange={setFirstName} placeholder="John" />
+              <InputField id="input-lastName" label="Patient last name" value={lastName} onChange={setLastName} placeholder="Doe" />
             </div>
 
-            {/* Date of Birth */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Date of birth</label>
-              <input
-                id="input-dob"
-                type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all"
-              />
-            </div>
+            <InputField id="input-dob" label="Date of birth" type="date" value={dob} onChange={setDob} />
 
-            {/* Payer & Member ID */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1.5">Payer</label>
@@ -137,33 +101,11 @@ export default function NewVobModal({ onClose, onSubmit }) {
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">Member ID</label>
-                <input
-                  id="input-memberId"
-                  type="text"
-                  value={memberId}
-                  onChange={(e) => setMemberId(e.target.value)}
-                  placeholder="W2749183021"
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all"
-                />
-              </div>
+              <InputField id="input-memberId" label="Member ID" value={memberId} onChange={setMemberId} placeholder="W2749183021" />
             </div>
 
-            {/* Provider NPI */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Provider NPI</label>
-              <input
-                id="input-npi"
-                type="text"
-                value={npi}
-                onChange={(e) => setNpi(e.target.value)}
-                placeholder="1487624930"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all"
-              />
-            </div>
+            <InputField id="input-npi" label="Provider NPI" value={npi} onChange={setNpi} placeholder="1487624930" />
 
-            {/* CPT Codes Tag Input */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-medium text-gray-600">CPT codes</label>
@@ -201,7 +143,6 @@ export default function NewVobModal({ onClose, onSubmit }) {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               id="btn-start-agent"
               type="submit"

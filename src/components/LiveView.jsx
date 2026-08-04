@@ -5,7 +5,6 @@ import LiveFeed from './LiveFeed';
 import { buildSimScript } from '../data/simScript';
 import { IconArrowLeft, IconClock } from './icons';
 
-/** Format seconds as m:ss */
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -26,13 +25,11 @@ export default function LiveView({ job, onBack, onJobComplete }) {
   const [callStatus, setCallStatus] = useState('Agent on Call');
   const feedRef = useRef(null);
 
-  // Elapsed timer
   useEffect(() => {
     const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Simulation engine — fires log entries on schedule
   useEffect(() => {
     const script = buildSimScript(job);
     const timers = script.map((entry, idx) =>
@@ -60,9 +57,8 @@ export default function LiveView({ job, onBack, onJobComplete }) {
     );
 
     return () => timers.forEach(clearTimeout);
-  }, [job]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [job]);
 
-  // Auto-scroll feed to bottom
   useEffect(() => {
     if (feedRef.current) {
       feedRef.current.scrollTop = feedRef.current.scrollHeight;
@@ -80,7 +76,6 @@ export default function LiveView({ job, onBack, onJobComplete }) {
 
   return (
     <div className="animate-fade-in h-[calc(100vh-32px)] flex flex-col">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-4">
           <button
@@ -112,7 +107,6 @@ export default function LiveView({ job, onBack, onJobComplete }) {
         </div>
       </div>
 
-      {/* Split panel */}
       <div className="flex gap-4 flex-1 min-h-0">
         <VerificationChecklist checklist={checklist} items={checklistItems} />
         <LiveFeed logs={logs} feedRef={feedRef} />

@@ -1,13 +1,5 @@
 import { PAYER_PHONES } from './seedData';
 
-/**
- * Builds a timed simulation script for a VOB call based on job data.
- * Each entry describes a log event: when it fires (delay ms), who said it,
- * and optionally which checklist item to mark complete.
- *
- * @param {object} job
- * @returns {Array<{delay: number, type: string, source: string, message: string, checklistUpdate?: string}>}
- */
 export function buildSimScript(job) {
   const phone = PAYER_PHONES[job.insurance] || '1-800-555-0100';
   const cpt1 = job.cptCodes[0] || '99214';

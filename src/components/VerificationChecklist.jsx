@@ -1,20 +1,12 @@
 import React from 'react';
 import { IconCheck } from './icons';
 
-/**
- * Displays the verification checklist with a progress bar.
- *
- * @param {object} props
- * @param {Record<string, 'pending'|'complete'|'n/a'>} props.checklist
- * @param {Array<{key: string, label: string}>} props.items
- */
 export default function VerificationChecklist({ checklist, items }) {
   const completedCount = Object.values(checklist).filter((v) => v === 'complete').length;
   const totalCount = items.length;
 
   return (
     <div className="w-72 flex-shrink-0 bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-bold text-gray-900">Verification checklist</h2>
         <span className="text-xs font-semibold text-brand-600">
@@ -22,7 +14,6 @@ export default function VerificationChecklist({ checklist, items }) {
         </span>
       </div>
 
-      {/* Progress bar */}
       <div className="w-full h-1.5 bg-gray-100 rounded-full mb-5 overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-700 ease-out"
@@ -30,7 +21,6 @@ export default function VerificationChecklist({ checklist, items }) {
         />
       </div>
 
-      {/* Items */}
       <div className="space-y-3 flex-1">
         {items.map(({ key, label }) => {
           const isComplete = checklist[key] === 'complete';

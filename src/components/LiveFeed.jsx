@@ -1,7 +1,6 @@
 import React from 'react';
 import { IconSpin } from './icons';
 
-/** Source badge color map */
 const SOURCE_BADGE = {
   SYSTEM: 'bg-amber-100 text-amber-800',
   API:    'bg-orange-100 text-orange-800',
@@ -12,24 +11,15 @@ const SOURCE_BADGE = {
   REP:    'bg-gray-200 text-gray-700',
 };
 
-/** Bubble background/border styles by message type */
 const BUBBLE_STYLE = {
   system: 'bg-amber-50 border-amber-200 text-amber-900',
   ai:     'bg-brand-50 border-brand-200 text-brand-900',
   rep:    'bg-gray-50 border-gray-200 text-gray-800',
 };
 
-/**
- * Live call feed panel — scrollable list of log entries.
- *
- * @param {object} props
- * @param {Array} props.logs
- * @param {React.RefObject} props.feedRef  - attached to the scroll container
- */
 export default function LiveFeed({ logs, feedRef }) {
   return (
     <div className="flex-1 bg-white rounded-xl border border-gray-200 flex flex-col min-h-0">
-      {/* Header */}
       <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse-dot" />
@@ -38,7 +28,6 @@ export default function LiveFeed({ logs, feedRef }) {
         <span className="text-xs text-gray-400">{logs.length} events</span>
       </div>
 
-      {/* Feed */}
       <div ref={feedRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
         {logs.length === 0 && (
           <div className="flex items-center justify-center h-full">
@@ -53,12 +42,10 @@ export default function LiveFeed({ logs, feedRef }) {
 
         {logs.map((log) => (
           <div key={log.id} className="log-entry flex gap-3">
-            {/* Timestamp */}
             <span className="text-[10px] font-mono text-gray-400 mt-2.5 flex-shrink-0 w-16">
               {log.timestamp}
             </span>
 
-            {/* Bubble */}
             <div className="flex-1">
               <span
                 className={`inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mb-1 ${

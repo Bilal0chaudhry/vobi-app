@@ -1,5 +1,6 @@
 import React from 'react';
 import { IconDashboard, IconCallHistory, IconSettings } from './icons';
+import VobiLogo from './VobiLogo';
 
 const NAV_ITEMS = [
   { key: 'dashboard',   label: 'Dashboard',    Icon: IconDashboard },
@@ -10,27 +11,17 @@ const NAV_ITEMS = [
 export default function Sidebar({ currentView, onNavigate }) {
   return (
     <aside className="fixed top-0 left-0 h-screen w-[200px] bg-white border-r border-gray-200 flex flex-col z-30">
-      {/* Logo */}
-      <div className="px-5 pt-5 pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center shadow-md shadow-brand-600/30">
-            <svg className="w-4.5 h-4.5 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-gray-900 leading-tight">Vobi</h1>
-            <p className="text-[10px] text-gray-500 leading-tight">Autonomous VOB Agent</p>
-          </div>
-        </div>
+      <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex flex-col items-start gap-0.5">
+        <VobiLogo size="md" />
+        <p className="text-[10px] font-semibold text-brand-600 tracking-wider uppercase pl-0.5">
+          Autonomous VOB Agent
+        </p>
       </div>
 
-      {/* Workspace label */}
-      <div className="px-5 pb-2">
+      <div className="px-5 pt-4 pb-2">
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Workspace</p>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-3 space-y-0.5">
         {NAV_ITEMS.map(({ key, label, Icon }) => {
           const isActive = currentView === key || (key === 'dashboard' && currentView === 'liveView');
@@ -52,7 +43,6 @@ export default function Sidebar({ currentView, onNavigate }) {
         })}
       </nav>
 
-      {/* User */}
       <div className="px-4 py-4 border-t border-gray-100">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold">

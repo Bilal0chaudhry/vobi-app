@@ -1,7 +1,8 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import CptBadge from './CptBadge';
-import { IconSignal, IconCheckCircle, IconZap, IconClock, IconPlus, IconArrowOut } from './icons';
+import PageHeader from './PageHeader';
+import { IconSignal, IconCheckCircle, IconZap, IconClock, IconArrowOut } from './icons';
 
 const STATS = [
   { label: 'Active jobs',       value: '2',      Icon: IconSignal,      iconClass: 'text-brand-500' },
@@ -13,23 +14,12 @@ const STATS = [
 export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
   return (
     <div className="animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Active and recent verification jobs</p>
-        </div>
-        <button
-          id="btn-new-verification"
-          onClick={onNewVerification}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-600/25 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 transition-all duration-200 active:scale-[0.97]"
-        >
-          <IconPlus />
-          New Verification
-        </button>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        subtitle="Active and recent verification jobs"
+        onNewVerification={onNewVerification}
+      />
 
-      {/* Stat cards */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {STATS.map(({ label, value, Icon, iconClass }) => (
           <div
@@ -45,7 +35,6 @@ export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
         ))}
       </div>
 
-      {/* Verification requests table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div>
