@@ -46,11 +46,17 @@ class EventLoggerProcessor(FrameProcessor):
                 "message": frame.text
             })
         elif self.source_type == "VOBI" and isinstance(frame, TextFrame):
-            await self.event_queue.put({
-                "type": "ai",
-                "source": "VOBI",
-                "message": frame.text
-            })
+            text = frame.text
+            if "[END_CALL]" in text:
+                text = text.replace("[END_CALL]", "")
+                await self.event_queue.put({"type": "control", "message": "close"})
+                
+            if text.strip():
+                await self.event_queue.put({
+                    "type": "ai",
+                    "source": "VOBI",
+                    "message": text
+                })
             
         # VERY IMPORTANT: Push the frame down the pipeline so we don't break the bot!
         await self.push_frame(frame, direction)
@@ -60,7 +66,7 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
         params=VADParams(
             confidence=0.7,
             start_secs=0.2,
-            stop_secs=0.2,
+            stop_secs=1.0,
         )
     )
 

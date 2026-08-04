@@ -12,8 +12,19 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('dashboard');
   const [showNewVobModal, setShowNewVobModal] = useState(false);
-  const [jobs, setJobs] = useState(initialJobs);
+  const [jobs, setJobs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vobi_jobs');
+      return saved ? JSON.parse(saved) : initialJobs;
+    } catch (e) {
+      return initialJobs;
+    }
+  });
   const [activeJob, setActiveJob] = useState(null);
+
+  React.useEffect(() => {
+    localStorage.setItem('vobi_jobs', JSON.stringify(jobs));
+  }, [jobs]);
 
   const handleNavigate = (view) => {
     setCurrentView(view);
@@ -43,6 +54,12 @@ export default function App() {
     );
   };
 
+  const handleJobUpdate = (jobId, updates) => {
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? { ...j, ...updates } : j))
+    );
+  };
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -53,7 +70,7 @@ export default function App() {
         return <Settings onNewVerification={() => setShowNewVobModal(true)} />;
       case 'liveView':
         return activeJob
-          ? <LiveView job={activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} />
+          ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
           : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
       default:
         return null;

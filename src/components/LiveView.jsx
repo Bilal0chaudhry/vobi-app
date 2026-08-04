@@ -11,9 +11,24 @@ function formatTime(seconds) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function LiveView({ job, onBack, onJobComplete }) {
-  const [logs, setLogs] = useState([]);
-  const [checklist, setChecklist] = useState({
+export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
+  const [logs, setLogs] = useState(() => job.logs || [
+    {
+      id: 'start',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      type: 'system',
+      source: 'SYSTEM',
+      message: `Initiating VOB request for ${job.patientFirstName} ${job.patientLastName}...`,
+    },
+    {
+      id: 'connect',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      type: 'system',
+      source: 'SYSTEM',
+      message: 'Vobi is active on your local machine. Please speak into your microphone to verify benefits.',
+    }
+  ]);
+  const [checklist, setChecklist] = useState(() => job.checklist || {
     eligibility: 'pending',
     deductible: 'pending',
     oopMax: 'pending',
@@ -22,8 +37,13 @@ export default function LiveView({ job, onBack, onJobComplete }) {
     copay: 'pending',
   });
   const [elapsed, setElapsed] = useState(0);
-  const [callStatus, setCallStatus] = useState('Agent on Call');
+  const [callStatus, setCallStatus] = useState(job.status !== 'Pending' ? job.status : 'Agent on Call');
   const feedRef = useRef(null);
+
+  // Sync state up to App.jsx so it saves to localStorage
+  useEffect(() => {
+    onJobUpdate?.(job.id, { logs, checklist, status: callStatus });
+  }, [logs, checklist, callStatus]);
 
   const handleEndCall = async () => {
     try {
@@ -41,22 +61,7 @@ export default function LiveView({ job, onBack, onJobComplete }) {
   }, []);
 
   useEffect(() => {
-    setLogs([
-      {
-        id: 'start',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        type: 'system',
-        source: 'SYSTEM',
-        message: `Initiating VOB request for ${job.patientFirstName} ${job.patientLastName}...`,
-      },
-      {
-        id: 'connect',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        type: 'system',
-        source: 'SYSTEM',
-        message: 'Vobi is active on your local machine. Please speak into your microphone to verify benefits.',
-      }
-    ]);
+    if (callStatus === 'Completed') return;
 
     const eventSource = new EventSource('http://localhost:8000/events');
 
@@ -64,26 +69,41 @@ export default function LiveView({ job, onBack, onJobComplete }) {
       const data = JSON.parse(event.data);
       const text = data.message.toLowerCase();
       
-      setLogs((prev) => [
-        ...prev,
-        {
-          id: Date.now() + Math.random(),
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-          type: data.type,
-          source: data.source,
-          message: data.message,
+      setLogs((prev) => {
+        const lastLog = prev[prev.length - 1];
+        if (lastLog && lastLog.source === data.source) {
+          // Aggregate chunks from the same source
+          const updatedLogs = [...prev];
+          const suffix = (data.source === 'VOBI' ? '' : ' ') + data.message;
+          updatedLogs[updatedLogs.length - 1] = {
+            ...lastLog,
+            message: lastLog.message + suffix,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+          };
+          return updatedLogs;
+        } else {
+          return [
+            ...prev,
+            {
+              id: Date.now() + Math.random(),
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              type: data.type,
+              source: data.source,
+              message: data.message,
+            }
+          ];
         }
-      ]);
+      });
 
-      // Simple keyword matching for checklist updates
+      // Smarter keyword matching for checklist updates
       setChecklist((prev) => {
         const next = { ...prev };
         if (text.includes('deductible')) next.deductible = 'complete';
-        if (text.includes('out of pocket') || text.includes('oop')) next.oopMax = 'complete';
-        if (text.includes('copay') || text.includes('coinsurance')) next.copay = 'complete';
-        if (text.includes('active') || text.includes('eligible')) next.eligibility = 'complete';
-        if (job.cptCodes[0] && text.includes(job.cptCodes[0])) next.cpt1 = 'complete';
-        if (job.cptCodes[1] && text.includes(job.cptCodes[1])) next.cpt2 = 'complete';
+        if (text.includes('out of pocket') || text.includes('oop') || text.match(/max.*pocket/)) next.oopMax = 'complete';
+        if (text.includes('copay') || text.includes('coinsurance') || text.includes('%')) next.copay = 'complete';
+        if (text.includes('active') || text.includes('eligible') || text.includes('coverage is effective')) next.eligibility = 'complete';
+        if (job.cptCodes[0] && (text.includes(job.cptCodes[0]) || text.includes('cpt'))) next.cpt1 = 'complete';
+        if (job.cptCodes[1] && (text.includes(job.cptCodes[1]) || text.includes('second code'))) next.cpt2 = 'complete';
         
         return next;
       });
