@@ -15,7 +15,8 @@ from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineWorker
 from pipecat.workers.runner import WorkerRunner
 from pipecat.processors.frame_processor import FrameProcessor, FrameDirection
-from pipecat.frames.frames import Frame, TranscriptionFrame, TextFrame, EndFrame
+from pipecat.frames.frames import Frame, TranscriptionFrame, TextFrame, EndFrame, UserStoppedSpeakingFrame
+import random
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair
 from pipecat.services.deepgram.stt import DeepgramSTTService
@@ -26,6 +27,21 @@ from pipecat.transports.local.audio import LocalAudioTransport, LocalAudioTransp
 from prompts import VOBI_SYSTEM_PROMPT, VOBI_GREETING
 
 FISH_VOICE_ID = os.getenv("FISH_AUDIO_VOICE_ID", "")
+
+class FillerWordProcessor(FrameProcessor):
+    def __init__(self):
+        super().__init__()
+        self.fillers = ["Hmm...", "Umm...", "Let me check on that...", "Okay,", "Right, let's see..."]
+        
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        await super().process_frame(frame, direction)
+        
+        if isinstance(frame, UserStoppedSpeakingFrame) and direction == FrameDirection.DOWNSTREAM:
+            filler = random.choice(self.fillers)
+            if filler:
+                await self.push_frame(TextFrame(filler), FrameDirection.DOWNSTREAM)
+                
+        await self.push_frame(frame, direction)
 
 class EventLoggerProcessor(FrameProcessor):
     def __init__(self, event_queue: asyncio.Queue, source_type: str):
@@ -135,6 +151,7 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
         EventLoggerProcessor(event_queue, "REP"),
         context_aggregator.user(),
         llm,
+        FillerWordProcessor(),
         EventLoggerProcessor(event_queue, "VOBI"),
         tts,
         transport.output(),
