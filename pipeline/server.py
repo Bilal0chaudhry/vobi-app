@@ -54,6 +54,16 @@ async def start_call(data: PatientData):
     
     return {"message": "Call started successfully", "patient": data.patientFirstName}
 
+@app.post("/end-call")
+async def end_call():
+    global active_call, event_queue
+    if active_call is not None and not active_call.done():
+        active_call.cancel()
+        active_call = None
+    if event_queue is not None:
+        await event_queue.put({"type": "control", "message": "close"})
+    return {"message": "Call ended successfully"}
+
 async def event_generator():
     global event_queue
     if event_queue is None:

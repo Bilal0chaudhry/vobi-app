@@ -51,6 +51,9 @@ class EventLoggerProcessor(FrameProcessor):
                 "source": "VOBI",
                 "message": frame.text
             })
+            
+        # VERY IMPORTANT: Push the frame down the pipeline so we don't break the bot!
+        await self.push_frame(frame, direction)
 
 async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None):
     vad = SileroVADAnalyzer(

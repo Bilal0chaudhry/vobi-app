@@ -25,6 +25,16 @@ export default function LiveView({ job, onBack, onJobComplete }) {
   const [callStatus, setCallStatus] = useState('Agent on Call');
   const feedRef = useRef(null);
 
+  const handleEndCall = async () => {
+    try {
+      await fetch('http://localhost:8000/end-call', { method: 'POST' });
+    } catch (error) {
+      console.error('Failed to end call:', error);
+    }
+    setCallStatus('Completed');
+    onJobComplete?.(job.id);
+  };
+
   useEffect(() => {
     const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
     return () => clearInterval(timer);
@@ -127,6 +137,13 @@ export default function LiveView({ job, onBack, onJobComplete }) {
         </div>
 
         <div className="flex items-center gap-4">
+          <button
+            onClick={handleEndCall}
+            disabled={callStatus === 'Completed'}
+            className="px-4 py-1.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            End Call
+          </button>
           <StatusBadge status={callStatus} />
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg">
             <IconClock className="w-3.5 h-3.5 text-gray-500" />
