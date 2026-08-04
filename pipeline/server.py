@@ -57,8 +57,7 @@ async def end_call():
         stop_event.set()
     
     if active_call is not None and not active_call.done():
-        await asyncio.sleep(1)
-        active_call.cancel()
+        # Allow the pipeline to finish cleanly instead of force-cancelling
         active_call = None
         
     if event_queue is not None:
