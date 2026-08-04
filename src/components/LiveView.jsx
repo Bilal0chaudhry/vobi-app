@@ -75,9 +75,15 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
           // Aggregate chunks from the same source
           const updatedLogs = [...prev];
           const suffix = (data.source === 'VOBI' ? '' : ' ') + data.message;
+          const mergedText = lastLog.message + suffix;
+          
+          if (mergedText.includes('[END_CALL]')) {
+             handleEndCall();
+          }
+          
           updatedLogs[updatedLogs.length - 1] = {
             ...lastLog,
-            message: lastLog.message + suffix,
+            message: mergedText.replace('[END_CALL]', ''),
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
           };
           return updatedLogs;
@@ -117,7 +123,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
     return () => {
       eventSource.close();
     };
-  }, [job]);
+  }, [job.id, callStatus]);
 
   useEffect(() => {
     if (feedRef.current) {
