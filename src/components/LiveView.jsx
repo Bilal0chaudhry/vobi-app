@@ -4,6 +4,7 @@ import VerificationChecklist from './VerificationChecklist';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
 import { formatTime } from '../utils/formatters';
+import { normalizeNumbers } from '../utils/textNormalizer';
 import { IconArrowLeft, IconClock } from './icons';
 
 export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
@@ -33,6 +34,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
   });
   const [elapsed, setElapsed] = useState(0);
   const [callStatus, setCallStatus] = useState(job.status !== 'Pending' ? job.status : 'Agent on Call');
+  const [showToast, setShowToast] = useState(false);
   const feedRef = useRef(null);
 
   useEffect(() => {
@@ -46,6 +48,8 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
       console.error('Failed to end call:', error);
     }
     setCallStatus('Completed');
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
     onJobComplete?.(job.id);
   };
 
@@ -67,11 +71,18 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
         const lastLog = prev[prev.length - 1];
         if (lastLog && lastLog.source === data.source) {
           const updatedLogs = [...prev];
-          const suffix = (data.source === 'VOBI' ? '' : ' ') + data.message;
+          
+          let suffix = data.message;
+          if (!/^[\s.,!?]/.test(suffix) && !lastLog.message.endsWith(' ') && lastLog.message.length > 0) {
+            suffix = ' ' + suffix;
+          }
+          
           const mergedText = lastLog.message + suffix;
           
-          if (mergedText.includes('[END_CALL]')) {
-             handleEndCall();
+          if (mergedText.includes('[END_CALL]') && !lastLog.message.includes('[END_CALL]')) {
+             setTimeout(() => {
+                handleEndCall();
+             }, 4000);
           }
           
           updatedLogs[updatedLogs.length - 1] = {
@@ -97,11 +108,12 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
       if (data.source === 'REP') {
         setChecklist((prev) => {
           const next = { ...prev };
-          const cleanText = text.replace(/[^a-z0-9%]/gi, '');
+          const normalizedText = normalizeNumbers(text);
+          const cleanText = normalizedText.replace(/[^a-z0-9%]/gi, '');
           
           if (text.includes('deductible')) next.deductible = 'complete';
           if (text.includes('out of pocket') || text.includes('oop') || text.match(/max.*pocket/)) next.oopMax = 'complete';
-          if (text.includes('copay') || text.includes('coinsurance') || text.includes('%')) next.copay = 'complete';
+          if (text.includes('copay') || text.includes('co pay') || text.includes('coinsurance') || text.includes('%')) next.copay = 'complete';
           if (text.includes('active') || text.includes('eligible') || text.includes('coverage is effective')) next.eligibility = 'complete';
           
           const cpt1Clean = job.cptCodes[0]?.replace(/[^a-z0-9]/gi, '');
@@ -184,6 +196,15 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
         <VerificationChecklist checklist={checklist} items={checklistItems} />
         <LiveFeed logs={logs} feedRef={feedRef} />
       </div>
+
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg shadow-gray-900/20 flex items-center gap-3 animate-fade-in z-50">
+          <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="text-sm font-semibold">Call completed successfully</span>
+        </div>
+      )}
     </div>
   );
 }
