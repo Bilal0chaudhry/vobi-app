@@ -4,14 +4,17 @@ import CptBadge from './CptBadge';
 import PageHeader from './PageHeader';
 import { IconSignal, IconCheckCircle, IconZap, IconClock, IconArrowOut } from './icons';
 
-const STATS = [
-  { label: 'Active jobs',       value: '2',      Icon: IconSignal,      iconClass: 'text-brand-500' },
-  { label: 'Verified today',    value: '14',     Icon: IconCheckCircle, iconClass: 'text-emerald-500' },
-  { label: 'API fast-path rate',value: '38%',    Icon: IconZap,         iconClass: 'text-amber-500' },
-  { label: 'Avg. call time',    value: '6m 12s', Icon: IconClock,       iconClass: 'text-blue-500' },
-];
-
 export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
+  const activeJobs = jobs.filter(j => j.status !== 'Completed').length;
+  const verifiedJobs = jobs.filter(j => j.status === 'Completed').length;
+  
+  const STATS = [
+    { label: 'Active jobs',       value: activeJobs.toString(),      Icon: IconSignal,      iconClass: 'text-brand-500' },
+    { label: 'Verified today',    value: verifiedJobs.toString(),     Icon: IconCheckCircle, iconClass: 'text-emerald-500' },
+    { label: 'API fast-path rate',value: '0%',    Icon: IconZap,         iconClass: 'text-amber-500' },
+    { label: 'Avg. call time',    value: '0m 0s', Icon: IconClock,       iconClass: 'text-blue-500' },
+  ];
+
   return (
     <div className="animate-fade-in">
       <PageHeader
