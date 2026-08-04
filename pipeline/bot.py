@@ -2,6 +2,8 @@ import asyncio
 import os
 import sys
 
+os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
+
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -10,77 +12,88 @@ from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.audio.turn.smart_turn.local_smart_turn_v3 import LocalSmartTurnAnalyzerV3
 from pipecat.pipeline.pipeline import Pipeline
-from pipecat.pipeline.runner import PipelineRunner
-from pipecat.pipeline.task import PipelineParams, PipelineTask
-from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
+from pipecat.pipeline.worker import PipelineWorker
+from pipecat.workers.runner import WorkerRunner
+from pipecat.processors.aggregators.llm_context import LLMContext
+from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair
 from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.services.openai.llm import OpenAILLMService
-from pipecat.services.fish.tts import FishTTSService
-from pipecat.transports.local.audio import LocalAudioTransport
-from pipecat.transports.base_transport import TransportParams
+from pipecat.services.fish.tts import FishAudioTTSService
+from pipecat.transports.local.audio import LocalAudioTransport, LocalAudioTransportParams
 
 from prompts import VOBI_SYSTEM_PROMPT, VOBI_GREETING
 
-# ──────────────────────────────────────────────
-# Fish Audio: pick a female voice
-# Browse voices at https://fish.audio and copy the ID from the URL
-# Example: https://fish.audio/m/MODEL_ID_HERE
-# Then paste it below or set FISH_AUDIO_VOICE_ID in .env
-# ──────────────────────────────────────────────
 FISH_VOICE_ID = os.getenv("FISH_AUDIO_VOICE_ID", "")
 
 
-async def main():
-    # ── Transport: local mic/speaker ──
+async def start_bot(patient_data: dict = None):
+    vad = SileroVADAnalyzer(
+        params=VADParams(
+            confidence=0.7,
+            start_secs=0.2,
+            stop_secs=0.2,
+        )
+    )
+
     transport = LocalAudioTransport(
-        TransportParams(
+        LocalAudioTransportParams(
             audio_in_enabled=True,
             audio_out_enabled=True,
             vad_enabled=True,
-            vad_analyzer=SileroVADAnalyzer(
-                params=VADParams(
-                    confidence=0.7,
-                    start_secs=0.2,
-                    stop_secs=0.2,
-                )
-            ),
+            vad_analyzer=vad,
             vad_audio_passthrough=True,
         )
     )
 
-    # ── STT: Deepgram ──
     stt = DeepgramSTTService(
         api_key=os.getenv("DEEPGRAM_API_KEY"),
         model="nova-3",
         language="en",
     )
 
-    # ── LLM: OpenAI GPT ──
     llm = OpenAILLMService(
         api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o-mini",
+        settings=OpenAILLMService.Settings(model="gpt-4o-mini"),
     )
 
-    # ── TTS: Fish Audio (female voice) ──
-    tts = FishTTSService(
+    tts = FishAudioTTSService(
         api_key=os.getenv("FISH_AUDIO_API_KEY"),
-        model="speech-1.5",
-        reference_id=FISH_VOICE_ID if FISH_VOICE_ID else None,
+        settings=FishAudioTTSService.Settings(
+            model="s2.1-pro-free",
+            voice=FISH_VOICE_ID if FISH_VOICE_ID else None
+        )
     )
 
-    # ── Context + Smart Turn Detection ──
+    # Format the system prompt with patient data if provided, else use placeholders
+    if patient_data:
+        system_prompt = VOBI_SYSTEM_PROMPT.format(
+            patient_first_name=patient_data.get("patientFirstName", ""),
+            patient_last_name=patient_data.get("patientLastName", ""),
+            dob=patient_data.get("dob", ""),
+            member_id=patient_data.get("memberId", ""),
+            npi=patient_data.get("npi", ""),
+            cpt_codes=", ".join(patient_data.get("cptCodes", []))
+        )
+    else:
+        system_prompt = VOBI_SYSTEM_PROMPT.format(
+            patient_first_name="[Patient First Name]",
+            patient_last_name="[Patient Last Name]",
+            dob="[DOB]",
+            member_id="[Member ID]",
+            npi="[NPI]",
+            cpt_codes="[CPT Codes]"
+        )
+
     messages = [
-        {"role": "system", "content": VOBI_SYSTEM_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "assistant", "content": VOBI_GREETING},
     ]
 
-    context = OpenAILLMContext(messages=messages)
-    context_aggregator = llm.create_context_aggregator(
-        context,
-        assistant_expect_stripped_words=False,
+    context = LLMContext(messages=messages)
+    context_aggregator = LLMContextAggregatorPair(
+        context=context
     )
 
-    # ── Pipeline ──
     pipeline = Pipeline([
         transport.input(),
         stt,
@@ -91,15 +104,9 @@ async def main():
         context_aggregator.assistant(),
     ])
 
-    task = PipelineTask(
-        pipeline,
-        params=PipelineParams(
-            allow_interruptions=True,
-            enable_metrics=True,
-        ),
-    )
-
-    runner = PipelineRunner()
+    worker = PipelineWorker(pipeline)
+    runner = WorkerRunner()
+    await runner.add_workers(worker)
 
     print("=" * 50)
     print("  VOBI Voice Agent — Local Audio Mode")
@@ -107,12 +114,21 @@ async def main():
     print("  Press Ctrl+C to stop.")
     print("=" * 50)
 
-    await runner.run(task)
+    await runner.run()
 
 
 if __name__ == "__main__":
+    # Test with dummy data
+    dummy_data = {
+        "patientFirstName": "John",
+        "patientLastName": "Doe",
+        "dob": "1990-01-01",
+        "memberId": "W2749183021",
+        "npi": "1487624930",
+        "cptCodes": ["99214", "90837"]
+    }
     try:
-        asyncio.run(main())
+        asyncio.run(start_bot(dummy_data))
     except KeyboardInterrupt:
         print("\nVobi agent stopped.")
         sys.exit(0)

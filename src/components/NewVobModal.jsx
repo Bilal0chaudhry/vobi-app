@@ -29,11 +29,11 @@ export default function NewVobModal({ onClose, onSubmit }) {
     setCptCodes(cptCodes.filter((c) => c !== code));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!firstName || !lastName || !memberId || cptCodes.length === 0) return;
 
-    onSubmit({
+    const jobData = {
       id: `VOB-${Date.now()}`,
       patientFirstName: firstName,
       patientLastName: lastName,
@@ -44,7 +44,22 @@ export default function NewVobModal({ onClose, onSubmit }) {
       cptCodes,
       submitted: 'Just now',
       status: 'Agent on Call',
-    });
+    };
+
+    try {
+      // Trigger the local Python backend to start the Pipecat agent
+      await fetch('http://localhost:8000/start-call', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jobData),
+      });
+    } catch (error) {
+      console.error("Failed to start Vobi backend:", error);
+    }
+
+    onSubmit(jobData);
   };
 
   const isValid = firstName && lastName && memberId && cptCodes.length > 0;
