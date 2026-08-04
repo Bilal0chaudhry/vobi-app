@@ -102,23 +102,25 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
       });
 
       // Smarter keyword matching for checklist updates
-      setChecklist((prev) => {
-        const next = { ...prev };
-        const cleanText = text.replace(/[^a-z0-9%]/gi, ''); // Strip spaces and punctuation
-        
-        if (text.includes('deductible')) next.deductible = 'complete';
-        if (text.includes('out of pocket') || text.includes('oop') || text.match(/max.*pocket/)) next.oopMax = 'complete';
-        if (text.includes('copay') || text.includes('coinsurance') || text.includes('%')) next.copay = 'complete';
-        if (text.includes('active') || text.includes('eligible') || text.includes('coverage is effective')) next.eligibility = 'complete';
-        
-        const cpt1Clean = job.cptCodes[0]?.replace(/[^a-z0-9]/gi, '');
-        if (cpt1Clean && (cleanText.includes(cpt1Clean) || text.includes('cpt'))) next.cpt1 = 'complete';
-        
-        const cpt2Clean = job.cptCodes[1]?.replace(/[^a-z0-9]/gi, '');
-        if (cpt2Clean && (cleanText.includes(cpt2Clean) || text.includes('second code'))) next.cpt2 = 'complete';
-        
-        return next;
-      });
+      if (data.source === 'REP') {
+        setChecklist((prev) => {
+          const next = { ...prev };
+          const cleanText = text.replace(/[^a-z0-9%]/gi, ''); // Strip spaces and punctuation
+          
+          if (text.includes('deductible')) next.deductible = 'complete';
+          if (text.includes('out of pocket') || text.includes('oop') || text.match(/max.*pocket/)) next.oopMax = 'complete';
+          if (text.includes('copay') || text.includes('coinsurance') || text.includes('%')) next.copay = 'complete';
+          if (text.includes('active') || text.includes('eligible') || text.includes('coverage is effective')) next.eligibility = 'complete';
+          
+          const cpt1Clean = job.cptCodes[0]?.replace(/[^a-z0-9]/gi, '');
+          if (cpt1Clean && (cleanText.includes(cpt1Clean) || text.includes('cpt'))) next.cpt1 = 'complete';
+          
+          const cpt2Clean = job.cptCodes[1]?.replace(/[^a-z0-9]/gi, '');
+          if (cpt2Clean && (cleanText.includes(cpt2Clean) || text.includes('second code'))) next.cpt2 = 'complete';
+          
+          return next;
+        });
+      }
     };
 
     eventSource.onerror = () => {
