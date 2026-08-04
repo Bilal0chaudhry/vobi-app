@@ -85,6 +85,12 @@ async def event_generator():
 async def get_events():
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    global active_call
+    if active_call is not None and not active_call.done():
+        active_call.cancel()
+        
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
