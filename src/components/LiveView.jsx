@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import StatusBadge from './StatusBadge';
 import VerificationChecklist from './VerificationChecklist';
 import LiveFeed from './LiveFeed';
-import { buildSimScript } from '../data/simScript';
+
 import { IconArrowLeft, IconClock } from './icons';
 
 function formatTime(seconds) {
@@ -31,32 +31,22 @@ export default function LiveView({ job, onBack, onJobComplete }) {
   }, []);
 
   useEffect(() => {
-    const script = buildSimScript(job);
-    const timers = script.map((entry, idx) =>
-      setTimeout(() => {
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: idx,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-            type: entry.type,
-            source: entry.source,
-            message: entry.message,
-          },
-        ]);
-
-        if (entry.checklistUpdate) {
-          if (entry.checklistUpdate === 'done') {
-            setCallStatus('Completed');
-            onJobComplete?.(job.id);
-          } else {
-            setChecklist((prev) => ({ ...prev, [entry.checklistUpdate]: 'complete' }));
-          }
-        }
-      }, entry.delay)
-    );
-
-    return () => timers.forEach(clearTimeout);
+    setLogs([
+      {
+        id: 0,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        type: 'system',
+        source: 'SYSTEM',
+        message: `Initiating VOB request for ${job.patientFirstName} ${job.patientLastName}...`,
+      },
+      {
+        id: 1,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        type: 'system',
+        source: 'SYSTEM',
+        message: 'Vobi is active on your local machine. Please speak into your microphone to verify benefits.',
+      }
+    ]);
   }, [job]);
 
   useEffect(() => {
