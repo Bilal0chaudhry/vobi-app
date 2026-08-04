@@ -88,8 +88,8 @@ export default function NewVobModal({ onClose, onSubmit }) {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-3">
-              <InputField id="input-firstName" label="Patient first name" value={firstName} onChange={setFirstName} placeholder="John" />
-              <InputField id="input-lastName" label="Patient last name" value={lastName} onChange={setLastName} placeholder="Doe" />
+              <InputField id="input-firstName" label="Patient first name" value={firstName} onChange={setFirstName} />
+              <InputField id="input-lastName" label="Patient last name" value={lastName} onChange={setLastName} />
             </div>
 
             <InputField id="input-dob" label="Date of birth" type="date" value={dob} onChange={setDob} />
@@ -116,10 +116,10 @@ export default function NewVobModal({ onClose, onSubmit }) {
                   ))}
                 </select>
               </div>
-              <InputField id="input-memberId" label="Member ID" value={memberId} onChange={setMemberId} placeholder="W2749183021" />
+              <InputField id="input-memberId" label="Member ID" value={memberId} onChange={setMemberId} />
             </div>
 
-            <InputField id="input-npi" label="Provider NPI" value={npi} onChange={setNpi} placeholder="1487624930" />
+            <InputField id="input-npi" label="Provider NPI" value={npi} onChange={setNpi} />
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
