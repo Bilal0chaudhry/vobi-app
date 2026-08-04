@@ -94,10 +94,14 @@ async def event_generator():
 async def get_events():
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-@app.on_event("shutdown")
-async def shutdown_event():
+@app.on_event("startup")
+async def startup_event():
+    import signal
     import os
-    os._exit(0)
+    def force_exit(*args):
+        print("\nForce killing server...")
+        os._exit(0)
+    signal.signal(signal.SIGINT, force_exit)
         
 if __name__ == "__main__":
     import uvicorn
