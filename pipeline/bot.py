@@ -15,7 +15,7 @@ from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineWorker
 from pipecat.workers.runner import WorkerRunner
 from pipecat.processors.frame_processor import FrameProcessor, FrameDirection
-from pipecat.frames.frames import Frame, TranscriptionFrame, TextFrame
+from pipecat.frames.frames import Frame, TranscriptionFrame, TextFrame, EndFrame
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair
 from pipecat.services.deepgram.stt import DeepgramSTTService
@@ -61,11 +61,11 @@ class EventLoggerProcessor(FrameProcessor):
         # VERY IMPORTANT: Push the frame down the pipeline so we don't break the bot!
         await self.push_frame(frame, direction)
 
-async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None):
+async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None, stop_event: asyncio.Event = None):
     vad = SileroVADAnalyzer(
         params=VADParams(
             confidence=0.7,
-            start_secs=0.2,
+            start_secs=0.5,
             stop_secs=1.0,
         )
     )
@@ -144,6 +144,14 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
     worker = PipelineWorker(pipeline)
     runner = WorkerRunner()
     await runner.add_workers(worker)
+
+    async def wait_for_stop():
+        if stop_event:
+            await stop_event.wait()
+            await pipeline.queue_frame(EndFrame())
+            
+    if stop_event:
+        asyncio.create_task(wait_for_stop())
 
     print("=" * 50)
     print("  VOBI Voice Agent — Local Audio Mode")

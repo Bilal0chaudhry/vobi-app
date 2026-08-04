@@ -40,26 +40,35 @@ class PatientData(BaseModel):
 active_call = None
 # Global event queue for SSE
 event_queue = None
+# Global stop event for Pipecat graceful shutdown
+stop_event = None
 
 @app.post("/start-call")
 async def start_call(data: PatientData):
-    global active_call, event_queue
+    global active_call, event_queue, stop_event
     if active_call is not None and not active_call.done():
         raise HTTPException(status_code=400, detail="A call is already in progress.")
     
     event_queue = asyncio.Queue()
+    stop_event = asyncio.Event()
     
     # Run the bot in a background task
-    active_call = asyncio.create_task(start_bot(data.model_dump(), event_queue))
+    active_call = asyncio.create_task(start_bot(data.model_dump(), event_queue, stop_event))
     
     return {"message": "Call started successfully", "patient": data.patientFirstName}
 
 @app.post("/end-call")
 async def end_call():
-    global active_call, event_queue
+    global active_call, event_queue, stop_event
+    if stop_event is not None:
+        stop_event.set()
+    
     if active_call is not None and not active_call.done():
+        # Wait a moment for EndFrame to process before cancelling the task forcefully
+        await asyncio.sleep(1)
         active_call.cancel()
         active_call = None
+        
     if event_queue is not None:
         await event_queue.put({"type": "control", "message": "close"})
     return {"message": "Call ended successfully"}
