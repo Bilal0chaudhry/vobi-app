@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageHeader from './PageHeader';
 import InputField from './InputField';
 
@@ -34,10 +34,15 @@ function ToggleRow({ id, label, description, defaultOn }) {
 }
 
 export default function Settings({ onNewVerification }) {
-  const [practiceName, setPracticeName] = useState('Northside Cardiology');
-  const [defaultNpi, setDefaultNpi] = useState('1487624930');
-  const [taxId, setTaxId] = useState('84-2910337');
-  const [callbackNumber, setCallbackNumber] = useState('(312) 555-0184');
+  const [practiceName, setPracticeName] = useState(() => localStorage.getItem('practiceName') || 'Northside Cardiology');
+  const [defaultNpi, setDefaultNpi] = useState(() => localStorage.getItem('defaultNpi') || '1487624930');
+  const [taxId, setTaxId] = useState(() => localStorage.getItem('taxId') || '84-2910337');
+  const [callbackNumber, setCallbackNumber] = useState(() => localStorage.getItem('callbackNumber') || '(312) 555-0184');
+
+  useEffect(() => { localStorage.setItem('practiceName', practiceName); }, [practiceName]);
+  useEffect(() => { localStorage.setItem('defaultNpi', defaultNpi); }, [defaultNpi]);
+  useEffect(() => { localStorage.setItem('taxId', taxId); }, [taxId]);
+  useEffect(() => { localStorage.setItem('callbackNumber', callbackNumber); }, [callbackNumber]);
 
   return (
     <div className="animate-fade-in max-w-2xl mx-auto">

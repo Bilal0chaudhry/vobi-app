@@ -14,6 +14,8 @@ from pipecat.audio.turn.smart_turn.local_smart_turn_v3 import LocalSmartTurnAnal
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineWorker
 from pipecat.workers.runner import WorkerRunner
+from pipecat.processors.frame_processor import FrameProcessor, FrameDirection
+from pipecat.frames.frames import Frame, TranscriptionFrame, TextFrame
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair
 from pipecat.services.deepgram.stt import DeepgramSTTService
@@ -25,8 +27,32 @@ from prompts import VOBI_SYSTEM_PROMPT, VOBI_GREETING
 
 FISH_VOICE_ID = os.getenv("FISH_AUDIO_VOICE_ID", "")
 
+class EventLoggerProcessor(FrameProcessor):
+    def __init__(self, event_queue: asyncio.Queue, source_type: str):
+        super().__init__()
+        self.event_queue = event_queue
+        self.source_type = source_type
+        
+    async def process_frame(self, frame: Frame, direction: FrameDirection):
+        await super().process_frame(frame, direction)
+        
+        if self.event_queue is None:
+            return
+            
+        if self.source_type == "REP" and isinstance(frame, TranscriptionFrame):
+            await self.event_queue.put({
+                "type": "rep",
+                "source": "REP",
+                "message": frame.text
+            })
+        elif self.source_type == "VOBI" and isinstance(frame, TextFrame):
+            await self.event_queue.put({
+                "type": "ai",
+                "source": "VOBI",
+                "message": frame.text
+            })
 
-async def start_bot(patient_data: dict = None):
+async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None):
     vad = SileroVADAnalyzer(
         params=VADParams(
             confidence=0.7,
@@ -97,8 +123,10 @@ async def start_bot(patient_data: dict = None):
     pipeline = Pipeline([
         transport.input(),
         stt,
+        EventLoggerProcessor(event_queue, "REP"),
         context_aggregator.user(),
         llm,
+        EventLoggerProcessor(event_queue, "VOBI"),
         tts,
         transport.output(),
         context_aggregator.assistant(),

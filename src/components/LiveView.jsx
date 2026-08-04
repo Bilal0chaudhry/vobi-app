@@ -33,20 +33,60 @@ export default function LiveView({ job, onBack, onJobComplete }) {
   useEffect(() => {
     setLogs([
       {
-        id: 0,
+        id: 'start',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
         type: 'system',
         source: 'SYSTEM',
         message: `Initiating VOB request for ${job.patientFirstName} ${job.patientLastName}...`,
       },
       {
-        id: 1,
+        id: 'connect',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
         type: 'system',
         source: 'SYSTEM',
         message: 'Vobi is active on your local machine. Please speak into your microphone to verify benefits.',
       }
     ]);
+
+    const eventSource = new EventSource('http://localhost:8000/events');
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const text = data.message.toLowerCase();
+      
+      setLogs((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: data.type,
+          source: data.source,
+          message: data.message,
+        }
+      ]);
+
+      // Simple keyword matching for checklist updates
+      setChecklist((prev) => {
+        const next = { ...prev };
+        if (text.includes('deductible')) next.deductible = 'complete';
+        if (text.includes('out of pocket') || text.includes('oop')) next.oopMax = 'complete';
+        if (text.includes('copay') || text.includes('coinsurance')) next.copay = 'complete';
+        if (text.includes('active') || text.includes('eligible')) next.eligibility = 'complete';
+        if (job.cptCodes[0] && text.includes(job.cptCodes[0])) next.cpt1 = 'complete';
+        if (job.cptCodes[1] && text.includes(job.cptCodes[1])) next.cpt2 = 'complete';
+        
+        return next;
+      });
+    };
+
+    eventSource.onerror = () => {
+      console.error('SSE connection error');
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }, [job]);
 
   useEffect(() => {
