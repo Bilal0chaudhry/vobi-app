@@ -96,9 +96,8 @@ async def get_events():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    global active_call
-    if active_call is not None and not active_call.done():
-        active_call.cancel()
+    import os
+    os._exit(0)
         
 if __name__ == "__main__":
     import uvicorn
