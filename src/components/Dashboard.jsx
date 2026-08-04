@@ -1,7 +1,8 @@
 import React from 'react';
-import StatusBadge from './StatusBadge';
+import Badge from './ui/Badge';
 import CptBadge from './CptBadge';
 import PageHeader from './PageHeader';
+import Button from './ui/Button';
 import { IconSignal, IconCheckCircle, IconZap, IconClock, IconArrowOut } from './icons';
 
 export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
@@ -44,10 +45,10 @@ export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
             <h2 className="text-sm font-bold text-gray-900">Verification requests</h2>
             <p className="text-xs text-gray-400 mt-0.5">Updated moments ago</p>
           </div>
-          <button className="text-xs font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors">
+          <Button variant="ghost" className="text-brand-600 hover:text-brand-700">
             View all
             <IconArrowOut />
-          </button>
+          </Button>
         </div>
 
         <table className="w-full">
@@ -86,16 +87,18 @@ export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
                 </td>
                 <td className="px-4 py-3.5 text-sm text-gray-500">{job.submitted}</td>
                 <td className="px-4 py-3.5">
-                  <StatusBadge status={job.status} />
+                  <Badge status={job.status} />
                 </td>
                 <td className="px-4 py-3.5">
-                  <button
+                  <Button
                     id={`open-job-${job.id}`}
                     onClick={() => onOpenJob(job)}
-                    className="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
+                    variant="ghost"
+                    size="sm"
+                    className="text-brand-600 hover:text-brand-700 font-medium"
                   >
                     Open
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}

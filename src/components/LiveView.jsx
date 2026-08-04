@@ -1,15 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import StatusBadge from './StatusBadge';
-import VerificationChecklist from './VerificationChecklist';
 import LiveFeed from './LiveFeed';
-
+import VerificationChecklist from './VerificationChecklist';
+import Badge from './ui/Badge';
+import Button from './ui/Button';
+import { formatTime } from '../utils/formatters';
 import { IconArrowLeft, IconClock } from './icons';
-
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
 
 export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
   const [logs, setLogs] = useState(() => job.logs || [
@@ -40,7 +35,6 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
   const [callStatus, setCallStatus] = useState(job.status !== 'Pending' ? job.status : 'Agent on Call');
   const feedRef = useRef(null);
 
-  // Sync state up to App.jsx so it saves to localStorage
   useEffect(() => {
     onJobUpdate?.(job.id, { logs, checklist, status: callStatus });
   }, [logs, checklist, callStatus]);
@@ -72,7 +66,6 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
       setLogs((prev) => {
         const lastLog = prev[prev.length - 1];
         if (lastLog && lastLog.source === data.source) {
-          // Aggregate chunks from the same source
           const updatedLogs = [...prev];
           const suffix = (data.source === 'VOBI' ? '' : ' ') + data.message;
           const mergedText = lastLog.message + suffix;
@@ -101,11 +94,10 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
         }
       });
 
-      // Smarter keyword matching for checklist updates
       if (data.source === 'REP') {
         setChecklist((prev) => {
           const next = { ...prev };
-          const cleanText = text.replace(/[^a-z0-9%]/gi, ''); // Strip spaces and punctuation
+          const cleanText = text.replace(/[^a-z0-9%]/gi, '');
           
           if (text.includes('deductible')) next.deductible = 'complete';
           if (text.includes('out of pocket') || text.includes('oop') || text.match(/max.*pocket/)) next.oopMax = 'complete';
@@ -152,14 +144,14 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
     <div className="animate-fade-in h-[calc(100vh-32px)] flex flex-col">
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <button
+          <Button
             id="btn-back-dashboard"
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+            variant="ghost"
           >
             <IconArrowLeft />
             Back
-          </button>
+          </Button>
           <div>
             <h1 className="text-lg font-bold text-gray-900">
               {job.patientFirstName} {job.patientLastName}
@@ -171,14 +163,14 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
         </div>
 
         <div className="flex items-center gap-4">
-          <button
+          <Button
             onClick={handleEndCall}
             disabled={callStatus === 'Completed'}
-            className="px-4 py-1.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            variant="danger"
           >
             End Call
-          </button>
-          <StatusBadge status={callStatus} />
+          </Button>
+          <Badge status={callStatus} />
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg">
             <IconClock className="w-3.5 h-3.5 text-gray-500" />
             <span className="text-sm font-mono font-semibold text-gray-700">

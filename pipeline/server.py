@@ -1,7 +1,6 @@
 import os
 import sys
 
-# Fix NLTK security import error before importing anything
 os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException
@@ -14,7 +13,6 @@ from bot import start_bot
 
 app = FastAPI()
 
-# Allow frontend to access the backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,12 +33,8 @@ class PatientData(BaseModel):
     submitted: str
     status: str
 
-# Store the current running bot task to prevent multiple concurrent calls
-# using the local microphone.
 active_call = None
-# Global event queue for SSE
 event_queue = None
-# Global stop event for Pipecat graceful shutdown
 stop_event = None
 
 @app.post("/start-call")
@@ -52,7 +46,6 @@ async def start_call(data: PatientData):
     event_queue = asyncio.Queue()
     stop_event = asyncio.Event()
     
-    # Run the bot in a background task
     active_call = asyncio.create_task(start_bot(data.model_dump(), event_queue, stop_event))
     
     return {"message": "Call started successfully", "patient": data.patientFirstName}
@@ -64,7 +57,6 @@ async def end_call():
         stop_event.set()
     
     if active_call is not None and not active_call.done():
-        # Wait a moment for EndFrame to process before cancelling the task forcefully
         await asyncio.sleep(1)
         active_call.cancel()
         active_call = None
@@ -80,9 +72,7 @@ async def event_generator():
         
     while True:
         try:
-            # Wait for a new event from the queue
             event_data = await event_queue.get()
-            # If we receive a poison pill, close the stream
             if event_data.get("type") == "control" and event_data.get("message") == "close":
                 break
             

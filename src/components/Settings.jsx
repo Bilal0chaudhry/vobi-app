@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from './PageHeader';
-import InputField from './InputField';
+import InputField from './ui/InputField';
+import Button from './ui/Button';
 
 function Toggle({ id, defaultOn }) {
   const [on, setOn] = useState(defaultOn);
@@ -75,6 +76,11 @@ export default function Settings({ onNewVerification }) {
             </div>
             <Toggle id="toggle-recordings" defaultOn={false} />
           </div>
+        </div>
+        <div className="mt-8 pt-5 border-t border-gray-100 flex justify-end">
+          <Button onClick={() => alert('Settings saved!')}>
+            Save Changes
+          </Button>
         </div>
       </div>
     </div>

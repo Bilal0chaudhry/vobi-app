@@ -58,7 +58,6 @@ class EventLoggerProcessor(FrameProcessor):
                     "message": text
                 })
             
-        # VERY IMPORTANT: Push the frame down the pipeline so we don't break the bot!
         await self.push_frame(frame, direction)
 
 async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None, stop_event: asyncio.Event = None):
@@ -99,7 +98,6 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
         )
     )
 
-    # Format the system prompt with patient data if provided, else use placeholders
     if patient_data:
         system_prompt = VOBI_SYSTEM_PROMPT.format(
             patient_first_name=patient_data.get("patientFirstName", ""),
@@ -163,7 +161,6 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
 
 
 if __name__ == "__main__":
-    # Test with dummy data
     dummy_data = {
         "patientFirstName": "John",
         "patientLastName": "Doe",
