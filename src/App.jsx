@@ -6,6 +6,7 @@ import Settings from './components/Settings';
 import LiveView from './components/LiveView';
 import NewVobModal from './components/NewVobModal';
 import SplashScreen from './components/SplashScreen';
+import PortalVobPage from './components/PortalVobPage';
 import { initialJobs } from './data/seedData';
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
     setActiveJob(null);
   };
 
+  // ── Call flow (existing) ─────────────────────────────────────
   const handleSubmitNewVob = (newJob) => {
     setJobs((prev) => [newJob, ...prev]);
     setActiveJob(newJob);
@@ -38,9 +40,18 @@ export default function App() {
     setShowNewVobModal(false);
   };
 
+  // ── Portal flow (new) ────────────────────────────────────────
+  const handlePortalSubmit = (newJob) => {
+    setJobs((prev) => [newJob, ...prev]);
+    setActiveJob(newJob);
+    setCurrentView('portalVob');
+    setShowNewVobModal(false);
+  };
+
   const handleOpenJob = (job) => {
     setActiveJob(job);
-    setCurrentView('liveView');
+    // Route to correct view based on job source
+    setCurrentView(job.source === 'portal' ? 'portalVob' : 'liveView');
   };
 
   const handleBackToDashboard = () => {
@@ -72,6 +83,14 @@ export default function App() {
         return activeJob
           ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
           : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
+      case 'portalVob':
+        return activeJob
+          ? <PortalVobPage
+              job={jobs.find(j => j.id === activeJob.id) || activeJob}
+              onBack={handleBackToDashboard}
+              onJobUpdate={handleJobUpdate}
+            />
+          : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
       default:
         return null;
     }
@@ -94,6 +113,7 @@ export default function App() {
           <NewVobModal
             onClose={() => setShowNewVobModal(false)}
             onSubmit={handleSubmitNewVob}
+            onPortalSubmit={handlePortalSubmit}
           />
         )}
       </div>
