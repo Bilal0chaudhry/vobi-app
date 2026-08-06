@@ -14,7 +14,7 @@ export default function Sidebar({ currentView, onNavigate }) {
       <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex flex-col items-start gap-0.5">
         <VobiLogo size="md" />
         <p className="text-[10px] font-semibold text-brand-600 tracking-wider uppercase pl-0.5">
-          Autonomous VOB Agent Test
+          Autonomous VOB Agent
         </p>
       </div>
 
@@ -31,8 +31,8 @@ export default function Sidebar({ currentView, onNavigate }) {
               id={`nav-${key}`}
               onClick={() => onNavigate(key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive
-                  ? 'bg-brand-50 text-brand-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-brand-50 text-brand-700'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
             >
               <Icon />
