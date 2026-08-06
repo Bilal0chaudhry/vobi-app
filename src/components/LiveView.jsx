@@ -79,7 +79,10 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
           
           const mergedText = lastLog.message + suffix;
           
-          if (mergedText.includes('[END_CALL]') && !lastLog.message.includes('[END_CALL]')) {
+          const isEndCall = /\[\s*END\s*_?\s*CALL\s*\]/i.test(mergedText) || (data.source === 'VOBI' && /\bgoodbye\b/i.test(mergedText));
+          const wasEndCall = /\[\s*END\s*_?\s*CALL\s*\]/i.test(lastLog.message) || (data.source === 'VOBI' && /\bgoodbye\b/i.test(lastLog.message));
+          
+          if (isEndCall && !wasEndCall) {
              setTimeout(() => {
                 handleEndCall();
              }, 4000);
@@ -87,7 +90,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
           
           updatedLogs[updatedLogs.length - 1] = {
             ...lastLog,
-            message: mergedText.replace('[END_CALL]', ''),
+            message: mergedText.replace(/\[\s*END\s*_?\s*CALL\s*\]/gi, '').trim(),
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
           };
           return updatedLogs;
@@ -105,7 +108,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
         }
       });
 
-      if (data.source === 'REP') {
+      if (data.source === 'REP' || data.source === 'VOBI') {
         setChecklist((prev) => {
           const next = { ...prev };
           const normalizedText = normalizeNumbers(text);
