@@ -75,6 +75,7 @@ async def end_call():
         stop_event.set()
     
     if active_call is not None and not active_call.done():
+        active_call.cancel()
         active_call = None
         
     if event_queue is not None:

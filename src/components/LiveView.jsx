@@ -5,6 +5,7 @@ import Badge from './ui/Badge';
 import Button from './ui/Button';
 import { formatTime } from '../utils/formatters';
 import { normalizeNumbers } from '../utils/textNormalizer';
+import { endCall, getEventsUrl } from '../utils/api';
 import { IconArrowLeft, IconClock } from './icons';
 
 export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
@@ -43,7 +44,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
 
   const handleEndCall = async () => {
     try {
-      await fetch('http://localhost:8000/end-call', { method: 'POST' });
+      await endCall();
     } catch (error) {
       console.error('Failed to end call:', error);
     }
@@ -61,7 +62,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
   useEffect(() => {
     if (callStatus === 'Completed') return;
 
-    const eventSource = new EventSource('http://localhost:8000/events');
+    const eventSource = new EventSource(getEventsUrl());
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -73,10 +74,6 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
           const updatedLogs = [...prev];
           
           let suffix = data.message;
-          if (!/^[\s.,!?]/.test(suffix) && !lastLog.message.endsWith(' ') && lastLog.message.length > 0) {
-            suffix = ' ' + suffix;
-          }
-          
           const mergedText = lastLog.message + suffix;
           
           const isEndCall = /\[\s*END\s*_?\s*CALL\s*\]/i.test(mergedText) || (data.source === 'VOBI' && /\bgoodbye\b/i.test(mergedText));
@@ -111,13 +108,15 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
       if (data.source === 'REP' || data.source === 'VOBI') {
         setChecklist((prev) => {
           const next = { ...prev };
-          const normalizedText = normalizeNumbers(text);
+          const lastLogMessage = (prevLogs => prevLogs[prevLogs.length - 1]?.message || '')(logs);
+          const currentText = lastLogMessage + data.message;
+          const normalizedText = normalizeNumbers(currentText.toLowerCase());
           const cleanText = normalizedText.replace(/[^a-z0-9%]/gi, '');
           
-          if (text.includes('deductible')) next.deductible = 'complete';
-          if (text.includes('out of pocket') || text.includes('oop') || text.match(/max.*pocket/)) next.oopMax = 'complete';
-          if (text.includes('copay') || text.includes('co pay') || text.includes('coinsurance') || text.includes('%')) next.copay = 'complete';
-          if (text.includes('active') || text.includes('eligible') || text.includes('coverage is effective')) next.eligibility = 'complete';
+          if (currentText.toLowerCase().includes('deductible')) next.deductible = 'complete';
+          if (currentText.toLowerCase().includes('out of pocket') || currentText.toLowerCase().includes('oop') || currentText.toLowerCase().match(/max.*pocket/)) next.oopMax = 'complete';
+          if (currentText.toLowerCase().includes('copay') || currentText.toLowerCase().includes('co pay') || currentText.toLowerCase().includes('coinsurance') || currentText.toLowerCase().includes('%')) next.copay = 'complete';
+          if (currentText.toLowerCase().includes('active') || currentText.toLowerCase().includes('eligible') || currentText.toLowerCase().includes('coverage is effective')) next.eligibility = 'complete';
           
           const cpt1Clean = job.cptCodes[0]?.replace(/[^a-z0-9]/gi, '');
           if (cpt1Clean && (cleanText.includes(cpt1Clean) || text.includes('cpt'))) next.cpt1 = 'complete';
