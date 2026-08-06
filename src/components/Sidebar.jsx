@@ -14,7 +14,7 @@ export default function Sidebar({ currentView, onNavigate }) {
       <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex flex-col items-start gap-0.5">
         <VobiLogo size="md" />
         <p className="text-[10px] font-semibold text-brand-600 tracking-wider uppercase pl-0.5">
-          Autonomous VOB Agent
+          Autonomous VOB Agent Test
         </p>
       </div>
 
