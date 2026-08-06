@@ -102,6 +102,18 @@ async def availity_eligibility(data: AvailityRequest):
         raise HTTPException(status_code=500, detail="Failed to authenticate with Availity")
     
     coverage_url = "https://api.availity.com/coverages/v1/coverages"
+    
+    PAYER_ID_MAP = {
+        "Aetna": "60054",
+        "Blue Cross": "00474",
+        "Cigna": "62308",
+        "United Healthcare": "87726",
+        "Humana": "61101",
+        "Medicare": "00431",
+        "Medicaid": "Varies"
+    }
+    payer_id = PAYER_ID_MAP.get(data.insurance, "60054")
+    
     payload = {
         "submitter": {"npi": data.npi or "1234567890"},
         "provider": {"npi": data.npi or "1234567890"},
@@ -112,7 +124,7 @@ async def availity_eligibility(data: AvailityRequest):
             "genderCode": data.gender,
             "birthDate": data.dob,
         },
-        "payer": {"payerId": "AETNA"} 
+        "payer": {"payerId": payer_id} 
     }
     
     if data.stateCode or data.zipCode:
@@ -130,31 +142,71 @@ async def availity_eligibility(data: AvailityRequest):
         req = urllib.request.Request(coverage_url, data=json.dumps(payload).encode("utf-8"))
         req.add_header("Content-Type", "application/json")
         req.add_header("Authorization", f"Bearer {access_token}")
+        req.add_header("X-Api-Mock-Scenario-ID", "1")
         
         with urllib.request.urlopen(req) as response:
             api_response = json.loads(response.read().decode())
     except Exception as e:
         print("Error calling Availity Coverages API:", e)
-        api_response = {"error": str(e), "message": "API call failed, returning mock data for UI demo"}
+        raise HTTPException(status_code=500, detail="failed to fetch data")
+        
+    coverages = api_response.get("coverages", [])
+    if not coverages:
+        raise HTTPException(status_code=404, detail="failed to fetch data")
+        
+    coverage = coverages[0]
+    subscriber = coverage.get("subscriber", {})
+    patient = coverage.get("patient", subscriber)
     
+    plans = coverage.get("plans", [])
+    plan = plans[0] if plans else {}
+    
+    raw_benefits = plan.get("benefits", [])
+    benefits_list = []
+    copay = None
+    deductible = None
+    coinsurance = None
+    
+    def clean_financial(val):
+        if isinstance(val, str):
+            return val.replace("$", "").strip()
+        return val
+
+    for b in raw_benefits:
+        name = b.get("description", "Benefit")
+        fin = b.get("financials", {})
+        
+        if "copay" in fin:
+            copay = clean_financial(fin["copay"])
+        if "deductible" in fin:
+            deductible = clean_financial(fin["deductible"])
+        if "coinsurance" in fin:
+            coinsurance = clean_financial(fin["coinsurance"])
+            
+        benefits_list.append({
+            "name": name,
+            "inNetwork": b.get("inNetwork", True),
+            "amount": clean_financial(fin.get("deductible") or fin.get("copay")),
+            "percent": clean_financial(fin.get("coinsurance"))
+        })
+
     return {
         "patient": {
-            "name": f"{data.patientFirstName} {data.patientLastName}",
-            "memberId": data.memberId,
-            "dob": data.dob,
-            "gender": "Unknown",
-            "relationship": "Self"
+            "name": f"{patient.get('firstName', data.patientFirstName)} {patient.get('lastName', data.patientLastName)}",
+            "memberId": subscriber.get("memberId", data.memberId),
+            "dob": patient.get("birthDate", data.dob),
+            "gender": patient.get("genderCode", "Unknown"),
+            "relationship": patient.get("relationshipCode", "Self")
         },
         "coverage": {
-            "status": "Active" if "error" not in api_response else "Pending/Error",
-            "planType": "PPO",
-            "effectiveDate": "2023-01-01",
-            "copay": 25
+            "status": coverage.get("status", "Active"),
+            "planType": plan.get("planType", "Unknown"),
+            "effectiveDate": coverage.get("effectiveDate", ""),
+            "copay": copay,
+            "deductibleInNetwork": deductible,
+            "coinsurance": coinsurance
         },
-        "benefits": [
-            { "name": "Co-Insurance", "inNetwork": True, "percent": 20 },
-            { "name": "Deductible", "inNetwork": True, "amount": 500 }
-        ],
+        "benefits": benefits_list,
         "rawResponse": api_response
     }
 
