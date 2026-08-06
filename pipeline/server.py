@@ -57,8 +57,25 @@ stop_event = None
 @app.post("/start-call")
 async def start_call(data: PatientData):
     global active_call, event_queue, stop_event
+    
     if active_call is not None and not active_call.done():
-        raise HTTPException(status_code=400, detail="A call is already in progress.")
+        raise HTTPException(status_code=400, detail="A call is already active")
+        
+    print("\n" + "="*50)
+    print(f"🚨 INCOMING CALL FOR: {data.insurance}")
+    print("="*50)
+    print('\a', end='', flush=True)  # System bell for notification sound
+    
+    try:
+        # Ask user for input without blocking the asyncio event loop
+        answer = await asyncio.to_thread(input, "Accept call? (y/n): ")
+        if answer.strip().lower() != 'y':
+            print("Call rejected.")
+            raise HTTPException(status_code=403, detail="All representatives are busy")
+    except EOFError:
+        raise HTTPException(status_code=403, detail="All representatives are busy")
+        
+    print("Call accepted! Starting Vobi...\n")
     
     event_queue = asyncio.Queue()
     stop_event = asyncio.Event()

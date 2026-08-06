@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { PAYERS } from '../data/seedData';
+import { startCall } from '../utils/api';
 import { IconX } from './icons';
 import InputField from './ui/InputField';
 import Button from './ui/Button';
@@ -61,6 +62,8 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
   const [cptCodes, setCptCodes] = useState([]);
   const [cptInput, setCptInput] = useState('');
   const cptRef = useRef(null);
+  const [isStarting, setIsStarting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleAddCpt = (e) => {
     if (e.key === 'Enter' && cptInput.trim()) {
@@ -105,18 +108,18 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
       return;
     }
 
-    // Call flow — existing behaviour
-    try {
-      await fetch('http://localhost:8000/start-call', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobData),
-      });
-    } catch (error) {
-      console.error('Failed to start Vobi backend:', error);
-    }
+    setIsStarting(true);
+    setError(null);
 
-    onSubmit(jobData);
+    // Call flow
+    try {
+      await startCall(jobData);
+      onSubmit(jobData);
+    } catch (err) {
+      console.error('Failed to start Vobi backend:', err);
+      setError(err.message || 'Failed to connect to representative');
+      setIsStarting(false);
+    }
   };
 
   const isValid = firstName && lastName && memberId && (source === 'portal' || cptCodes.length > 0);
@@ -228,14 +231,30 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
           </div>
         )}
 
+        {error && (
+          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium border border-red-100 flex items-center gap-2 animate-fade-in">
+            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            {error}
+          </div>
+        )}
+
         <Button
           id="btn-start-agent"
           type="submit"
-          disabled={!isValid}
+          disabled={!isValid || isStarting}
           fullWidth
         >
-          {buttonIcon}
-          Start Vobi Agent
+          {isStarting ? (
+            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" className="opacity-25" />
+              <path d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
+            </svg>
+          ) : buttonIcon}
+          {isStarting ? 'Calling representative...' : 'Start Vobi Agent'}
         </Button>
       </form>
     </Modal>
