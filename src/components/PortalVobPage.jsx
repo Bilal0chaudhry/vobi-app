@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Button from './ui/Button';
 
-/* ── Status helpers ─────────────────────────────────────────── */
+
 const STATUS = {
   IDLE: 'idle',
   LOADING: 'loading',
@@ -9,9 +9,9 @@ const STATUS = {
   ERROR: 'error',
 };
 
-/* ── Availity API call ──────────────────────────────────────── */
+
 async function queryAvailityEligibility(job) {
-  // The backend proxies to Availity so we never expose credentials in the browser.
+
   const res = await fetch('http://localhost:8000/availity/eligibility', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -34,7 +34,7 @@ async function queryAvailityEligibility(job) {
   return res.json();
 }
 
-/* ── Small UI helpers ───────────────────────────────────────── */
+
 function InfoRow({ label, value }) {
   if (value == null || value === '') return null;
   return (
@@ -57,7 +57,7 @@ function Section({ title, icon, children }) {
   );
 }
 
-/* ── Coverage benefit display ───────────────────────────────── */
+
 function BenefitCard({ benefit }) {
   return (
     <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 mb-2 last:mb-0">
@@ -80,7 +80,7 @@ function BenefitCard({ benefit }) {
   );
 }
 
-/* ── Loading skeleton ────────────────────────────────────────── */
+
 function Skeleton() {
   return (
     <div className="space-y-4 animate-pulse">
@@ -98,7 +98,7 @@ function Skeleton() {
   );
 }
 
-/* ── Main page component ─────────────────────────────────────── */
+
 export default function PortalVobPage({ job, onBack, onJobUpdate }) {
   const [status, setStatus] = useState(STATUS.IDLE);
   const [result, setResult] = useState(null);
@@ -119,10 +119,10 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
     }
   };
 
-  // Auto-run on mount
+
   useEffect(() => {
     runLookup();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   const patient = result?.patient || {};
@@ -132,7 +132,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Header */}
+
       <div className="flex items-center gap-3 mb-6">
         <button
           id="btn-portal-back"
@@ -152,7 +152,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
           </p>
         </div>
 
-        {/* Availity badge */}
+
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full text-[11px] font-semibold border border-brand-200">
           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
@@ -163,7 +163,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
         </span>
       </div>
 
-      {/* ── LOADING ── */}
+
       {status === STATUS.LOADING && (
         <div>
           <div className="flex items-center gap-3 mb-5 p-4 bg-brand-50 border border-brand-200 rounded-xl">
@@ -176,7 +176,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
         </div>
       )}
 
-      {/* ── ERROR ── */}
+
       {status === STATUS.ERROR && (
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
@@ -200,10 +200,10 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
         </div>
       )}
 
-      {/* ── SUCCESS ── */}
+
       {status === STATUS.SUCCESS && result && (
         <div className="space-y-4">
-          {/* Status banner */}
+
           <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
             <svg className="w-5 h-5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
@@ -231,7 +231,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             </Button>
           </div>
 
-          {/* Patient info */}
+
           <Section
             title="Patient"
             icon={
@@ -248,7 +248,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             <InfoRow label="Relationship" value={patient.relationship} />
           </Section>
 
-          {/* Coverage */}
+
           <Section
             title="Coverage"
             icon={
@@ -268,7 +268,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             <InfoRow label="Copay" value={coverage.copay != null ? `$${coverage.copay}` : undefined} />
           </Section>
 
-          {/* Benefits */}
+
           {benefits.length > 0 && (
             <Section
               title={`Benefits (${benefits.length})`}
@@ -287,7 +287,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             </Section>
           )}
 
-          {/* CPT codes requested */}
+
           <Section
             title="CPT Codes Verified"
             icon={
@@ -311,7 +311,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             </div>
           </Section>
 
-          {/* Raw JSON toggle (dev helper) */}
+
           <details className="group">
             <summary className="text-xs text-gray-400 cursor-pointer select-none hover:text-gray-600 transition-colors">
               View raw Availity response
