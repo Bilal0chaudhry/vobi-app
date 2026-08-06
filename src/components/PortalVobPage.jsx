@@ -62,14 +62,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             {job.insurance} · Member #{job.memberId} · NPI {job.npi}
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full text-[11px] font-semibold border border-brand-200">
-          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-            <line x1="8" y1="21" x2="16" y2="21" />
-            <line x1="12" y1="17" x2="12" y2="21" />
-          </svg>
-          Availity Portal
-        </span>
       </div>
 
       {status === STATUS.LOADING && (

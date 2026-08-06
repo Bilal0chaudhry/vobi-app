@@ -79,7 +79,7 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!firstName || !lastName || !memberId || cptCodes.length === 0) return;
+    if (!firstName || !lastName || !memberId || (source === 'call' && cptCodes.length === 0)) return;
 
     const jobData = {
       id: `VOB-${Date.now()}`,
@@ -119,7 +119,7 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
     onSubmit(jobData);
   };
 
-  const isValid = firstName && lastName && memberId && cptCodes.length > 0;
+  const isValid = firstName && lastName && memberId && (source === 'portal' || cptCodes.length > 0);
 
   const description =
     source === 'call'
@@ -154,7 +154,7 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <InputField id="input-dob" label="Date of birth" type="date" value={dob} onChange={setDob} />
+          <InputField id="input-dob" label="Date of birth" type="date" value={dob} onChange={setDob} max="9999-12-31" />
           <Select
             id="input-gender"
             label="Gender"
@@ -189,42 +189,44 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
           <InputField id="input-npi" label="Provider NPI" value={npi} onChange={setNpi} />
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-medium text-gray-600">CPT codes</label>
-            <span className="text-[10px] text-gray-400">Press Enter to add</span>
-          </div>
-          <div
-            className="flex flex-wrap items-center gap-1.5 min-h-[44px] px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-400 transition-all cursor-text"
-            onClick={() => cptRef.current?.focus()}
-          >
-            {cptCodes.map((code) => (
-              <span
-                key={code}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs font-medium"
-              >
-                {code}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveCpt(code)}
-                  className="text-brand-400 hover:text-brand-700 transition-colors"
+        {source === 'call' && (
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-medium text-gray-600">CPT codes</label>
+              <span className="text-[10px] text-gray-400">Press Enter to add</span>
+            </div>
+            <div
+              className="flex flex-wrap items-center gap-1.5 min-h-[44px] px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-400 transition-all cursor-text"
+              onClick={() => cptRef.current?.focus()}
+            >
+              {cptCodes.map((code) => (
+                <span
+                  key={code}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs font-medium"
                 >
-                  <IconX className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-            <input
-              ref={cptRef}
-              id="input-cpt"
-              type="text"
-              value={cptInput}
-              onChange={(e) => setCptInput(e.target.value)}
-              onKeyDown={handleAddCpt}
-              placeholder={cptCodes.length === 0 ? 'e.g. 99214' : ''}
-              className="flex-1 min-w-[60px] bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
-            />
+                  {code}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCpt(code)}
+                    className="text-brand-400 hover:text-brand-700 transition-colors"
+                  >
+                    <IconX className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              <input
+                ref={cptRef}
+                id="input-cpt"
+                type="text"
+                value={cptInput}
+                onChange={(e) => setCptInput(e.target.value)}
+                onKeyDown={handleAddCpt}
+                placeholder={cptCodes.length === 0 ? 'e.g. 99214' : ''}
+                className="flex-1 min-w-[60px] bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <Button
           id="btn-start-agent"
