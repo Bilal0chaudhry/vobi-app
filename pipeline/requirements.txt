@@ -1,3 +1,5 @@
 pipecat-ai[deepgram,openai,fish,silero,local]
 python-dotenv
-fastapi\nuvicorn
+fastapi
+uvicorn
+requests

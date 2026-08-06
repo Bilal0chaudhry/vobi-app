@@ -51,8 +51,12 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dob, setDob] = useState('');
+  const [gender, setGender] = useState('U');
+  const [stateCode, setStateCode] = useState('');
+  const [zipCode, setZipCode] = useState('');
   const [payer, setPayer] = useState('Aetna');
   const [memberId, setMemberId] = useState('');
+  const [groupNumber, setGroupNumber] = useState('');
   const [npi, setNpi] = useState('1487624930');
   const [cptCodes, setCptCodes] = useState([]);
   const [cptInput, setCptInput] = useState('');
@@ -82,8 +86,12 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
       patientFirstName: firstName,
       patientLastName: lastName,
       dob,
+      gender,
+      stateCode,
+      zipCode,
       insurance: payer,
       memberId,
+      groupNumber,
       npi,
       cptCodes,
       submitted: 'Just now',
@@ -116,7 +124,7 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
   const description =
     source === 'call'
       ? 'Vobi tries the payer API first, then calls the insurer if needed.'
-      : 'Vobi will query the Availity portal to retrieve benefits in real time.';
+      : 'Vobi will query the insurance portal to retrieve benefits in real time.';
 
   const buttonIcon = (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -145,7 +153,25 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
           <InputField id="input-lastName" label="Patient last name" value={lastName} onChange={setLastName} />
         </div>
 
-        <InputField id="input-dob" label="Date of birth" type="date" value={dob} onChange={setDob} />
+        <div className="grid grid-cols-2 gap-3">
+          <InputField id="input-dob" label="Date of birth" type="date" value={dob} onChange={setDob} />
+          <Select
+            id="input-gender"
+            label="Gender"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            options={[
+              { value: 'M', label: 'Male' },
+              { value: 'F', label: 'Female' },
+              { value: 'U', label: 'Unknown' },
+            ]}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <InputField id="input-state" label="State (e.g. NY)" value={stateCode} onChange={setStateCode} />
+          <InputField id="input-zip" label="Zip Code" value={zipCode} onChange={setZipCode} />
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Select
@@ -158,7 +184,10 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
           <InputField id="input-memberId" label="Member ID" value={memberId} onChange={setMemberId} />
         </div>
 
-        <InputField id="input-npi" label="Provider NPI" value={npi} onChange={setNpi} />
+        <div className="grid grid-cols-2 gap-3">
+          <InputField id="input-groupNumber" label="Group Number (Optional)" value={groupNumber} onChange={setGroupNumber} />
+          <InputField id="input-npi" label="Provider NPI" value={npi} onChange={setNpi} />
+        </div>
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
