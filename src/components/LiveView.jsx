@@ -5,19 +5,42 @@ import Badge from './ui/Badge';
 import Button from './ui/Button';
 import { formatTime } from '../utils/formatters';
 import { normalizeNumbers } from '../utils/textNormalizer';
-import { endCall, getEventsUrl } from '../utils/api';
+import { endCall, getEventsUrl, startCall } from '../utils/api';
 import { IconArrowLeft, IconClock } from './icons';
 
 export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
-  const [logs, setLogs] = useState(() => job.logs || [
-    {
-      id: 'start',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      type: 'system',
-      source: 'SYSTEM',
-      message: `Call connected. Representative has joined the call.`,
+  const [logs, setLogs] = useState(() => {
+    if (job.logs) return job.logs;
+    
+    if (job.isNewCall) {
+      return [
+        {
+          id: 'start',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'system',
+          source: 'SYSTEM',
+          message: `Initiating VOB request for ${job.patientFirstName} ${job.patientLastName}...`,
+        },
+        {
+          id: 'wait',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'system',
+          source: 'SYSTEM',
+          message: 'Waiting for representative to connect...',
+        }
+      ];
     }
-  ]);
+    
+    return [
+      {
+        id: 'start',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        type: 'system',
+        source: 'SYSTEM',
+        message: `Call connected. Representative has joined the call.`,
+      }
+    ];
+  });
   const [checklist, setChecklist] = useState(() => job.checklist || {
     eligibility: 'pending',
     deductible: 'pending',
@@ -34,6 +57,36 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
   useEffect(() => {
     onJobUpdate?.(job.id, { logs, checklist, status: callStatus });
   }, [logs, checklist, callStatus]);
+
+  useEffect(() => {
+    if (job.isNewCall) {
+      job.isNewCall = false; // Prevent double calls in strict mode
+      
+      const initiateCall = async () => {
+        try {
+          await startCall(job);
+          setLogs(prev => [...prev, {
+             id: 'connected',
+             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+             type: 'system',
+             source: 'SYSTEM',
+             message: 'Representative connected. Call starting...'
+          }]);
+        } catch (err) {
+          setLogs(prev => [...prev, {
+             id: 'error',
+             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+             type: 'system',
+             source: 'SYSTEM',
+             message: err.message || 'Call rejected: All representatives are busy.'
+          }]);
+          setCallStatus('Completed');
+        }
+      };
+      
+      initiateCall();
+    }
+  }, [job]);
 
   const handleEndCall = async () => {
     try {

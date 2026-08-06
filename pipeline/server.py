@@ -77,7 +77,16 @@ async def start_call(data: PatientData):
         
     print("Call accepted! Starting Vobi...\n")
     
-    event_queue = asyncio.Queue()
+    if event_queue is None:
+        event_queue = asyncio.Queue()
+    else:
+        # Drain the existing queue so it's fresh for the new call
+        while not event_queue.empty():
+            try:
+                event_queue.get_nowait()
+            except asyncio.QueueEmpty:
+                break
+                
     stop_event = asyncio.Event()
     
     from bot import start_bot

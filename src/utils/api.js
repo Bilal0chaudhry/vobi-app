@@ -1,4 +1,4 @@
-const API_BASE = 'https://roy-bibliographic-vcr-commentary.trycloudflare.com';
+const API_BASE = 'https://utilize-bits-plot-developing.trycloudflare.com';
 
 export async function queryAvailityEligibility(job) {
   const res = await fetch(`${API_BASE}/availity/eligibility`, {

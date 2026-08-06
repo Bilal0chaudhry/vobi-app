@@ -100,26 +100,16 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
       submitted: 'Just now',
       status: source === 'portal' ? 'Portal Lookup' : 'Agent on Call',
       source,
+      isNewCall: source === 'call',
     };
 
     if (source === 'portal') {
-      // Route to the portal page
       onPortalSubmit(jobData);
       return;
     }
 
-    setIsStarting(true);
-    setError(null);
-
-    // Call flow
-    try {
-      await startCall(jobData);
-      onSubmit(jobData);
-    } catch (err) {
-      console.error('Failed to start Vobi backend:', err);
-      setError(err.message || 'Failed to connect to representative');
-      setIsStarting(false);
-    }
+    // Immediately pass to LiveView.jsx, which will handle the /start-call and waiting state
+    onSubmit(jobData);
   };
 
   const isValid = firstName && lastName && memberId && (source === 'portal' || cptCodes.length > 0);
