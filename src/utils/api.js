@@ -1,4 +1,4 @@
-const API_BASE = 'https://utilize-bits-plot-developing.trycloudflare.com';
+const API_BASE = 'https://description-hunt-diamond-cet.trycloudflare.com';
 
 export async function queryAvailityEligibility(job) {
   const res = await fetch(`${API_BASE}/availity/eligibility`, {
