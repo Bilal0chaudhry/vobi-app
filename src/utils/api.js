@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://protein-pack-her-mention.trycloudflare.com';
 
 export async function queryAvailityEligibility(job) {
   const res = await fetch(`${API_BASE}/availity/eligibility`, {
