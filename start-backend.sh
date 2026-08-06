@@ -7,7 +7,7 @@ echo "=========================================================="
 # 1. Start python server in the background
 echo "-> Starting Python backend..."
 cd pipeline
-../.venv/bin/python server.py &
+.venv/bin/python server.py &
 SERVER_PID=$!
 cd ..
 

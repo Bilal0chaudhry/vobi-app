@@ -1,4 +1,4 @@
-const API_BASE = 'https://protein-pack-her-mention.trycloudflare.com';
+const API_BASE = 'https://hats-consciousness-teddy-optimum.trycloudflare.com';
 
 export async function queryAvailityEligibility(job) {
   const res = await fetch(`${API_BASE}/availity/eligibility`, {
