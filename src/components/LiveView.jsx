@@ -15,14 +15,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
       type: 'system',
       source: 'SYSTEM',
-      message: `Initiating VOB request for ${job.patientFirstName} ${job.patientLastName}...`,
-    },
-    {
-      id: 'connect',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      type: 'system',
-      source: 'SYSTEM',
-      message: 'Vobi is active on your local machine. Please speak into your microphone to verify benefits.',
+      message: `Call connected. Representative has joined the call.`,
     }
   ]);
   const [checklist, setChecklist] = useState(() => job.checklist || {

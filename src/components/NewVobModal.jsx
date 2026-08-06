@@ -254,7 +254,7 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
               <path d="M4 12a8 8 0 018-8v8H4z" className="opacity-75" />
             </svg>
           ) : buttonIcon}
-          {isStarting ? 'Calling representative...' : 'Start Vobi Agent'}
+          {isStarting ? 'Waiting for representative to connect...' : 'Start Vobi Agent'}
         </Button>
       </form>
     </Modal>

@@ -4,14 +4,7 @@ echo "=========================================================="
 echo "              Starting Vobi Voice Backend                 "
 echo "=========================================================="
 
-# 1. Start python server in the background
-echo "-> Starting Python backend..."
-cd pipeline
-.venv/bin/python server.py &
-SERVER_PID=$!
-cd ..
-
-# 2. Start cloudflared in the background
+# 1. Start cloudflared in the background
 echo "-> Starting Cloudflare Tunnel..."
 rm -f cloudflared.log
 ./cloudflared tunnel --url http://localhost:8000 2> cloudflared.log &
@@ -31,23 +24,24 @@ echo ""
 echo "✅ Cloudflare Tunnel is live at: $URL"
 echo ""
 
-# 3. Update frontend configuration
+# 2. Update frontend configuration
 echo "-> Updating frontend with new URL..."
 sed -i "s|const API_BASE = '.*';|const API_BASE = '${URL}';|g" src/utils/api.js
 
-# 4. Automatically deploy to GitHub Pages
+# 3. Automatically deploy to GitHub Pages
 echo "-> Deploying updated website to GitHub Pages..."
 npm run deploy
 
 echo ""
 echo "=========================================================="
-echo " 🎉 SUCCESS! Backend is running and website is updated! 🎉"
+echo " 🎉 SUCCESS! Backend is ready and website is updated! 🎉"
 echo " Anyone can now visit your GitHub Pages site to test it."
-echo ""
-echo " (Your laptop's microphone and speakers are active for calls)"
-echo " Press Ctrl+C to shut everything down."
+echo " Waiting for incoming calls..."
 echo "=========================================================="
 
-# Wait for user to press Ctrl+C, then kill processes
-trap "echo -e '\nShutting down...'; kill $SERVER_PID $TUNNEL_PID; exit" INT
-wait
+# Trap Ctrl+C to clean up background processes
+trap "echo -e '\nShutting down...'; kill $TUNNEL_PID; exit" INT
+
+# 4. Start python server in the foreground! (so we can type 'y'/'n')
+cd pipeline
+.venv/bin/python server.py
