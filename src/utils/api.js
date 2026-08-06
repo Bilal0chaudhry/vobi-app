@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = 'http://localhost:8000';
 
 export async function queryAvailityEligibility(job) {
   const res = await fetch(`${API_BASE}/availity/eligibility`, {
@@ -50,4 +50,3 @@ export async function endCall() {
 export function getEventsUrl() {
   return `${API_BASE}/events`;
 }
-
