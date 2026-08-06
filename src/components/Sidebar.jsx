@@ -3,9 +3,9 @@ import { IconDashboard, IconCallHistory, IconSettings } from './icons';
 import VobiLogo from './VobiLogo';
 
 const NAV_ITEMS = [
-  { key: 'dashboard',   label: 'Dashboard',    Icon: IconDashboard },
+  { key: 'dashboard', label: 'Dashboard', Icon: IconDashboard },
   { key: 'callHistory', label: 'Call History', Icon: IconCallHistory },
-  { key: 'settings',    label: 'Settings',     Icon: IconSettings },
+  { key: 'settings', label: 'Settings', Icon: IconSettings },
 ];
 
 export default function Sidebar({ currentView, onNavigate }) {
@@ -14,7 +14,7 @@ export default function Sidebar({ currentView, onNavigate }) {
       <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex flex-col items-start gap-0.5">
         <VobiLogo size="md" />
         <p className="text-[10px] font-semibold text-brand-600 tracking-wider uppercase pl-0.5">
-          Autonomous VOB Agent
+          Autonomous VOB Agent Test
         </p>
       </div>
 
@@ -30,11 +30,10 @@ export default function Sidebar({ currentView, onNavigate }) {
               key={key}
               id={`nav-${key}`}
               onClick={() => onNavigate(key)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-                isActive
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive
                   ? 'bg-brand-50 text-brand-700'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
+                }`}
             >
               <Icon />
               {label}
