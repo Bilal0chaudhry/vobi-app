@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Button from './ui/Button';
-
+import InfoRow from './ui/InfoRow';
+import Section from './ui/Section';
+import BenefitCard from './ui/BenefitCard';
+import Skeleton from './ui/Skeleton';
+import { queryAvailityEligibility } from '../utils/api';
 
 const STATUS = {
   IDLE: 'idle',
@@ -8,96 +12,6 @@ const STATUS = {
   SUCCESS: 'success',
   ERROR: 'error',
 };
-
-
-async function queryAvailityEligibility(job) {
-
-  const res = await fetch('http://localhost:8000/availity/eligibility', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      payer: job.insurance,
-      memberId: job.memberId,
-      patientFirstName: job.patientFirstName,
-      patientLastName: job.patientLastName,
-      dob: job.dob,
-      npi: job.npi,
-      cptCodes: job.cptCodes,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Availity returned ${res.status}`);
-  }
-
-  return res.json();
-}
-
-
-function InfoRow({ label, value }) {
-  if (value == null || value === '') return null;
-  return (
-    <div className="flex items-start justify-between py-2.5 border-b border-gray-100 last:border-0 gap-4">
-      <span className="text-xs font-medium text-gray-500 shrink-0">{label}</span>
-      <span className="text-xs text-gray-900 text-right font-medium">{String(value)}</span>
-    </div>
-  );
-}
-
-function Section({ title, icon, children }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="flex items-center gap-2.5 px-4 py-3 bg-gray-50 border-b border-gray-100">
-        <span className="text-brand-600">{icon}</span>
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
-      </div>
-      <div className="px-4 py-1">{children}</div>
-    </div>
-  );
-}
-
-
-function BenefitCard({ benefit }) {
-  return (
-    <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 mb-2 last:mb-0">
-      <p className="text-xs font-semibold text-gray-700 mb-0.5">{benefit.name || 'Benefit'}</p>
-      {benefit.coverageLevel && (
-        <p className="text-[11px] text-gray-500">Level: {benefit.coverageLevel}</p>
-      )}
-      {benefit.amount != null && (
-        <p className="text-[11px] text-gray-500">Amount: ${benefit.amount}</p>
-      )}
-      {benefit.percent != null && (
-        <p className="text-[11px] text-gray-500">Percent: {benefit.percent}%</p>
-      )}
-      {benefit.inNetwork != null && (
-        <p className="text-[11px] text-gray-500">
-          Network: {benefit.inNetwork ? 'In-Network' : 'Out-of-Network'}
-        </p>
-      )}
-    </div>
-  );
-}
-
-
-function Skeleton() {
-  return (
-    <div className="space-y-4 animate-pulse">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="h-10 bg-gray-100" />
-          <div className="px-4 py-3 space-y-2">
-            <div className="h-3 bg-gray-100 rounded w-3/4" />
-            <div className="h-3 bg-gray-100 rounded w-1/2" />
-            <div className="h-3 bg-gray-100 rounded w-2/3" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 
 export default function PortalVobPage({ job, onBack, onJobUpdate }) {
   const [status, setStatus] = useState(STATUS.IDLE);
@@ -119,10 +33,8 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
     }
   };
 
-
   useEffect(() => {
     runLookup();
-
   }, []);
 
   const patient = result?.patient || {};
@@ -132,7 +44,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-
       <div className="flex items-center gap-3 mb-6">
         <button
           id="btn-portal-back"
@@ -151,8 +62,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             {job.insurance} · Member #{job.memberId} · NPI {job.npi}
           </p>
         </div>
-
-
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full text-[11px] font-semibold border border-brand-200">
           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
@@ -163,19 +72,17 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
         </span>
       </div>
 
-
       {status === STATUS.LOADING && (
         <div>
           <div className="flex items-center gap-3 mb-5 p-4 bg-brand-50 border border-brand-200 rounded-xl">
             <span className="w-4 h-4 rounded-full border-2 border-brand-600 border-t-transparent animate-spin shrink-0" />
             <p className="text-sm font-medium text-brand-700">
-              Querying Availity eligibility API…
+              Querying eligibility API…
             </p>
           </div>
           <Skeleton />
         </div>
       )}
-
 
       {status === STATUS.ERROR && (
         <div className="space-y-4">
@@ -200,10 +107,8 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
         </div>
       )}
 
-
       {status === STATUS.SUCCESS && result && (
         <div className="space-y-4">
-
           <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
             <svg className="w-5 h-5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
@@ -231,7 +136,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             </Button>
           </div>
 
-
           <Section
             title="Patient"
             icon={
@@ -241,13 +145,12 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
               </svg>
             }
           >
-            <InfoRow label="Name" value={`${patient.firstName || job.patientFirstName} ${patient.lastName || job.patientLastName}`} />
+            <InfoRow label="Name" value={`${patient.name || job.patientFirstName + ' ' + job.patientLastName}`} />
             <InfoRow label="Date of Birth" value={patient.dob || job.dob} />
-            <InfoRow label="Member ID" value={subscriber.memberId || job.memberId} />
+            <InfoRow label="Member ID" value={patient.memberId || subscriber.memberId || job.memberId} />
             <InfoRow label="Group #" value={subscriber.groupNumber} />
             <InfoRow label="Relationship" value={patient.relationship} />
           </Section>
-
 
           <Section
             title="Coverage"
@@ -268,7 +171,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             <InfoRow label="Copay" value={coverage.copay != null ? `$${coverage.copay}` : undefined} />
           </Section>
 
-
           {benefits.length > 0 && (
             <Section
               title={`Benefits (${benefits.length})`}
@@ -286,7 +188,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
               </div>
             </Section>
           )}
-
 
           <Section
             title="CPT Codes Verified"
@@ -310,16 +211,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
               ))}
             </div>
           </Section>
-
-
-          <details className="group">
-            <summary className="text-xs text-gray-400 cursor-pointer select-none hover:text-gray-600 transition-colors">
-              View raw Availity response
-            </summary>
-            <pre className="mt-2 p-3 bg-gray-900 text-green-400 rounded-lg text-[10px] overflow-auto max-h-60">
-              {JSON.stringify(result, null, 2)}
-            </pre>
-          </details>
         </div>
       )}
     </div>

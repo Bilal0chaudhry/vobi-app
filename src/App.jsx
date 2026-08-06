@@ -32,7 +32,7 @@ export default function App() {
     setActiveJob(null);
   };
 
-  // ── Call flow (existing) ─────────────────────────────────────
+
   const handleSubmitNewVob = (newJob) => {
     setJobs((prev) => [newJob, ...prev]);
     setActiveJob(newJob);
@@ -40,7 +40,7 @@ export default function App() {
     setShowNewVobModal(false);
   };
 
-  // ── Portal flow (new) ────────────────────────────────────────
+
   const handlePortalSubmit = (newJob) => {
     setJobs((prev) => [newJob, ...prev]);
     setActiveJob(newJob);
@@ -50,7 +50,6 @@ export default function App() {
 
   const handleOpenJob = (job) => {
     setActiveJob(job);
-    // Route to correct view based on job source
     setCurrentView(job.source === 'portal' ? 'portalVob' : 'liveView');
   };
 

@@ -3,6 +3,9 @@ import sys
 
 os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="../.env")
+
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -87,7 +90,8 @@ async def availity_eligibility(data: AvailityRequest):
     token_data = urllib.parse.urlencode({
         "grant_type": "client_credentials",
         "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET
+        "client_secret": CLIENT_SECRET,
+        "scope": "healthcare-hipaa-transactions-demo-demo healthcare-hipaa-transactions-demo"
     }).encode("utf-8")
     
     try:
@@ -101,7 +105,7 @@ async def availity_eligibility(data: AvailityRequest):
         print("Error getting Availity token:", e)
         raise HTTPException(status_code=500, detail="Failed to authenticate with Availity")
     
-    coverage_url = "https://api.availity.com/coverages/v1/coverages"
+    coverage_url = "https://api.availity.com/v1/coverages"
     
     PAYER_ID_MAP = {
         "Aetna": "60054",
@@ -112,40 +116,45 @@ async def availity_eligibility(data: AvailityRequest):
         "Medicare": "00431",
         "Medicaid": "Varies"
     }
-    payer_id = PAYER_ID_MAP.get(data.insurance, "60054")
+    payer_id = PAYER_ID_MAP.get(data.payer, "60054")
     
     payload = {
-        "submitter": {"npi": data.npi or "1234567890"},
+        "payerId": payer_id,
         "provider": {"npi": data.npi or "1234567890"},
-        "subscriber": {
-            "memberId": data.memberId,
+        "patient": {
             "firstName": data.patientFirstName,
             "lastName": data.patientLastName,
-            "genderCode": data.gender,
-            "birthDate": data.dob,
+            "dateOfBirth": data.dob,
+            "memberId": data.memberId
         },
-        "payer": {"payerId": payer_id} 
+        "serviceDate": "2026-08-06",
+        "serviceTypeCode": "30"
     }
     
     if data.stateCode or data.zipCode:
-        payload["subscriber"]["address"] = {}
+        payload["patient"]["address"] = {}
         if data.stateCode:
-            payload["subscriber"]["address"]["stateCode"] = data.stateCode
+            payload["patient"]["address"]["stateCode"] = data.stateCode
         if data.zipCode:
-            payload["subscriber"]["address"]["zipCode"] = data.zipCode
+            payload["patient"]["address"]["zipCode"] = data.zipCode
             
     if data.groupNumber:
-        payload["payer"]["groupNumber"] = data.groupNumber
+        payload["groupNumber"] = data.groupNumber
     
     api_response = None
     try:
         req = urllib.request.Request(coverage_url, data=json.dumps(payload).encode("utf-8"))
         req.add_header("Content-Type", "application/json")
         req.add_header("Authorization", f"Bearer {access_token}")
-        req.add_header("X-Api-Mock-Scenario-ID", "1")
+        req.add_header("X-Api-Mock-Scenario-ID", "Coverages-Complete-i")
+        req.add_header("X-Api-Mock-Response", "true")
         
         with urllib.request.urlopen(req) as response:
             api_response = json.loads(response.read().decode())
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode()
+        print("Error calling Availity Coverages API (HTTP):", e.code, error_body)
+        raise HTTPException(status_code=500, detail="failed to fetch data")
     except Exception as e:
         print("Error calling Availity Coverages API:", e)
         raise HTTPException(status_code=500, detail="failed to fetch data")
@@ -206,8 +215,7 @@ async def availity_eligibility(data: AvailityRequest):
             "deductibleInNetwork": deductible,
             "coinsurance": coinsurance
         },
-        "benefits": benefits_list,
-        "rawResponse": api_response
+        "benefits": benefits_list
     }
 
 async def event_generator():
