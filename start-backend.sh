@@ -32,11 +32,11 @@ npm run deploy
 echo "-> Waiting for GitHub Pages to update its global cache (this usually takes 1-3 minutes)..."
 while true; do
   # Fetch the HTML to find the JS bundle name
-  JS_PATH=$(curl -s https://bilal-chaudhry.github.io/vobi-app/ | grep -o 'assets/index-[a-zA-Z0-9_-]*\.js' | head -1)
+  JS_PATH=$(curl -s https://bilal0chaudhry.github.io/vobi-app/ | grep -o 'assets/index-[a-zA-Z0-9_-]*\.js' | head -1)
   
   if [ ! -z "$JS_PATH" ]; then
     # Check if the new URL is in the JS bundle
-    if curl -s "https://bilal-chaudhry.github.io/vobi-app/$JS_PATH" | grep -q "$URL"; then
+    if curl -s "https://bilal0chaudhry.github.io/vobi-app/$JS_PATH" | grep -q "$URL"; then
       break
     fi
   fi
@@ -47,7 +47,7 @@ echo ""
 echo "=========================================================="
 echo " 🎉 SUCCESS! Backend and Website are running! 🎉"
 echo " The website cache is fully cleared. Anyone can visit:"
-echo " https://bilal-chaudhry.github.io/vobi-app/"
+echo " https://bilal0chaudhry.github.io/vobi-app/"
 echo " Waiting for incoming calls..."
 echo "=========================================================="
 

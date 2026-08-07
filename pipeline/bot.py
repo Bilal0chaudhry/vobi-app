@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
+# Suppress Pipecat debug logs to keep the terminal clean
+from loguru import logger
+logger.remove()
+logger.add(sys.stderr, level="WARNING")
+
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.audio.turn.smart_turn.local_smart_turn_v3 import LocalSmartTurnAnalyzerV3
@@ -140,7 +145,7 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
     ])
 
     worker = PipelineWorker(pipeline)
-    runner = WorkerRunner()
+    runner = WorkerRunner(handle_sigint=False)
     await runner.add_workers(worker)
 
     async def wait_for_stop():
@@ -151,12 +156,7 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
     if stop_event:
         asyncio.create_task(wait_for_stop())
 
-    print("=" * 50)
-    print("  VOBI Voice Agent — Local Audio Mode")
-    print("  Speak into your microphone to begin.")
-    print("  Press Ctrl+C to stop.")
-    print("=" * 50)
-
+    # Silenced the redundant terminal prints here since server.py handles the clean UI
     await runner.run()
 
 

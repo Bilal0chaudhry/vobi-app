@@ -6,7 +6,7 @@ import Button from './ui/Button';
 import { formatTime } from '../utils/formatters';
 import { normalizeNumbers } from '../utils/textNormalizer';
 import { endCall, getEventsUrl, startCall } from '../utils/api';
-import { IconArrowLeft, IconClock } from './icons';
+import { IconArrowLeft, IconClock, IconCheckCircle } from './icons';
 
 export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
   const [logs, setLogs] = useState(() => {
@@ -176,8 +176,8 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
     };
 
     eventSource.onerror = () => {
-      console.error('SSE connection error');
-      eventSource.close();
+      console.error('SSE connection error, attempting to reconnect...');
+      // DO NOT call eventSource.close() here, so the browser can automatically reconnect
     };
 
     return () => {
@@ -247,9 +247,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
 
       {showToast && (
         <div className="fixed bottom-6 right-6 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg shadow-gray-900/20 flex items-center gap-3 animate-fade-in z-50">
-          <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+          <IconCheckCircle className="w-5 h-5 text-emerald-400" />
           <span className="text-sm font-semibold">Call completed successfully</span>
         </div>
       )}

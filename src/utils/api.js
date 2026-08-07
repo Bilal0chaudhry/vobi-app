@@ -1,9 +1,22 @@
-const API_BASE = 'https://involvement-hull-forever-relaxation.trycloudflare.com';
+const API_BASE = 'https://yards-submissions-judicial-containers.trycloudflare.com';
 
-export async function queryAvailityEligibility(job) {
-  const res = await fetch(`${API_BASE}/availity/eligibility`, {
+async function fetchWithConfig(endpoint, options = {}) {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Server returned ${res.status}`);
+  }
+
+  return res.json();
+}
+
+export function queryAvailityEligibility(job) {
+  return fetchWithConfig('/availity/eligibility', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       payer: job.insurance,
       memberId: job.memberId,
@@ -14,37 +27,17 @@ export async function queryAvailityEligibility(job) {
       cptCodes: job.cptCodes,
     }),
   });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Server returned ${res.status}`);
-  }
-
-  return res.json();
 }
 
-export async function startCall(patientData) {
-  const res = await fetch(`${API_BASE}/start-call`, {
+export function startCall(patientData) {
+  return fetchWithConfig('/start-call', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(patientData),
   });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Server returned ${res.status}`);
-  }
-
-  return res.json();
 }
 
-export async function endCall() {
-  const res = await fetch(`${API_BASE}/end-call`, { method: 'POST' });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Server returned ${res.status}`);
-  }
-  return res.json();
+export function endCall() {
+  return fetchWithConfig('/end-call', { method: 'POST' });
 }
 
 export function getEventsUrl() {

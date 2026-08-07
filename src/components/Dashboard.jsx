@@ -1,6 +1,6 @@
 import React from 'react';
 import Badge from './ui/Badge';
-import CptBadge from './CptBadge';
+import CptBadge from './ui/CptBadge';
 import PageHeader from './PageHeader';
 import Button from './ui/Button';
 import { IconSignal, IconCheckCircle, IconZap, IconClock, IconArrowOut } from './icons';

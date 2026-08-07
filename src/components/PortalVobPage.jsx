@@ -4,7 +4,17 @@ import InfoRow from './ui/InfoRow';
 import Section from './ui/Section';
 import BenefitCard from './ui/BenefitCard';
 import Skeleton from './ui/Skeleton';
+import PatientDetails from './ui/PatientDetails';
 import { queryAvailityEligibility } from '../utils/api';
+import { 
+  IconChevronLeft, 
+  IconAlertCircle, 
+  IconCheckCircleSolid, 
+  IconRefresh, 
+  IconShield, 
+  IconFileText, 
+  IconClipboardCheck 
+} from './icons';
 
 const STATUS = {
   IDLE: 'idle',
@@ -50,9 +60,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
           onClick={onBack}
           className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+          <IconChevronLeft className="w-4 h-4" />
         </button>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-gray-900">
@@ -79,21 +87,14 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
       {status === STATUS.ERROR && (
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
+            <IconAlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-red-700 mb-0.5">Portal lookup failed</p>
               <p className="text-xs text-red-600">{error}</p>
             </div>
           </div>
           <Button id="btn-portal-retry" onClick={runLookup} variant="secondary" fullWidth>
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
-            </svg>
+            <IconRefresh className="w-4 h-4" />
             Retry
           </Button>
         </div>
@@ -102,9 +103,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
       {status === STATUS.SUCCESS && result && (
         <div className="space-y-4">
           <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <svg className="w-5 h-5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <IconCheckCircleSolid className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-emerald-700">
                 {result.eligibilityStatus || 'Active Coverage Confirmed'}
@@ -120,38 +119,18 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
               size="sm"
               className="ml-auto shrink-0"
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 4 23 10 17 10" />
-                <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
-              </svg>
+              <IconRefresh className="w-3.5 h-3.5" />
               Refresh
             </Button>
           </div>
 
-          <Section
-            title="Patient"
-            icon={
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            }
-          >
-            <InfoRow label="Name" value={`${patient.name || job.patientFirstName + ' ' + job.patientLastName}`} />
-            <InfoRow label="Date of Birth" value={patient.dob || job.dob} />
-            <InfoRow label="Member ID" value={patient.memberId || subscriber.memberId || job.memberId} />
-            <InfoRow label="Group #" value={subscriber.groupNumber} />
-            <InfoRow label="Relationship" value={patient.relationship} />
-          </Section>
+          <PatientDetails 
+            patient={patient} 
+            subscriber={subscriber} 
+            fallbackJob={job} 
+          />
 
-          <Section
-            title="Coverage"
-            icon={
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            }
-          >
+          <Section title="Coverage" icon={<IconShield />}>
             <InfoRow label="Plan Name" value={coverage.planName || result.planName} />
             <InfoRow label="Plan Type" value={coverage.planType} />
             <InfoRow label="Effective Date" value={coverage.effectiveDate} />
@@ -164,15 +143,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
           </Section>
 
           {benefits.length > 0 && (
-            <Section
-              title={`Benefits (${benefits.length})`}
-              icon={
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 11 12 14 22 4" />
-                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-                </svg>
-              }
-            >
+            <Section title={`Benefits (${benefits.length})`} icon={<IconFileText />}>
               <div className="py-2">
                 {benefits.map((b, i) => (
                   <BenefitCard key={i} benefit={b} />
@@ -181,17 +152,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
             </Section>
           )}
 
-          <Section
-            title="CPT Codes Verified"
-            icon={
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
-            }
-          >
+          <Section title="CPT Codes Verified" icon={<IconClipboardCheck />}>
             <div className="py-2 flex flex-wrap gap-2">
               {job.cptCodes.map((code) => (
                 <span
