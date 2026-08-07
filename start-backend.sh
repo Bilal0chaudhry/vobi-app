@@ -20,10 +20,6 @@ while true; do
   sleep 1
 done
 
-echo ""
-echo "✅ Cloudflare Tunnel is live at: $URL"
-echo ""
-
 # 2. Update frontend configuration
 echo "-> Updating frontend with new URL..."
 sed -i "s|const API_BASE = '.*';|const API_BASE = '${URL}';|g" src/utils/api.js
@@ -32,16 +28,32 @@ sed -i "s|const API_BASE = '.*';|const API_BASE = '${URL}';|g" src/utils/api.js
 echo "-> Deploying updated website to GitHub Pages..."
 npm run deploy
 
+# 4. Wait for GitHub Pages cache to clear
+echo "-> Waiting for GitHub Pages to update its global cache (this usually takes 1-3 minutes)..."
+while true; do
+  # Fetch the HTML to find the JS bundle name
+  JS_PATH=$(curl -s https://bilal-chaudhry.github.io/vobi-app/ | grep -o 'assets/index-[a-zA-Z0-9_-]*\.js' | head -1)
+  
+  if [ ! -z "$JS_PATH" ]; then
+    # Check if the new URL is in the JS bundle
+    if curl -s "https://bilal-chaudhry.github.io/vobi-app/$JS_PATH" | grep -q "$URL"; then
+      break
+    fi
+  fi
+  sleep 5
+done
+
 echo ""
 echo "=========================================================="
-echo " 🎉 SUCCESS! Backend is ready and website is updated! 🎉"
-echo " Anyone can now visit your GitHub Pages site to test it."
+echo " 🎉 SUCCESS! Backend and Website are running! 🎉"
+echo " The website cache is fully cleared. Anyone can visit:"
+echo " https://bilal-chaudhry.github.io/vobi-app/"
 echo " Waiting for incoming calls..."
 echo "=========================================================="
 
 # Trap Ctrl+C to clean up background processes
 trap "echo -e '\nShutting down...'; kill $TUNNEL_PID; exit" INT
 
-# 4. Start python server in the foreground! (so we can type 'y'/'n')
+# 5. Start python server in the foreground!
 cd pipeline
 .venv/bin/python server.py
