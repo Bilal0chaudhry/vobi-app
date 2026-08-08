@@ -4,11 +4,16 @@ const NUM_WORD =
   /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)\b/;
 
 const TOPIC_PATTERNS = {
+  eligibility: /\beligib|\bcoverage\b/i,
+  networkStatus: /\bin[- ]network\b|\bout[- ]of[- ]network\b|\bparticipat|\bnetwork\b/i,
   deductible: /\bdeductible\b/i,
   oopMax: /\bout[- ]of[- ]pocket\b|\boop\b|\bmax\w*\b.*\bpocket|\bmaximum\b/i,
   copay: /\bcopay\b|\bco[- ]?pay\b|\bcoinsurance\b/i,
-  eligibility: /\beligib|\bcoverage\b/i,
   cpt: /\bcpt\b/i,
+  buyAndBill: /\bbuy\s*(and|&)\s*bill\b/i,
+  priorAuth: /\bprior\s*auth|\bauthoriz/i,
+  referral: /\breferral\b|\bpcp\b/i,
+  formulary: /\bformular|\bpreferred\s*(drug|med)|\bformulary\b/i,
 };
 
 const DISPUTE_PHRASES =
@@ -57,10 +62,17 @@ export function updateChecklistFromRep(text, checklist, pendingTopics, cptCodes)
     next.eligibility = "complete";
     remaining = remaining.filter((t) => t !== "eligibility");
   }
+
+  if (/\bin[- ]network\b/i.test(text) || /\bout[- ]of[- ]network\b/i.test(text) || /\bparticipat\w*/i.test(text)) {
+    next.networkStatus = "complete";
+    remaining = remaining.filter((t) => t !== "networkStatus");
+  }
+
   if (/\bdeductible\b/.test(text) && (dollar || confirm)) {
     next.deductible = "complete";
     remaining = remaining.filter((t) => t !== "deductible");
   }
+
   if (
     (/\bout[- ]of[- ]pocket\b/.test(text) || /\boop\b/.test(text) || /\bmax\w*\b.*\bpocket\b/.test(text)) &&
     (dollar || confirm)
@@ -68,12 +80,33 @@ export function updateChecklistFromRep(text, checklist, pendingTopics, cptCodes)
     next.oopMax = "complete";
     remaining = remaining.filter((t) => t !== "oopMax");
   }
+
   if (
     (/\bcopay\b/.test(text) || /\bco[- ]?pay\b/.test(text) || /\bcoinsurance\b/.test(text)) &&
     (dollar || pct || confirm)
   ) {
     next.copay = "complete";
     remaining = remaining.filter((t) => t !== "copay");
+  }
+
+  if (/\bbuy\s*(and|&)\s*bill\b/i.test(text) || (remaining.includes("buyAndBill") && confirm)) {
+    next.buyAndBill = "complete";
+    remaining = remaining.filter((t) => t !== "buyAndBill");
+  }
+
+  if (/\bprior\s*auth\w*\b/i.test(text) || /\bauthoriz\w*/i.test(text)) {
+    next.priorAuth = "complete";
+    remaining = remaining.filter((t) => t !== "priorAuth");
+  }
+
+  if (/\breferral\b/i.test(text) || /\bpcp\b/i.test(text)) {
+    next.referral = "complete";
+    remaining = remaining.filter((t) => t !== "referral");
+  }
+
+  if (/\bformular\w*/i.test(text) || /\bpreferred\s*(drug|med)\b/i.test(text)) {
+    next.formulary = "complete";
+    remaining = remaining.filter((t) => t !== "formulary");
   }
 
   if ((dollar || pct) && remaining.length > 0) {
@@ -86,7 +119,8 @@ export function updateChecklistFromRep(text, checklist, pendingTopics, cptCodes)
   }
 
   if (confirm && remaining.length > 0) {
-    const resolvable = remaining.filter((t) => t !== "cpt" && next[t] !== "complete");
+    const nonCptTopics = ["eligibility", "networkStatus", "deductible", "oopMax", "copay", "buyAndBill", "priorAuth", "referral", "formulary"];
+    const resolvable = remaining.filter((t) => nonCptTopics.includes(t) && next[t] !== "complete");
     for (const topic of resolvable) {
       next[topic] = "complete";
     }

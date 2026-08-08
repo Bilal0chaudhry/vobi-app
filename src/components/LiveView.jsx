@@ -29,11 +29,16 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
 
   const [checklist, setChecklist] = useState(() => job.checklist || {
     eligibility: "pending",
+    networkStatus: "pending",
     deductible: "pending",
     oopMax: "pending",
     cpt1: "pending",
     cpt2: job.cptCodes.length > 1 ? "pending" : "n/a",
     copay: "pending",
+    buyAndBill: "pending",
+    priorAuth: "pending",
+    referral: "pending",
+    formulary: "pending",
   });
 
   const [elapsed, setElapsed] = useState(0);
@@ -202,11 +207,16 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
 
   const checklistItems = [
     { key: "eligibility", label: "Eligibility Status" },
+    { key: "networkStatus", label: "Network Status" },
     { key: "deductible", label: "Deductible" },
     { key: "oopMax", label: "Out-of-Pocket Max" },
     { key: "cpt1", label: `CPT ${job.cptCodes[0] || "—"}` },
     ...(job.cptCodes.length > 1 ? [{ key: "cpt2", label: `CPT ${job.cptCodes[1]}` }] : []),
     { key: "copay", label: "Copay / Coinsurance" },
+    { key: "buyAndBill", label: "Buy & Bill" },
+    { key: "priorAuth", label: "Prior Authorization" },
+    { key: "referral", label: "PCP Referral" },
+    { key: "formulary", label: "Formulary / Preferred Drug" },
   ];
 
   return (
