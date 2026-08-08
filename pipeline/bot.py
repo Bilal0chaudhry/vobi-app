@@ -54,7 +54,12 @@ class EventLoggerProcessor(FrameProcessor):
             text = frame.text
             if "[END_CALL]" in text:
                 text = text.replace("[END_CALL]", "")
-                await self.event_queue.put({"type": "control", "message": "close"})
+                # Delay the close signal so TTS can finish speaking the goodbye
+                asyncio.get_event_loop().call_later(
+                    15, lambda: asyncio.ensure_future(
+                        self.event_queue.put({"type": "control", "message": "close"})
+                    )
+                )
                 
             if text.strip():
                 await self.event_queue.put({

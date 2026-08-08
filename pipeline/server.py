@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path="../.env")
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
-from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import json
@@ -36,6 +35,9 @@ async def start_call(data: PatientData):
     
     if active_call is not None and not active_call.done():
         raise HTTPException(status_code=400, detail="A call is already active")
+    
+    # Reset message buffer for the new call
+    broadcaster.reset()
         
     print("\n" + "="*50)
     print(f"🚨 INCOMING CALL FOR: {data.insurance}")
@@ -79,38 +81,15 @@ async def end_call():
 async def availity_eligibility(data: AvailityRequest):
     return fetch_eligibility(data)
 
-@app.get("/events")
-async def get_events(request: Request):
-    async def event_generator():
-        q = asyncio.Queue()
-        broadcaster.queues.add(q)
-        try:
-            while True:
-                if await request.is_disconnected():
-                    break
-                
-                try:
-                    event_data = await asyncio.wait_for(q.get(), timeout=1.0)
-                    if event_data.get("type") == "control" and event_data.get("message") == "close":
-                        break
-                    yield f"data: {json.dumps(event_data)}\n\n"
-                except asyncio.TimeoutError:
-                    continue
-        except asyncio.CancelledError:
-            pass
-        finally:
-            if q in broadcaster.queues:
-                broadcaster.queues.remove(q)
-
-    return StreamingResponse(
-        event_generator(), 
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        }
-    )
+@app.get("/messages")
+async def get_messages(since: int = 0):
+    """Polling endpoint: returns new messages since the given index."""
+    new_messages = broadcaster.get_messages_since(since)
+    return {
+        "messages": new_messages,
+        "next": since + len(new_messages),
+        "done": broadcaster.call_ended,
+    }
 
 @app.on_event("startup")
 async def startup_event():

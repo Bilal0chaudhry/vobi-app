@@ -1,4 +1,4 @@
-const API_BASE = 'https://yards-submissions-judicial-containers.trycloudflare.com';
+const API_BASE = 'https://towns-nested-obtaining-arnold.trycloudflare.com';
 
 async function fetchWithConfig(endpoint, options = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -40,6 +40,6 @@ export function endCall() {
   return fetchWithConfig('/end-call', { method: 'POST' });
 }
 
-export function getEventsUrl() {
-  return `${API_BASE}/events`;
+export function pollMessages(since = 0) {
+  return fetchWithConfig(`/messages?since=${since}`);
 }
