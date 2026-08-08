@@ -1,8 +1,13 @@
-const API_BASE = 'https://towns-nested-obtaining-arnold.trycloudflare.com';
+const API_BASE = "https://farming-angela-vendor-birds.trycloudflare.com";
+const API_KEY = "__VOBI_API_KEY__";
 
 async function fetchWithConfig(endpoint, options = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": API_KEY,
+      ...options.headers,
+    },
     ...options,
   });
 
@@ -15,8 +20,8 @@ async function fetchWithConfig(endpoint, options = {}) {
 }
 
 export function queryAvailityEligibility(job) {
-  return fetchWithConfig('/availity/eligibility', {
-    method: 'POST',
+  return fetchWithConfig("/availity/eligibility", {
+    method: "POST",
     body: JSON.stringify({
       payer: job.insurance,
       memberId: job.memberId,
@@ -30,14 +35,14 @@ export function queryAvailityEligibility(job) {
 }
 
 export function startCall(patientData) {
-  return fetchWithConfig('/start-call', {
-    method: 'POST',
+  return fetchWithConfig("/start-call", {
+    method: "POST",
     body: JSON.stringify(patientData),
   });
 }
 
 export function endCall() {
-  return fetchWithConfig('/end-call', { method: 'POST' });
+  return fetchWithConfig("/end-call", { method: "POST" });
 }
 
 export function pollMessages(since = 0) {

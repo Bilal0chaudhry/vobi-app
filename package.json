@@ -1,11 +1,9 @@
 {
   "name": "vobi-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Vobi - AI Voice Benefits Verification",
   "scripts": {
     "dev": "vite",
-    "vobi": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",

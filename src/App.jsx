@@ -32,14 +32,12 @@ export default function App() {
     setActiveJob(null);
   };
 
-
   const handleSubmitNewVob = (newJob) => {
     setJobs((prev) => [newJob, ...prev]);
     setActiveJob(newJob);
     setCurrentView('liveView');
     setShowNewVobModal(false);
   };
-
 
   const handlePortalSubmit = (newJob) => {
     setJobs((prev) => [newJob, ...prev]);

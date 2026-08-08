@@ -5,17 +5,14 @@ import sys
 os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
 
 from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
-
-# Suppress Pipecat debug logs to keep the terminal clean
 from loguru import logger
 logger.remove()
 logger.add(sys.stderr, level="WARNING")
 
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
-from pipecat.audio.turn.smart_turn.local_smart_turn_v3 import LocalSmartTurnAnalyzerV3
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineWorker
 from pipecat.workers.runner import WorkerRunner
@@ -32,59 +29,72 @@ from prompts import VOBI_SYSTEM_PROMPT, VOBI_GREETING
 
 FISH_VOICE_ID = os.getenv("FISH_AUDIO_VOICE_ID", "")
 
+
 class EventLoggerProcessor(FrameProcessor):
-    def __init__(self, event_queue: asyncio.Queue, source_type: str):
+    def __init__(self, event_queue, source_type: str):
         super().__init__()
         self.event_queue = event_queue
         self.source_type = source_type
-        
+
     async def process_frame(self, frame: Frame, direction: FrameDirection):
         await super().process_frame(frame, direction)
-        
+
         if self.event_queue is None:
+            await self.push_frame(frame, direction)
             return
-            
+
         if self.source_type == "REP" and isinstance(frame, TranscriptionFrame):
             await self.event_queue.put({
                 "type": "rep",
                 "source": "REP",
-                "message": frame.text
+                "message": frame.text,
             })
         elif self.source_type == "VOBI" and isinstance(frame, TextFrame):
             text = frame.text
             if "[END_CALL]" in text:
                 text = text.replace("[END_CALL]", "")
-                # Delay the close signal so TTS can finish speaking the goodbye
-                asyncio.get_event_loop().call_later(
-                    15, lambda: asyncio.ensure_future(
-                        self.event_queue.put({"type": "control", "message": "close"})
-                    )
-                )
-                
+                await self.event_queue.put({"type": "control", "message": "end_pending"})
+
             if text.strip():
                 await self.event_queue.put({
                     "type": "ai",
                     "source": "VOBI",
-                    "message": text
+                    "message": text,
                 })
-            
+
         await self.push_frame(frame, direction)
 
-async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None, stop_event: asyncio.Event = None):
-    vad = SileroVADAnalyzer(
-        params=VADParams(
-            confidence=0.7,
-            start_secs=0.5,
-            stop_secs=1.0,
-        )
-    )
 
+def build_system_prompt(patient_data: dict | None) -> str:
+    defaults = {
+        "patient_first_name": "[Patient First Name]",
+        "patient_last_name": "[Patient Last Name]",
+        "dob": "[DOB]",
+        "member_id": "[Member ID]",
+        "npi": "[NPI]",
+        "cpt_codes": "[CPT Codes]",
+    }
+    if patient_data:
+        defaults.update({
+            "patient_first_name": patient_data.get("patientFirstName", ""),
+            "patient_last_name": patient_data.get("patientLastName", ""),
+            "dob": patient_data.get("dob", ""),
+            "member_id": patient_data.get("memberId", ""),
+            "npi": patient_data.get("npi", ""),
+            "cpt_codes": ", ".join(patient_data.get("cptCodes", [])),
+        })
+    return VOBI_SYSTEM_PROMPT.format(**defaults)
+
+
+async def start_bot(patient_data: dict = None, event_queue=None, stop_event: asyncio.Event = None):
     transport = LocalAudioTransport(
         LocalAudioTransportParams(
             audio_in_enabled=True,
             audio_out_enabled=True,
             vad_enabled=True,
-            vad_analyzer=vad,
+            vad_analyzer=SileroVADAnalyzer(
+                params=VADParams(confidence=0.7, start_secs=0.5, stop_secs=1.0)
+            ),
             vad_audio_passthrough=True,
         )
     )
@@ -104,38 +114,15 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
         api_key=os.getenv("FISH_AUDIO_API_KEY"),
         settings=FishAudioTTSService.Settings(
             model="s2.1-pro-free",
-            voice=FISH_VOICE_ID if FISH_VOICE_ID else None
-        )
+            voice=FISH_VOICE_ID if FISH_VOICE_ID else None,
+        ),
     )
 
-    if patient_data:
-        system_prompt = VOBI_SYSTEM_PROMPT.format(
-            patient_first_name=patient_data.get("patientFirstName", ""),
-            patient_last_name=patient_data.get("patientLastName", ""),
-            dob=patient_data.get("dob", ""),
-            member_id=patient_data.get("memberId", ""),
-            npi=patient_data.get("npi", ""),
-            cpt_codes=", ".join(patient_data.get("cptCodes", []))
-        )
-    else:
-        system_prompt = VOBI_SYSTEM_PROMPT.format(
-            patient_first_name="[Patient First Name]",
-            patient_last_name="[Patient Last Name]",
-            dob="[DOB]",
-            member_id="[Member ID]",
-            npi="[NPI]",
-            cpt_codes="[CPT Codes]"
-        )
-
-    messages = [
-        {"role": "system", "content": system_prompt},
+    context = LLMContext(messages=[
+        {"role": "system", "content": build_system_prompt(patient_data)},
         {"role": "assistant", "content": VOBI_GREETING},
-    ]
-
-    context = LLMContext(messages=messages)
-    context_aggregator = LLMContextAggregatorPair(
-        context=context
-    )
+    ])
+    context_aggregator = LLMContextAggregatorPair(context=context)
 
     pipeline = Pipeline([
         transport.input(),
@@ -153,15 +140,12 @@ async def start_bot(patient_data: dict = None, event_queue: asyncio.Queue = None
     runner = WorkerRunner(handle_sigint=False)
     await runner.add_workers(worker)
 
-    async def wait_for_stop():
-        if stop_event:
+    if stop_event:
+        async def wait_for_stop():
             await stop_event.wait()
             await pipeline.queue_frame(EndFrame())
-            
-    if stop_event:
         asyncio.create_task(wait_for_stop())
 
-    # Silenced the redundant terminal prints here since server.py handles the clean UI
     await runner.run()
 
 
@@ -172,7 +156,7 @@ if __name__ == "__main__":
         "dob": "1990-01-01",
         "memberId": "W2749183021",
         "npi": "1487624930",
-        "cptCodes": ["99214", "90837"]
+        "cptCodes": ["99214", "90837"],
     }
     try:
         asyncio.run(start_bot(dummy_data))

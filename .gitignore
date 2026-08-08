@@ -11,15 +11,21 @@ dist
 dist-ssr
 *.local
 
-# Environment & local config — NEVER COMMIT THESE
+# Environment & secrets — NEVER COMMIT
 .env
 .env.local
 .env.*.local
 .env.production
+
+# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Runtime artifacts
+cloudflared
+cloudflared.log
 
 # Editor & OS files
 .vscode/*
