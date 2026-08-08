@@ -1,15 +1,29 @@
 import asyncio
 import os
 import sys
+import ctypes
 
 os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
+
+# Suppress ALSA/Jack noise before any audio imports
+try:
+    asound = ctypes.cdll.LoadLibrary("libasound.so.2")
+    _err_handler_t = ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p)
+    asound.snd_lib_error_set_handler(_err_handler_t(lambda *_: None))
+except OSError:
+    pass
+
+os.environ["JACK_NO_START_SERVER"] = "1"
+
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from loguru import logger
 logger.remove()
-logger.add(sys.stderr, level="WARNING")
+logger.add(sys.stderr, level="ERROR")
 
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
@@ -146,7 +160,15 @@ async def start_bot(patient_data: dict = None, event_queue=None, stop_event: asy
             await pipeline.queue_frame(EndFrame())
         asyncio.create_task(wait_for_stop())
 
-    await runner.run()
+    try:
+        await runner.run()
+    except asyncio.CancelledError:
+        pass
+    finally:
+        try:
+            await pipeline.queue_frame(EndFrame())
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

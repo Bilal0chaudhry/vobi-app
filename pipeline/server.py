@@ -2,10 +2,12 @@ import os
 import sys
 import time
 import signal
+import warnings
 from contextlib import asynccontextmanager
 from collections import defaultdict
 
 os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from dotenv import load_dotenv
 load_dotenv(dotenv_path="../.env")
@@ -34,7 +36,7 @@ rate_limit_store = defaultdict(list)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     def force_exit(*args):
-        print("\nShutting down...")
+        print("\n✋ Server stopped.")
         os._exit(0)
     signal.signal(signal.SIGINT, force_exit)
     yield
@@ -78,6 +80,13 @@ broadcaster = Broadcaster()
 stop_event = None
 
 
+def cleanup_call():
+    global active_call, stop_event
+    active_call = None
+    stop_event = None
+    print("\n📞 Call ended. Ready for next call.\n")
+
+
 @app.post("/start-call")
 async def start_call(data: PatientData):
     global active_call, broadcaster, stop_event
@@ -88,26 +97,26 @@ async def start_call(data: PatientData):
     broadcaster.reset()
 
     print("\n" + "=" * 50)
-    print(f"🚨 INCOMING CALL FOR: {data.insurance}")
+    print(f"📞 INCOMING: {data.patientFirstName} {data.patientLastName} ({data.insurance})")
     print("=" * 50)
     print("\a", end="", flush=True)
 
     try:
-        answer = await asyncio.to_thread(input, "Accept call? (y/n): ")
+        answer = await asyncio.to_thread(input, "Accept? (y/n): ")
         if answer.strip().lower() != "y":
-            print("Call rejected.\n")
+            print("❌ Rejected.\n")
             raise HTTPException(status_code=403, detail="All representatives are busy")
     except EOFError:
         raise HTTPException(status_code=403, detail="All representatives are busy")
 
-    print("✅ Call accepted! Vobi is connected.")
-    print("👉 Live transcript → website dashboard")
-    print("👉 Speak into your microphone to verify benefits.\n")
+    print("✅ Connected — speaking to VOBI.\n")
 
     stop_event = asyncio.Event()
 
     from bot import start_bot
     active_call = asyncio.create_task(start_bot(data.model_dump(), broadcaster, stop_event))
+
+    active_call.add_done_callback(lambda _: cleanup_call())
 
     return {"message": "Call started successfully", "patient": data.patientFirstName}
 
@@ -121,6 +130,10 @@ async def end_call():
 
     if active_call is not None and not active_call.done():
         active_call.cancel()
+        try:
+            await asyncio.wait_for(asyncio.shield(active_call), timeout=3.0)
+        except (asyncio.CancelledError, asyncio.TimeoutError, Exception):
+            pass
         active_call = None
 
     await broadcaster.put({"type": "control", "message": "close"})
