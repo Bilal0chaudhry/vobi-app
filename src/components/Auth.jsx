@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import vobiLogoLight from '../assets/vobi-logo-light-transparent.png';
+import vobiLogoLight from '../assets/vobi-logo.png';
 
 function GoogleIcon() {
   return (
