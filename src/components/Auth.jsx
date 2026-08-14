@@ -115,7 +115,9 @@ export default function Auth() {
             }
           }
         });
-        if (error) throw error;
+        if (error) {
+          throw new Error(error.message.includes('Database error') ? 'Server Error. Please try again later.' : error.message);
+        }
         
         if (!data.session) {
           showToastMsg('success', 'Account created! Please check your email.');

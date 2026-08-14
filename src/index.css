@@ -105,14 +105,14 @@ body {
 }
 
 /* ── Toast Notifications ── */
-@keyframes slideInLeft {
-  0% { transform: translateX(-100%) scale(0.95); opacity: 0; }
+@keyframes slideInRight {
+  0% { transform: translateX(100%) scale(0.95); opacity: 0; }
   100% { transform: translateX(0) scale(1); opacity: 1; }
 }
 
-@keyframes slideOutLeft {
+@keyframes slideOutRight {
   0% { transform: translateX(0) scale(1); opacity: 1; }
-  100% { transform: translateX(-100%) scale(0.95); opacity: 0; }
+  100% { transform: translateX(100%) scale(0.95); opacity: 0; }
 }
 
 @keyframes progressShrink {
@@ -121,11 +121,11 @@ body {
 }
 
 .toast-enter {
-  animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .toast-exit {
-  animation: slideOutLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideOutRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .toast-progress {

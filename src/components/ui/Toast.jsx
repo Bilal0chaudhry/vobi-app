@@ -17,7 +17,7 @@ export default function Toast({ type, message, duration = 4000, onClose }) {
 
   return (
     <div 
-      className={`fixed top-6 left-6 z-50 flex flex-col bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 ${isExiting ? 'toast-exit' : 'toast-enter'}`} 
+      className={`fixed top-6 right-6 z-50 flex flex-col bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 ${isExiting ? 'toast-exit' : 'toast-enter'}`} 
       style={{ minWidth: '320px' }}
     >
       <div className="flex items-center gap-3 px-5 py-4">
