@@ -63,7 +63,7 @@ export default function Auth() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -74,7 +74,11 @@ export default function Auth() {
           }
         });
         if (error) throw error;
-        // The App component will catch the auth state change automatically
+        
+        if (!data.session) {
+          setErrorMsg("Account created! Please check your email to confirm your address before signing in.");
+          setIsSignUp(false);
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
