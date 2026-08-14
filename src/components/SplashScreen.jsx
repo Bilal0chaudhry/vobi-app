@@ -1,72 +1,91 @@
 import React, { useEffect, useState } from 'react';
-import VobiLogo from './VobiLogo';
 import vobiLogoLight from '../assets/vobi-logo.png';
 
 export default function SplashScreen({ onFinish }) {
-  const [progress, setProgress] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setFadeOut(true);
-          setTimeout(onFinish, 400);
-          return 100;
-        }
-        const next = prev + Math.floor(Math.random() * 22) + 14;
-        return next > 100 ? 100 : next;
-      });
-    }, 120);
+    // Total animation time is around 2 seconds. Trigger fade out at 2.4s.
+    const timer = setTimeout(() => {
+      setFadeOut(true);
+      setTimeout(onFinish, 700); // 700ms smooth fade out transition
+    }, 2400);
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 text-white transition-opacity duration-500 ${
-      fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
-    }`}>
-      <div className="absolute w-[600px] h-[600px] bg-cyan-600/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
-      <div className="absolute w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-2xl pointer-events-none" />
+    <>
+      <style>
+        {`
+          .v-path-anim {
+            stroke-dasharray: 140;
+            stroke-dashoffset: 140;
+            animation: drawV 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          }
+          
+          @keyframes drawV {
+            0% {
+              stroke-dashoffset: 140;
+            }
+            100% {
+              stroke-dashoffset: 0;
+            }
+          }
+          
+          .v-glow {
+            animation: glowPulse 2s ease-in-out infinite alternate 0.5s;
+          }
+          
+          @keyframes glowPulse {
+            0% {
+              filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3));
+            }
+            100% {
+              filter: drop-shadow(0 0 40px rgba(45, 212, 191, 0.8));
+            }
+          }
+        `}
+      </style>
       
-      {/* Hidden preloader for Auth logo to prevent popping */}
-      <img src={vobiLogoLight} alt="preload" className="hidden" aria-hidden="true" />
+      <div className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0a0f1c] text-white transition-opacity duration-700 ease-in-out ${
+        fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}>
+        {/* Deep, premium background ambient glows */}
+        <div className="absolute w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+        
+        {/* Hidden preloader for Auth logo to prevent popping */}
+        <img src={vobiLogoLight} alt="preload" className="hidden" aria-hidden="true" />
 
-      <div className="relative z-10 flex flex-col items-center text-center px-6">
-        <div className="mb-2 px-8 py-5 rounded-3xl bg-white shadow-2xl shadow-indigo-500/20 border border-slate-200 transform hover:scale-105 transition-transform duration-300">
-          <VobiLogo size="xl" />
-        </div>
+        {/* The Animated "V" Logo */}
+        <div className="relative flex items-center justify-center w-32 h-32 md:w-48 md:h-48 v-glow">
+          <svg 
+            viewBox="0 0 100 100" 
+            className="w-full h-full overflow-visible"
+            fill="none"
+          >
+            <defs>
+              {/* Vibrant tech gradient matching the Auth page */}
+              <linearGradient id="v-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#60a5fa" />   {/* blue-400 */}
+                <stop offset="50%" stopColor="#818cf8" />  {/* indigo-400 */}
+                <stop offset="100%" stopColor="#2dd4bf" /> {/* teal-400 */}
+              </linearGradient>
+            </defs>
 
-        <p className="text-xs font-semibold tracking-widest uppercase text-slate-400 mb-4">
-          Autonomous VOB Agent
-        </p>
-
-        <div className="flex items-center gap-1.5 h-6 mb-8 mt-2">
-          {[40, 80, 100, 60, 95, 50, 85, 45, 70, 90].map((h, i) => (
-            <span
-              key={i}
-              className="w-1 bg-gradient-to-t from-cyan-400 to-indigo-400 rounded-full animate-pulse"
-              style={{
-                height: `${h}%`,
-                animationDelay: `${i * 100}ms`,
-                animationDuration: '750ms',
-              }}
+            {/* The single continuous V stroke */}
+            <path
+              d="M 20 20 L 50 80 L 80 20"
+              stroke="url(#v-gradient)"
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="v-path-anim"
             />
-          ))}
+          </svg>
         </div>
-
-        <div className="w-72 bg-slate-900 border border-slate-800/80 rounded-full h-2.5 p-0.5 mb-3 overflow-hidden shadow-inner">
-          <div
-            className="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-200 ease-out shadow-md shadow-cyan-500/50"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <p className="text-xs font-mono text-slate-400 tracking-wider uppercase">
-          {progress < 100 ? `Initializing VOBI Voice Agent... ${progress}%` : 'Agent Ready'}
-        </p>
       </div>
-    </div>
+    </>
   );
 }
