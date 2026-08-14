@@ -1,5 +1,5 @@
-const API_BASE = "https://fantasy-room-usr-titanium.trycloudflare.com";
-const API_KEY = "c05d0396faae14e1f48ed6747b42a7ae8b8be7a8037bc14c7900a8c6cc8adb75";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 async function fetchWithConfig(endpoint, options = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, {

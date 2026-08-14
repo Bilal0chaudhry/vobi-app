@@ -23,8 +23,8 @@ while true; do
 done
 echo "  ✅ Tunnel ready: $URL"
 
-sed -i "s|const API_BASE = \".*\";|const API_BASE = \"${URL}\";|g" src/utils/api.js
-sed -i "s|const API_KEY = \".*\";|const API_KEY = \"${API_KEY}\";|g" src/utils/api.js
+echo "VITE_API_BASE=$URL" > .env.local
+echo "VITE_API_KEY=$API_KEY" >> .env.local
 
 echo "  📦 Building & deploying..."
 npm run deploy --silent 2>/dev/null
