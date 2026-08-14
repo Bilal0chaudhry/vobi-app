@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PageHeader from './PageHeader';
 import InputField from './ui/InputField';
 import Button from './ui/Button';
-import { updateProfile } from '../utils/db';
+import { updateProfile, updateSettings } from '../utils/db';
 
 function Toggle({ id, checked, onChange }) {
   return (
@@ -34,30 +34,35 @@ function ToggleRow({ id, label, description, checked, onChange }) {
   );
 }
 
-export default function Settings({ profile, onProfileUpdate }) {
+export default function Settings({ profile, settings, onProfileUpdate, onSettingsUpdate }) {
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [organization, setOrganization] = useState(profile?.organization || '');
-  const [defaultNpi, setDefaultNpi] = useState(profile?.npi || '');
-  const [taxId, setTaxId] = useState(profile?.tax_id || '');
-  const [callbackNumber, setCallbackNumber] = useState(profile?.callback_number || '');
-  const [autoRedial, setAutoRedial] = useState(profile?.auto_redial ?? true);
-  const [callRecording, setCallRecording] = useState(profile?.call_recording ?? false);
+  const [defaultNpi, setDefaultNpi] = useState(settings?.npi || '');
+  const [taxId, setTaxId] = useState(settings?.tax_id || '');
+  const [callbackNumber, setCallbackNumber] = useState(settings?.callback_number || '');
+  const [autoRedial, setAutoRedial] = useState(settings?.auto_redial ?? false);
+  const [callRecording, setCallRecording] = useState(settings?.call_recording ?? false);
   
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '');
       setOrganization(profile.organization || '');
-      setDefaultNpi(profile.npi || '');
-      setTaxId(profile.tax_id || '');
-      setCallbackNumber(profile.callback_number || '');
-      setAutoRedial(profile.auto_redial ?? true);
-      setCallRecording(profile.call_recording ?? false);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (settings) {
+      setDefaultNpi(settings.npi || '');
+      setTaxId(settings.tax_id || '');
+      setCallbackNumber(settings.callback_number || '');
+      setAutoRedial(settings.auto_redial ?? false);
+      setCallRecording(settings.call_recording ?? false);
+    }
+  }, [settings]);
 
   // Hardcore Validation Rules
   useEffect(() => {
@@ -100,9 +105,7 @@ export default function Settings({ profile, onProfileUpdate }) {
   }, [fullName, organization, defaultNpi, taxId, callbackNumber]);
 
   // Auto-formatters for Inputs
-  const handleNpiChange = (val) => {
-    setDefaultNpi(val.replace(/\D/g, '').slice(0, 10)); // Only digits, max 10
-  };
+  const handleNpiChange = (val) => setDefaultNpi(val.replace(/\D/g, '').slice(0, 10));
 
   const handleTaxIdChange = (val) => {
     const cleaned = val.replace(/\D/g, '').slice(0, 9);
@@ -121,38 +124,48 @@ export default function Settings({ profile, onProfileUpdate }) {
     setCallbackNumber(`(${match[1]}) ${match[2]}-${match[3]}`);
   };
 
-  const hasChanges = 
+  const profileHasChanges = 
     fullName !== (profile?.full_name || '') ||
-    organization !== (profile?.organization || '') ||
-    defaultNpi !== (profile?.npi || '') ||
-    taxId !== (profile?.tax_id || '') ||
-    callbackNumber !== (profile?.callback_number || '') ||
-    autoRedial !== (profile?.auto_redial ?? true) ||
-    callRecording !== (profile?.call_recording ?? false);
+    organization !== (profile?.organization || '');
+
+  const settingsHasChanges = 
+    defaultNpi !== (settings?.npi || '') ||
+    taxId !== (settings?.tax_id || '') ||
+    callbackNumber !== (settings?.callback_number || '') ||
+    autoRedial !== (settings?.auto_redial ?? false) ||
+    callRecording !== (settings?.call_recording ?? false);
 
   const isValid = Object.keys(errors).length === 0;
-  const canSave = hasChanges && isValid;
+  const canSave = (profileHasChanges || settingsHasChanges) && isValid;
+
+  const showToastMsg = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => setToast({ show: false, type: 'success', message: '' }), 4000);
+  };
 
   const handleSave = async () => {
     if (!canSave) return;
     setIsSaving(true);
     try {
-      const updates = {
-        full_name: fullName,
-        organization: organization,
-        npi: defaultNpi,
-        tax_id: taxId,
-        callback_number: callbackNumber,
-        auto_redial: autoRedial,
-        call_recording: callRecording,
-      };
-      const newProfile = await updateProfile(profile.id, updates);
-      onProfileUpdate(newProfile);
+      if (profileHasChanges) {
+        const p = await updateProfile(profile.id, { full_name: fullName, organization });
+        onProfileUpdate(p);
+      }
       
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      if (settingsHasChanges) {
+        const s = await updateSettings(profile.id, {
+          npi: defaultNpi,
+          tax_id: taxId,
+          callback_number: callbackNumber,
+          auto_redial: autoRedial,
+          call_recording: callRecording,
+        });
+        onSettingsUpdate(s);
+      }
+      
+      showToastMsg('success', 'Settings saved successfully');
     } catch (err) {
-      alert('Failed to save settings: ' + err.message);
+      showToastMsg('error', 'Failed to save settings: ' + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -160,22 +173,26 @@ export default function Settings({ profile, onProfileUpdate }) {
 
   return (
     <div className="animate-fade-in relative">
-      {showToast && (
-        <div className="fixed top-6 right-6 z-50 animate-fade-in bg-emerald-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
-          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          <span className="text-sm font-medium">Settings saved successfully</span>
+      {toast.show && (
+        <div className={`fixed top-6 right-6 z-50 animate-fade-in px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
+          toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'
+        }`}>
+          {toast.type === 'success' ? (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+          <span className="text-sm font-medium">{toast.message}</span>
         </div>
       )}
 
-      <PageHeader
-        title="Settings"
-        subtitle="Practice profile and agent behavior"
-      />
+      <PageHeader title="Settings" subtitle="Practice profile and agent behavior" />
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        {/* Left Column: Main Settings */}
         <div className="xl:col-span-8 space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <div className="border-b border-gray-100 pb-4 mb-6">
@@ -195,7 +212,6 @@ export default function Settings({ profile, onProfileUpdate }) {
           </div>
         </div>
 
-        {/* Right Column: Preferences & Actions */}
         <div className="xl:col-span-4 space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <div className="border-b border-gray-100 pb-4 mb-5">
@@ -227,11 +243,11 @@ export default function Settings({ profile, onProfileUpdate }) {
           <div className="bg-brand-50 rounded-xl border border-brand-100 p-6 shadow-sm">
             <h2 className="text-sm font-bold text-brand-900 mb-2">Unsaved Changes</h2>
             <p className="text-sm text-brand-700 mb-5">
-              {hasChanges 
-                ? isValid 
-                  ? "You have modified your settings. Review and save them to apply." 
-                  : "Please fix the validation errors before you can save."
-                : "Your settings are up to date."}
+              {canSave 
+                ? "You have modified your settings. Review and save them to apply." 
+                : (!isValid 
+                    ? "Please fix the validation errors before you can save." 
+                    : "Your settings are up to date.")}
             </p>
             <Button onClick={handleSave} disabled={!canSave || isSaving} fullWidth className="py-2.5">
               {isSaving ? 'Saving to Database...' : 'Save Changes'}

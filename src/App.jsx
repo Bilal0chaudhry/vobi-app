@@ -11,11 +11,12 @@ import Auth from './components/Auth';
 import AdminDashboard from './components/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/StatusScreens';
 import { supabase } from './utils/supabase';
-import { fetchJobs, createJob, updateJob } from './utils/db';
+import { fetchJobs, createJob, updateJob, fetchSettings } from './utils/db';
 
 export default function App() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [userSettings, setUserSettings] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('dashboard');
@@ -34,7 +35,10 @@ export default function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setIsAuthenticated(!!session);
-      if (!session) setProfile(null);
+      if (!session) {
+        setProfile(null);
+        setUserSettings(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -43,16 +47,16 @@ export default function App() {
   useEffect(() => {
     if (!session) return;
     
-    const fetchProfile = async () => {
+    const fetchUserData = async () => {
       try {
         const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
         if (error) {
           console.error("Profile fetch error:", error);
-          // If the profile doesn't exist or table is missing, mock a pending profile
-          // so the UI doesn't hang on a blank screen.
           setProfile({ id: session.user.id, status: 'pending', error: error.message });
         } else {
           setProfile(data);
+          const settingsData = await fetchSettings(session.user.id);
+          setUserSettings(settingsData || { id: session.user.id });
         }
       } catch (err) {
         console.error("Profile catch error:", err);
@@ -60,9 +64,9 @@ export default function App() {
       }
     };
 
-    fetchProfile();
+    fetchUserData();
 
-    // Listen for profile changes (e.g. admin approves them while they are waiting)
+    // Listen for profile changes
     const profileChannel = supabase
       .channel('public:profiles')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${session.user.id}` }, payload => {
@@ -90,7 +94,7 @@ export default function App() {
     const channel = supabase
       .channel('public:jobs')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
-        loadJobs(); // Reload jobs when database changes
+        loadJobs();
       })
       .subscribe();
 
@@ -157,7 +161,13 @@ export default function App() {
       case 'callHistory':
         return <CallHistory jobs={jobs} />;
       case 'settings':
-        return <Settings session={session} profile={profile} onProfileUpdate={(p) => setProfile(p)} />;
+        return <Settings 
+          session={session} 
+          profile={profile} 
+          settings={userSettings} 
+          onProfileUpdate={(p) => setProfile(p)} 
+          onSettingsUpdate={(s) => setUserSettings(s)} 
+        />;
       case 'liveView':
         return activeJob
           ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />

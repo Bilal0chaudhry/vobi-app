@@ -95,3 +95,31 @@ export async function updateProfile(userId, updates) {
   }
   return data;
 }
+
+export async function fetchSettings(userId) {
+  const { data, error } = await supabase
+    .from('settings')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching settings:', error);
+    return null;
+  }
+  return data; // Might be null if user hasn't saved settings yet
+}
+
+export async function updateSettings(userId, settingsData) {
+  const { data, error } = await supabase
+    .from('settings')
+    .upsert({ id: userId, ...settingsData })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating settings:', error);
+    throw error;
+  }
+  return data;
+}
