@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import VobiLogo from './VobiLogo';
+import vobiLogoLight from '../assets/vobi-logo.png';
 
 export default function SplashScreen({ onFinish }) {
   const [progress, setProgress] = useState(0);
@@ -28,6 +29,9 @@ export default function SplashScreen({ onFinish }) {
     }`}>
       <div className="absolute w-[600px] h-[600px] bg-cyan-600/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-2xl pointer-events-none" />
+      
+      {/* Hidden preloader for Auth logo to prevent popping */}
+      <img src={vobiLogoLight} alt="preload" className="hidden" aria-hidden="true" />
 
       <div className="relative z-10 flex flex-col items-center text-center px-6">
         <div className="mb-2 px-8 py-5 rounded-3xl bg-white shadow-2xl shadow-indigo-500/20 border border-slate-200 transform hover:scale-105 transition-transform duration-300">
