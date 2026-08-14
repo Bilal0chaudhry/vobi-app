@@ -155,9 +155,9 @@ export default function App() {
       case 'dashboard':
         return <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
       case 'callHistory':
-        return <CallHistory jobs={jobs} onNewVerification={() => setShowNewVobModal(true)} />;
+        return <CallHistory jobs={jobs} />;
       case 'settings':
-        return <Settings onNewVerification={() => setShowNewVobModal(true)} session={session} profile={profile} onProfileUpdate={(p) => setProfile(p)} />;
+        return <Settings session={session} profile={profile} onProfileUpdate={(p) => setProfile(p)} />;
       case 'liveView':
         return activeJob
           ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />

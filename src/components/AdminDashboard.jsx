@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { fetchProfiles, approveProfile, rejectProfile } from '../utils/admin';
+import PageHeader from './PageHeader';
 
 export default function AdminDashboard({ onLogout }) {
   const [profiles, setProfiles] = useState([]);
@@ -30,18 +31,18 @@ export default function AdminDashboard({ onLogout }) {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-sm text-gray-500">Manage user access and approvals.</p>
-        </div>
-        <button onClick={onLogout} className="text-sm font-medium text-gray-600 hover:text-gray-900">
+    <div className="animate-fade-in">
+      <div className="flex items-start justify-between mb-6">
+        <PageHeader
+          title="Admin Dashboard"
+          subtitle="Manage user access and approvals"
+        />
+        <button onClick={onLogout} className="text-sm font-medium text-gray-600 hover:text-gray-900 mt-2">
           Sign out
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
