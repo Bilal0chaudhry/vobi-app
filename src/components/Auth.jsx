@@ -186,7 +186,7 @@ export default function Auth() {
               100% { opacity: 0.4; transform: scale(0.95); filter: blur(100px); }
             }
             @keyframes textGradientFlow {
-              to { background-position: 200% center; }
+              to { background-position: -300% center; }
             }
             .animate-bg-glow-1 {
               animation: bgGlowPulse 6s ease-in-out infinite;
@@ -195,8 +195,9 @@ export default function Auth() {
               animation: bgGlowPulse 8s ease-in-out infinite reverse;
             }
             .animate-text-flow {
-              background-size: 200% auto;
-              animation: textGradientFlow 5s linear infinite;
+              background-image: linear-gradient(to right, #60a5fa 0%, #818cf8 33.33%, #5eead4 66.66%, #60a5fa 100%);
+              background-size: 300% auto;
+              animation: textGradientFlow 12s linear infinite;
             }
           `}
         </style>
@@ -209,7 +210,7 @@ export default function Auth() {
           {/* Logo and Slogan */}
           <div className="flex flex-col items-start mb-16 xl:mb-20">
             <img src={vobiLogoLight} alt="Vobi Logo" className="w-[160px] lg:w-[180px] xl:w-[220px] h-auto object-contain -ml-2" />
-            <span className="text-[11px] lg:text-xs tracking-[0.25em] font-bold uppercase mt-1.5 ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-teal-300 animate-text-flow drop-shadow-sm">
+            <span className="text-[11px] lg:text-xs tracking-[0.25em] font-bold uppercase mt-1.5 ml-1 bg-clip-text text-transparent animate-text-flow drop-shadow-sm">
               Autonomous VOB Agent
             </span>
           </div>
