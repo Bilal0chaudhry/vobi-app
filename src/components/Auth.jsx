@@ -148,6 +148,24 @@ export default function Auth() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email || errors.email) {
+      showToastMsg('error', 'Please enter a valid email address first.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+      showToastMsg('success', 'Password reset instructions sent to your email.');
+    } catch (err) {
+      showToastMsg('error', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex bg-white animate-fade-in relative">
       {toast.show && (
@@ -286,7 +304,7 @@ export default function Auth() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between ml-1 pr-1">
                   <label className="text-[13px] font-medium text-gray-700">Password</label>
-                  <button type="button" className="text-[13px] font-medium text-brand-600 hover:text-brand-700">Forgot?</button>
+                  <button type="button" onClick={handleForgotPassword} className="text-[13px] font-medium text-brand-600 hover:text-brand-700">Forgot?</button>
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
