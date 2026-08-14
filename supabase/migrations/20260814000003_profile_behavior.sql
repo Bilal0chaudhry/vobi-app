@@ -1,0 +1,3 @@
+ALTER TABLE profiles
+ADD COLUMN auto_redial BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN call_recording BOOLEAN NOT NULL DEFAULT false;

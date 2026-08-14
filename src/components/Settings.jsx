@@ -4,23 +4,22 @@ import InputField from './ui/InputField';
 import Button from './ui/Button';
 import { updateProfile } from '../utils/db';
 
-function Toggle({ id, defaultOn }) {
-  const [on, setOn] = useState(defaultOn);
+function Toggle({ id, checked, onChange }) {
   return (
     <button
       id={id}
       type="button"
       className="toggle-switch"
-      data-on={on.toString()}
-      onClick={() => setOn(!on)}
-      aria-pressed={on}
+      data-on={checked.toString()}
+      onClick={() => onChange(!checked)}
+      aria-pressed={checked}
     >
       <span className="toggle-dot" />
     </button>
   );
 }
 
-function ToggleRow({ id, label, description, defaultOn }) {
+function ToggleRow({ id, label, description, checked, onChange }) {
   return (
     <>
       <div className="flex items-center justify-between">
@@ -28,7 +27,7 @@ function ToggleRow({ id, label, description, defaultOn }) {
           <p className="text-sm font-semibold text-gray-900">{label}</p>
           <p className="text-xs text-gray-500 mt-0.5">{description}</p>
         </div>
-        <Toggle id={id} defaultOn={defaultOn} />
+        <Toggle id={id} checked={checked} onChange={onChange} />
       </div>
       <div className="border-t border-gray-100" />
     </>
@@ -41,6 +40,8 @@ export default function Settings({ profile, onProfileUpdate }) {
   const [defaultNpi, setDefaultNpi] = useState(profile?.npi || '');
   const [taxId, setTaxId] = useState(profile?.tax_id || '');
   const [callbackNumber, setCallbackNumber] = useState(profile?.callback_number || '');
+  const [autoRedial, setAutoRedial] = useState(profile?.auto_redial ?? true);
+  const [callRecording, setCallRecording] = useState(profile?.call_recording ?? false);
   
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -53,6 +54,8 @@ export default function Settings({ profile, onProfileUpdate }) {
       setDefaultNpi(profile.npi || '');
       setTaxId(profile.tax_id || '');
       setCallbackNumber(profile.callback_number || '');
+      setAutoRedial(profile.auto_redial ?? true);
+      setCallRecording(profile.call_recording ?? false);
     }
   }, [profile]);
 
@@ -123,7 +126,9 @@ export default function Settings({ profile, onProfileUpdate }) {
     organization !== (profile?.organization || '') ||
     defaultNpi !== (profile?.npi || '') ||
     taxId !== (profile?.tax_id || '') ||
-    callbackNumber !== (profile?.callback_number || '');
+    callbackNumber !== (profile?.callback_number || '') ||
+    autoRedial !== (profile?.auto_redial ?? true) ||
+    callRecording !== (profile?.call_recording ?? false);
 
   const isValid = Object.keys(errors).length === 0;
   const canSave = hasChanges && isValid;
@@ -138,6 +143,8 @@ export default function Settings({ profile, onProfileUpdate }) {
         npi: defaultNpi,
         tax_id: taxId,
         callback_number: callbackNumber,
+        auto_redial: autoRedial,
+        call_recording: callRecording,
       };
       const newProfile = await updateProfile(profile.id, updates);
       onProfileUpdate(newProfile);
@@ -196,14 +203,23 @@ export default function Settings({ profile, onProfileUpdate }) {
               <p className="text-sm text-gray-500 mt-1">Control how Vobi handles calls.</p>
             </div>
             <div className="space-y-5">
-              <ToggleRow id="toggle-api-fastpath" label="API fast-path"         description="Try payer APIs before placing a voice call."          defaultOn={true} />
-              <ToggleRow id="toggle-redial"       label="Auto re-dial on hold drop" description="Redial and re-navigate the IVR if the call drops." defaultOn={true} />
+              <ToggleRow 
+                id="toggle-redial"       
+                label="Auto re-dial on hold drop" 
+                description="Redial and re-navigate the IVR if the call drops." 
+                checked={autoRedial} 
+                onChange={setAutoRedial} 
+              />
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Call recordings</p>
                   <p className="text-xs text-gray-500 mt-0.5">Store audio alongside transcripts.</p>
                 </div>
-                <Toggle id="toggle-recordings" defaultOn={false} />
+                <Toggle 
+                  id="toggle-recordings" 
+                  checked={callRecording} 
+                  onChange={setCallRecording} 
+                />
               </div>
             </div>
           </div>
