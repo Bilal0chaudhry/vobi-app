@@ -220,7 +220,7 @@ export default function App() {
   }
 
   if (profile.status === 'pending') {
-    return <PendingScreen onLogout={handleLogout} error={profile.error} />;
+    return <PendingScreen onLogout={handleLogout} />;
   }
   
   if (profile.status === 'rejected') {

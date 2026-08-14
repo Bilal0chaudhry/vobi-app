@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import vobiLogoLight from '../assets/vobi-logo.png';
+import Toast from './ui/Toast';
+import { validateName, validateOrganization } from '../utils/validation';
 
 function GoogleIcon() {
   return (
@@ -46,7 +48,6 @@ function BuildingIcon() {
 }
 
 import { supabase } from '../utils/supabase';
-import Toast from './ui/Toast';
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -70,14 +71,14 @@ export default function Auth() {
       if (fullName) {
         if (fullName.length < 2) newErrors.fullName = 'Must be at least 2 characters';
         else if (fullName.length > 50) newErrors.fullName = 'Cannot exceed 50 characters';
-        else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(fullName)) {
+        else if (!validateName(fullName)) {
           newErrors.fullName = 'Letters and single spaces only';
         }
       }
       if (organization) {
         if (organization.length < 2) newErrors.organization = 'Must be at least 2 characters';
         else if (organization.length > 100) newErrors.organization = 'Cannot exceed 100 characters';
-        else if (!/^[a-zA-Z0-9]+(?:[\s.,&][a-zA-Z0-9]+)*$/.test(organization)) {
+        else if (!validateOrganization(organization)) {
           newErrors.organization = 'No special symbols or trailing spaces';
         }
       }

@@ -4,6 +4,7 @@ import InputField from './ui/InputField';
 import Button from './ui/Button';
 import Toast from './ui/Toast';
 import { updateProfile, updateSettings } from '../utils/db';
+import { validateName, validateOrganization, validateNpi, validateTaxId, validatePhone, formatTaxId, formatPhone } from '../utils/validation';
 
 function Toggle({ id, checked, onChange }) {
   return (
@@ -65,65 +66,42 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
     }
   }, [settings]);
 
-  // Validation Rules
   useEffect(() => {
     const newErrors = {};
     
-    // Name Validation
     if (fullName) {
       if (fullName.length < 2) newErrors.fullName = 'Name must be at least 2 characters';
       else if (fullName.length > 50) newErrors.fullName = 'Name cannot exceed 50 characters';
-      else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(fullName)) {
+      else if (!validateName(fullName)) {
         newErrors.fullName = 'Name must contain only letters and single spaces (no symbols)';
       }
     }
 
-    // Organization Validation
     if (organization) {
       if (organization.length < 2) newErrors.organization = 'Practice name must be at least 2 characters';
       else if (organization.length > 100) newErrors.organization = 'Practice name cannot exceed 100 characters';
-      else if (!/^[a-zA-Z0-9]+(?:[\s.,&][a-zA-Z0-9]+)*$/.test(organization)) {
+      else if (!validateOrganization(organization)) {
         newErrors.organization = 'Practice name cannot contain special symbols or trailing spaces';
       }
     }
 
-    // NPI Validation
-    if (defaultNpi && !/^\d{10}$/.test(defaultNpi)) {
+    if (defaultNpi && !validateNpi(defaultNpi)) {
       newErrors.defaultNpi = 'NPI must be exactly 10 digits';
     }
 
-    // Tax ID Validation
-    if (taxId && !/^\d{2}-\d{7}$/.test(taxId)) {
+    if (taxId && !validateTaxId(taxId)) {
       newErrors.taxId = 'Tax ID must be in format XX-XXXXXXX';
     }
 
-    // Callback Validation
-    if (callbackNumber && !/^\(\d{3}\)\s\d{3}-\d{4}$/.test(callbackNumber)) {
+    if (callbackNumber && !validatePhone(callbackNumber)) {
       newErrors.callbackNumber = 'Callback must be (XXX) XXX-XXXX';
     }
     
     setErrors(newErrors);
   }, [fullName, organization, defaultNpi, taxId, callbackNumber]);
-
-  // Input Auto-Formatters
   const handleNpiChange = (val) => setDefaultNpi(val.replace(/\D/g, '').slice(0, 10));
-
-  const handleTaxIdChange = (val) => {
-    const cleaned = val.replace(/\D/g, '').slice(0, 9);
-    const match = cleaned.match(/^(\d{0,2})(\d{0,7})$/);
-    if (!match) { setTaxId(''); return; }
-    if (!match[2]) { setTaxId(match[1]); return; }
-    setTaxId(`${match[1]}-${match[2]}`);
-  };
-
-  const handlePhoneChange = (val) => {
-    const cleaned = val.replace(/\D/g, '').slice(0, 10);
-    const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
-    if (!match) { setCallbackNumber(''); return; }
-    if (!match[2]) { setCallbackNumber(match[1].length === 3 ? `(${match[1]}) ` : match[1]); return; }
-    if (!match[3]) { setCallbackNumber(`(${match[1]}) ${match[2]}`); return; }
-    setCallbackNumber(`(${match[1]}) ${match[2]}-${match[3]}`);
-  };
+  const handleTaxIdChange = (val) => setTaxId(formatTaxId(val));
+  const handlePhoneChange = (val) => setCallbackNumber(formatPhone(val));
 
   const profileHasChanges = 
     fullName !== (profile?.full_name || '') ||
@@ -140,7 +118,7 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
   const canSave = (profileHasChanges || settingsHasChanges) && isValid;
 
   const showToastMsg = (type, message) => {
-    setToast({ show: false, type, message: '' }); // reset state quickly
+    setToast({ show: false, type, message: '' });
     setTimeout(() => setToast({ show: true, type, message }), 10);
   };
 
