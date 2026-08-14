@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PageHeader from './PageHeader';
 import InputField from './ui/InputField';
 import Button from './ui/Button';
+import { updateProfile } from '../utils/db';
 
 function Toggle({ id, defaultOn }) {
   const [on, setOn] = useState(defaultOn);
@@ -34,16 +35,43 @@ function ToggleRow({ id, label, description, defaultOn }) {
   );
 }
 
-export default function Settings({ onNewVerification }) {
-  const [practiceName, setPracticeName] = useState(() => localStorage.getItem('practiceName') || 'Northside Cardiology');
-  const [defaultNpi, setDefaultNpi] = useState(() => localStorage.getItem('defaultNpi') || '1487624930');
-  const [taxId, setTaxId] = useState(() => localStorage.getItem('taxId') || '84-2910337');
-  const [callbackNumber, setCallbackNumber] = useState(() => localStorage.getItem('callbackNumber') || '(312) 555-0184');
+export default function Settings({ onNewVerification, profile, onProfileUpdate }) {
+  const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [organization, setOrganization] = useState(profile?.organization || '');
+  const [defaultNpi, setDefaultNpi] = useState(profile?.npi || '');
+  const [taxId, setTaxId] = useState(profile?.tax_id || '');
+  const [callbackNumber, setCallbackNumber] = useState(profile?.callback_number || '');
+  const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => { localStorage.setItem('practiceName', practiceName); }, [practiceName]);
-  useEffect(() => { localStorage.setItem('defaultNpi', defaultNpi); }, [defaultNpi]);
-  useEffect(() => { localStorage.setItem('taxId', taxId); }, [taxId]);
-  useEffect(() => { localStorage.setItem('callbackNumber', callbackNumber); }, [callbackNumber]);
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || '');
+      setOrganization(profile.organization || '');
+      setDefaultNpi(profile.npi || '');
+      setTaxId(profile.tax_id || '');
+      setCallbackNumber(profile.callback_number || '');
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const updates = {
+        full_name: fullName,
+        organization: organization,
+        npi: defaultNpi,
+        tax_id: taxId,
+        callback_number: callbackNumber,
+      };
+      const newProfile = await updateProfile(profile.id, updates);
+      onProfileUpdate(newProfile);
+      alert('Settings saved successfully!');
+    } catch (err) {
+      alert('Failed to save settings: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="animate-fade-in max-w-2xl mx-auto">
@@ -55,9 +83,10 @@ export default function Settings({ onNewVerification }) {
       />
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-4">Practice</h2>
+        <h2 className="text-sm font-bold text-gray-900 mb-4">Profile</h2>
         <div className="grid grid-cols-2 gap-4">
-          <InputField id="settings-practiceName" label="Practice name"       value={practiceName}   onChange={setPracticeName} />
+          <InputField id="settings-fullName"     label="Full Name"           value={fullName}       onChange={setFullName} />
+          <InputField id="settings-organization" label="Practice Name"       value={organization}   onChange={setOrganization} />
           <InputField id="settings-npi"          label="Default provider NPI" value={defaultNpi}      onChange={setDefaultNpi} />
           <InputField id="settings-taxId"        label="Tax ID"              value={taxId}           onChange={setTaxId} />
           <InputField id="settings-callback"     label="Callback number"     value={callbackNumber}  onChange={setCallbackNumber} />
@@ -78,8 +107,8 @@ export default function Settings({ onNewVerification }) {
           </div>
         </div>
         <div className="mt-8 pt-5 border-t border-gray-100 flex justify-end">
-          <Button onClick={() => alert('Settings saved!')}>
-            Save Changes
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>

@@ -157,7 +157,7 @@ export default function App() {
       case 'callHistory':
         return <CallHistory jobs={jobs} onNewVerification={() => setShowNewVobModal(true)} />;
       case 'settings':
-        return <Settings onNewVerification={() => setShowNewVobModal(true)} session={session} />;
+        return <Settings onNewVerification={() => setShowNewVobModal(true)} session={session} profile={profile} onProfileUpdate={(p) => setProfile(p)} />;
       case 'liveView':
         return activeJob
           ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
@@ -205,6 +205,7 @@ export default function App() {
         onNavigate={handleNavigate} 
         isAdmin={profile.is_admin} 
         onLogout={handleLogout} 
+        profile={profile}
       />
 
       <main className="ml-[200px] flex-1 p-6">

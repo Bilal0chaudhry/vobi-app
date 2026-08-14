@@ -80,3 +80,18 @@ export async function updateJob(jobId, updates) {
   }
   return mapJobToFrontend(data);
 }
+
+export async function updateProfile(userId, updates) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+  return data;
+}

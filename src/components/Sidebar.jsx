@@ -8,11 +8,17 @@ const NAV_ITEMS = [
   { key: 'settings', label: 'Settings', Icon: IconSettings },
 ];
 
-export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout }) {
+export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, profile }) {
   const items = [...NAV_ITEMS];
   if (isAdmin) {
     items.push({ key: 'admin', label: 'Admin', Icon: IconShield });
   }
+
+  const fullName = profile?.full_name || 'Name not set';
+  const org = profile?.organization || 'No organization';
+  const initials = profile?.full_name
+    ? profile.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    : '??';
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-[200px] bg-white border-r border-gray-200 flex flex-col z-30">
@@ -50,11 +56,11 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout }) 
       <div className="px-4 py-4 border-t border-gray-100">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold">
-            AR
+            {initials}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-gray-800 truncate">Alicia Reyes</p>
-            <p className="text-[10px] text-gray-500 truncate">Northside Cardiology</p>
+            <p className="text-xs font-semibold text-gray-800 truncate">{fullName}</p>
+            <p className="text-[10px] text-gray-500 truncate">{org}</p>
           </div>
         </div>
       </div>
