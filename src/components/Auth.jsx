@@ -113,9 +113,12 @@ export default function Auth() {
         <div className="absolute top-[35%] -left-[200px] w-[500px] h-[500px] bg-[#14b8a6]/10 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="relative z-10 flex flex-col">
-          {/* Logo */}
-          <div className="flex items-center mb-4 xl:mb-6">
+          {/* Logo and Slogan */}
+          <div className="flex flex-col items-start mb-10 xl:mb-12">
             <img src={vobiLogoLight} alt="Vobi Logo" className="w-[160px] lg:w-[180px] xl:w-[220px] h-auto object-contain -ml-2" />
+            <span className="text-white/90 text-[11px] lg:text-xs tracking-[0.25em] font-semibold uppercase mt-1 ml-1 drop-shadow-sm">
+              Autonomous VOB Agent
+            </span>
           </div>
 
           {/* Badge */}
