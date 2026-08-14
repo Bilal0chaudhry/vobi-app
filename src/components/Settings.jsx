@@ -163,34 +163,58 @@ export default function Settings({ profile, onProfileUpdate }) {
         subtitle="Practice profile and agent behavior"
       />
 
-      <div className="max-w-4xl">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
-          <h2 className="text-sm font-bold text-gray-900 mb-4">Profile</h2>
-          <div className="grid grid-cols-2 gap-6">
-            <InputField id="settings-fullName"     label="Full Name"           value={fullName}       onChange={setFullName}       error={errors.fullName} />
-            <InputField id="settings-organization" label="Practice Name"       value={organization}   onChange={setOrganization}   error={errors.organization} />
-            <InputField id="settings-npi"          label="Default provider NPI" value={defaultNpi}      onChange={handleNpiChange}    error={errors.defaultNpi} placeholder="e.g. 1487624930" />
-            <InputField id="settings-taxId"        label="Tax ID"              value={taxId}           onChange={handleTaxIdChange}  error={errors.taxId} placeholder="e.g. 84-2910337" />
-            <InputField id="settings-callback"     label="Callback number"     value={callbackNumber}  onChange={handlePhoneChange}  error={errors.callbackNumber} placeholder="e.g. (312) 555-0184" />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        {/* Left Column: Main Settings */}
+        <div className="xl:col-span-8 space-y-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="border-b border-gray-100 pb-4 mb-6">
+              <h2 className="text-base font-bold text-gray-900">Practice Profile</h2>
+              <p className="text-sm text-gray-500 mt-1">Manage your personal and organization details.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="col-span-1 md:col-span-2">
+                <InputField id="settings-fullName"     label="Full Name"           value={fullName}       onChange={setFullName}       error={errors.fullName} />
+              </div>
+              <InputField id="settings-organization" label="Practice Name"       value={organization}   onChange={setOrganization}   error={errors.organization} />
+              <InputField id="settings-npi"          label="Default provider NPI" value={defaultNpi}      onChange={handleNpiChange}    error={errors.defaultNpi} placeholder="e.g. 1487624930" />
+              <InputField id="settings-taxId"        label="Tax ID"              value={taxId}           onChange={handleTaxIdChange}  error={errors.taxId} placeholder="e.g. 84-2910337" />
+              <InputField id="settings-callback"     label="Callback number"     value={callbackNumber}  onChange={handlePhoneChange}  error={errors.callbackNumber} placeholder="e.g. (312) 555-0184" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-sm font-bold text-gray-900 mb-5">Agent behavior</h2>
-          <div className="space-y-5">
-            <ToggleRow id="toggle-api-fastpath" label="API fast-path"         description="Try payer APIs before placing a voice call."          defaultOn={true} />
-            <ToggleRow id="toggle-redial"       label="Auto re-dial on hold drop" description="Redial and re-navigate the IVR if the call drops." defaultOn={true} />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-gray-900">Call recordings</p>
-                <p className="text-xs text-gray-500 mt-0.5">Store audio alongside transcripts for 90 days.</p>
+        {/* Right Column: Preferences & Actions */}
+        <div className="xl:col-span-4 space-y-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="border-b border-gray-100 pb-4 mb-5">
+              <h2 className="text-base font-bold text-gray-900">Agent Behavior</h2>
+              <p className="text-sm text-gray-500 mt-1">Control how Vobi handles calls.</p>
+            </div>
+            <div className="space-y-5">
+              <ToggleRow id="toggle-api-fastpath" label="API fast-path"         description="Try payer APIs before placing a voice call."          defaultOn={true} />
+              <ToggleRow id="toggle-redial"       label="Auto re-dial on hold drop" description="Redial and re-navigate the IVR if the call drops." defaultOn={true} />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Call recordings</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Store audio alongside transcripts.</p>
+                </div>
+                <Toggle id="toggle-recordings" defaultOn={false} />
               </div>
-              <Toggle id="toggle-recordings" defaultOn={false} />
             </div>
           </div>
-          <div className="mt-8 pt-5 border-t border-gray-100 flex justify-end">
-            <Button onClick={handleSave} disabled={!canSave || isSaving}>
-              {isSaving ? 'Saving...' : 'Save Changes'}
+
+          <div className="bg-brand-50 rounded-xl border border-brand-100 p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-brand-900 mb-2">Unsaved Changes</h2>
+            <p className="text-sm text-brand-700 mb-5">
+              {hasChanges 
+                ? isValid 
+                  ? "You have modified your settings. Review and save them to apply." 
+                  : "Please fix the validation errors before you can save."
+                : "Your settings are up to date."}
+            </p>
+            <Button onClick={handleSave} disabled={!canSave || isSaving} fullWidth className="py-2.5">
+              {isSaving ? 'Saving to Database...' : 'Save Changes'}
             </Button>
           </div>
         </div>
