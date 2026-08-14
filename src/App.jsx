@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import CallHistory from './components/CallHistory';
@@ -7,43 +7,84 @@ import LiveView from './components/LiveView';
 import NewVobModal from './components/NewVobModal';
 import SplashScreen from './components/SplashScreen';
 import PortalVobPage from './components/PortalVobPage';
-import { initialJobs } from './data/seedData';
+import Auth from './components/Auth';
+import { supabase } from './utils/supabase';
+import { fetchJobs, createJob, updateJob } from './utils/db';
 
 export default function App() {
+  const [session, setSession] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('dashboard');
   const [showNewVobModal, setShowNewVobModal] = useState(false);
-  const [jobs, setJobs] = useState(() => {
-    try {
-      const saved = localStorage.getItem('vobi_jobs');
-      return saved ? JSON.parse(saved) : initialJobs;
-    } catch (e) {
-      return initialJobs;
-    }
-  });
+  const [jobs, setJobs] = useState([]);
   const [activeJob, setActiveJob] = useState(null);
 
-  React.useEffect(() => {
-    localStorage.setItem('vobi_jobs', JSON.stringify(jobs));
-  }, [jobs]);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsAuthenticated(!!session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setJobs([]);
+      return;
+    }
+
+    const loadJobs = async () => {
+      const data = await fetchJobs();
+      setJobs(data);
+    };
+
+    loadJobs();
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('public:jobs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
+        loadJobs(); // Reload jobs when database changes
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [session]);
 
   const handleNavigate = (view) => {
     setCurrentView(view);
     setActiveJob(null);
   };
 
-  const handleSubmitNewVob = (newJob) => {
-    setJobs((prev) => [newJob, ...prev]);
-    setActiveJob(newJob);
-    setCurrentView('liveView');
-    setShowNewVobModal(false);
+  const handleSubmitNewVob = async (newJobData) => {
+    try {
+      const newJob = await createJob(newJobData, session.user.id);
+      setActiveJob(newJob);
+      setCurrentView('liveView');
+      setShowNewVobModal(false);
+    } catch (err) {
+      alert("Failed to create verification request.");
+    }
   };
 
-  const handlePortalSubmit = (newJob) => {
-    setJobs((prev) => [newJob, ...prev]);
-    setActiveJob(newJob);
-    setCurrentView('portalVob');
-    setShowNewVobModal(false);
+  const handlePortalSubmit = async (newJobData) => {
+    try {
+      const newJob = await createJob({ ...newJobData, status: 'Verified (Portal)' }, session.user.id);
+      setActiveJob(newJob);
+      setCurrentView('portalVob');
+      setShowNewVobModal(false);
+    } catch (err) {
+      alert("Failed to create verification request.");
+    }
   };
 
   const handleOpenJob = (job) => {
@@ -56,16 +97,12 @@ export default function App() {
     setCurrentView('dashboard');
   };
 
-  const handleJobComplete = (jobId) => {
-    setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, status: 'Completed' } : j))
-    );
+  const handleJobComplete = async (jobId) => {
+    await updateJob(jobId, { status: 'Completed' });
   };
 
-  const handleJobUpdate = (jobId, updates) => {
-    setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, ...updates } : j))
-    );
+  const handleJobUpdate = async (jobId, updates) => {
+    await updateJob(jobId, updates);
   };
 
   const renderView = () => {
@@ -75,7 +112,7 @@ export default function App() {
       case 'callHistory':
         return <CallHistory jobs={jobs} onNewVerification={() => setShowNewVobModal(true)} />;
       case 'settings':
-        return <Settings onNewVerification={() => setShowNewVobModal(true)} />;
+        return <Settings onNewVerification={() => setShowNewVobModal(true)} session={session} />;
       case 'liveView':
         return activeJob
           ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
@@ -99,7 +136,10 @@ export default function App() {
         <SplashScreen onFinish={() => setIsLoading(false)} />
       )}
 
-      <div className="flex min-h-screen bg-slate-50">
+      {!isAuthenticated ? (
+        <Auth />
+      ) : (
+        <div className="flex min-h-screen bg-slate-50">
         <Sidebar currentView={currentView} onNavigate={handleNavigate} />
 
         <main className="ml-[200px] flex-1 p-6">
@@ -114,6 +154,7 @@ export default function App() {
           />
         )}
       </div>
+      )}
     </>
   );
 }

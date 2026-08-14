@@ -1,5 +1,5 @@
-const API_BASE = "https://farming-angela-vendor-birds.trycloudflare.com";
-const API_KEY = "__VOBI_API_KEY__";
+const API_BASE = "https://fantasy-room-usr-titanium.trycloudflare.com";
+const API_KEY = "c05d0396faae14e1f48ed6747b42a7ae8b8be7a8037bc14c7900a8c6cc8adb75";
 
 async function fetchWithConfig(endpoint, options = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, {
