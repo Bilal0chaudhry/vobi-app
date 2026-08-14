@@ -12,6 +12,7 @@ import AdminDashboard from './components/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/StatusScreens';
 import { supabase } from './utils/supabase';
 import { fetchJobs, createJob, updateJob, fetchSettings } from './utils/db';
+import { fetchProfiles } from './utils/admin';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -23,6 +24,9 @@ export default function App() {
   const [showNewVobModal, setShowNewVobModal] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [activeJob, setActiveJob] = useState(null);
+  
+  // Admin State
+  const [adminProfiles, setAdminProfiles] = useState([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -38,6 +42,7 @@ export default function App() {
       if (!session) {
         setProfile(null);
         setUserSettings(null);
+        setAdminProfiles([]);
       }
     });
 
@@ -77,6 +82,7 @@ export default function App() {
     return () => supabase.removeChannel(profileChannel);
   }, [session]);
 
+  // Load jobs and real-time subscription
   useEffect(() => {
     if (!session || !profile || profile.status !== 'approved') {
       setJobs([]);
@@ -100,6 +106,30 @@ export default function App() {
 
     return () => supabase.removeChannel(channel);
   }, [session, profile]);
+
+  // Load Admin Profiles and real-time subscription
+  useEffect(() => {
+    if (!profile?.is_admin) {
+      setAdminProfiles([]);
+      return;
+    }
+
+    const loadAdminProfiles = async () => {
+      const data = await fetchProfiles();
+      setAdminProfiles(data);
+    };
+
+    loadAdminProfiles();
+
+    const adminChannel = supabase
+      .channel('admin:profiles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        loadAdminProfiles();
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(adminChannel);
+  }, [profile?.is_admin]);
 
   const handleNavigate = (view) => {
     setCurrentView(view);
@@ -152,7 +182,7 @@ export default function App() {
 
   const renderView = () => {
     if (currentView === 'admin' && profile?.is_admin) {
-      return <AdminDashboard onLogout={handleLogout} />;
+      return <AdminDashboard onLogout={handleLogout} profiles={adminProfiles} />;
     }
 
     switch (currentView) {

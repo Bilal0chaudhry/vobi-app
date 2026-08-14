@@ -1,32 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../utils/supabase';
-import { fetchProfiles, approveProfile, rejectProfile } from '../utils/admin';
+import React from 'react';
+import { approveProfile, rejectProfile } from '../utils/admin';
 import PageHeader from './PageHeader';
 
-export default function AdminDashboard({ onLogout }) {
-  const [profiles, setProfiles] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const loadProfiles = async () => {
-    setLoading(true);
-    const data = await fetchProfiles();
-    setProfiles(data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadProfiles();
-  }, []);
-
+export default function AdminDashboard({ onLogout, profiles }) {
   const handleApprove = async (id) => {
     await approveProfile(id);
-    loadProfiles();
+    // Realtime subscription in App.jsx will automatically refresh the list
   };
 
   const handleReject = async (id) => {
     if (confirm("Are you sure you want to reject this user?")) {
       await rejectProfile(id);
-      loadProfiles();
+      // Realtime subscription in App.jsx will automatically refresh the list
     }
   };
 
@@ -44,32 +29,28 @@ export default function AdminDashboard({ onLogout }) {
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 font-semibold text-gray-900">User</th>
-                <th className="px-6 py-4 font-semibold text-gray-900">Organization</th>
-                <th className="px-6 py-4 font-semibold text-gray-900">Status</th>
-                <th className="px-6 py-4 font-semibold text-gray-900 text-right">Actions</th>
+                <th className="w-2/5 px-6 py-4 font-semibold text-gray-900">User</th>
+                <th className="w-1/4 px-6 py-4 font-semibold text-gray-900">Organization</th>
+                <th className="w-1/6 px-6 py-4 font-semibold text-gray-900">Status</th>
+                <th className="w-1/6 px-6 py-4 font-semibold text-gray-900 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500">Loading users...</td>
-                </tr>
-              ) : profiles.length === 0 ? (
+              {profiles.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-8 text-center text-gray-500">No users found.</td>
                 </tr>
               ) : (
                 profiles.map(profile => (
                   <tr key={profile.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{profile.full_name || 'No Name Provided'}</div>
-                      <div className="text-gray-500">{profile.email}</div>
+                    <td className="px-6 py-4 truncate">
+                      <div className="font-medium text-gray-900 truncate">{profile.full_name || 'No Name Provided'}</div>
+                      <div className="text-gray-500 truncate">{profile.email}</div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-4 text-gray-600 truncate">
                       {profile.organization || '-'}
                     </td>
                     <td className="px-6 py-4">
