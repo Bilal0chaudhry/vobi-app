@@ -60,18 +60,22 @@ export default function Settings({ profile, onProfileUpdate }) {
   useEffect(() => {
     const newErrors = {};
     
-    // Name: 2-50 chars, no numbers or weird symbols
+    // Name: 2-50 chars, strict letters and single spaces only
     if (fullName) {
       if (fullName.length < 2) newErrors.fullName = 'Name must be at least 2 characters';
       else if (fullName.length > 50) newErrors.fullName = 'Name cannot exceed 50 characters';
-      else if (!/^[a-zA-Z\s\-']+$/.test(fullName)) newErrors.fullName = 'Name can only contain letters, spaces, hyphens, and apostrophes';
+      else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(fullName)) {
+        newErrors.fullName = 'Name must contain only letters and single spaces (no symbols)';
+      }
     }
 
-    // Organization: 2-100 chars
+    // Organization: 2-100 chars, strict alphanumeric with safe punctuation
     if (organization) {
       if (organization.length < 2) newErrors.organization = 'Practice name must be at least 2 characters';
       else if (organization.length > 100) newErrors.organization = 'Practice name cannot exceed 100 characters';
-      else if (!/^[a-zA-Z0-9\s\-',.&]+$/.test(organization)) newErrors.organization = 'Contains invalid characters';
+      else if (!/^[a-zA-Z0-9]+(?:[\s.,&][a-zA-Z0-9]+)*$/.test(organization)) {
+        newErrors.organization = 'Practice name cannot contain special symbols or trailing spaces';
+      }
     }
 
     // NPI: Exactly 10 digits
