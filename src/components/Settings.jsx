@@ -144,7 +144,11 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
       
       showToastMsg('success', 'Settings saved successfully');
     } catch (err) {
-      showToastMsg('error', 'Failed to save settings: ' + err.message);
+      if (err.message === 'Failed to fetch') {
+        showToastMsg('error', 'Network error. Please check your connection.');
+      } else {
+        showToastMsg('error', 'Failed to save settings: ' + err.message);
+      }
     } finally {
       setIsSaving(false);
     }

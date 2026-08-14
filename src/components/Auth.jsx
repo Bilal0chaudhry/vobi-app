@@ -134,7 +134,11 @@ export default function Auth() {
         if (error) throw error;
       }
     } catch (err) {
-      showToastMsg('error', err.message);
+      if (err.message === 'Failed to fetch') {
+        showToastMsg('error', 'Network error. Please check your connection.');
+      } else {
+        showToastMsg('error', err.message);
+      }
     } finally {
       setLoading(false);
     }
