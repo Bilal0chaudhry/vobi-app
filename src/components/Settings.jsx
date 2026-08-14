@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PageHeader from './PageHeader';
 import InputField from './ui/InputField';
 import Button from './ui/Button';
+import Toast from './ui/Toast';
 import { updateProfile, updateSettings } from '../utils/db';
 
 function Toggle({ id, checked, onChange }) {
@@ -139,8 +140,8 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
   const canSave = (profileHasChanges || settingsHasChanges) && isValid;
 
   const showToastMsg = (type, message) => {
-    setToast({ show: true, type, message });
-    setTimeout(() => setToast({ show: false, type: 'success', message: '' }), 4000);
+    setToast({ show: false, type, message: '' }); // reset state quickly
+    setTimeout(() => setToast({ show: true, type, message }), 10);
   };
 
   const handleSave = async () => {
@@ -174,20 +175,11 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
   return (
     <div className="animate-fade-in relative">
       {toast.show && (
-        <div className={`fixed top-6 right-6 z-50 animate-fade-in px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
-          toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'
-        }`}>
-          {toast.type === 'success' ? (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          )}
-          <span className="text-sm font-medium">{toast.message}</span>
-        </div>
+        <Toast 
+          type={toast.type} 
+          message={toast.message} 
+          onClose={() => setToast({ show: false, type: 'success', message: '' })} 
+        />
       )}
 
       <PageHeader title="Settings" subtitle="Practice profile and agent behavior" />
