@@ -178,15 +178,38 @@ export default function Auth() {
       )}
       {/* Left Panel - Dark (Exactly 50%) */}
       <div className="hidden md:flex w-1/2 bg-[#0a0f1c] relative flex-col justify-between p-8 lg:p-12 xl:p-16 overflow-hidden shrink-0">
-        {/* Subtle background glow originating from the left */}
-        <div className="absolute top-[20%] -left-[300px] w-[800px] h-[800px] bg-[#1d4ed8]/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-[35%] -left-[200px] w-[500px] h-[500px] bg-[#14b8a6]/10 rounded-full blur-[100px] pointer-events-none" />
+        <style>
+          {`
+            @keyframes bgGlowPulse {
+              0% { opacity: 0.4; transform: scale(0.95); filter: blur(100px); }
+              50% { opacity: 0.8; transform: scale(1.05); filter: blur(120px); }
+              100% { opacity: 0.4; transform: scale(0.95); filter: blur(100px); }
+            }
+            @keyframes textGradientFlow {
+              to { background-position: 200% center; }
+            }
+            .animate-bg-glow-1 {
+              animation: bgGlowPulse 6s ease-in-out infinite;
+            }
+            .animate-bg-glow-2 {
+              animation: bgGlowPulse 8s ease-in-out infinite reverse;
+            }
+            .animate-text-flow {
+              background-size: 200% auto;
+              animation: textGradientFlow 5s linear infinite;
+            }
+          `}
+        </style>
+
+        {/* Dynamic pulsating background glows */}
+        <div className="absolute top-[20%] -left-[300px] w-[800px] h-[800px] bg-[#1d4ed8]/25 rounded-full pointer-events-none animate-bg-glow-1" />
+        <div className="absolute top-[35%] -left-[200px] w-[500px] h-[500px] bg-[#14b8a6]/20 rounded-full pointer-events-none animate-bg-glow-2" />
         
         <div className="relative z-10 flex flex-col">
           {/* Logo and Slogan */}
           <div className="flex flex-col items-start mb-16 xl:mb-20">
             <img src={vobiLogoLight} alt="Vobi Logo" className="w-[160px] lg:w-[180px] xl:w-[220px] h-auto object-contain -ml-2" />
-            <span className="text-[11px] lg:text-xs tracking-[0.25em] font-bold uppercase mt-1.5 ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-teal-300 drop-shadow-sm">
+            <span className="text-[11px] lg:text-xs tracking-[0.25em] font-bold uppercase mt-1.5 ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-teal-300 animate-text-flow drop-shadow-sm">
               Autonomous VOB Agent
             </span>
           </div>
