@@ -98,10 +98,7 @@ export default function Auth() {
     e.preventDefault();
     
     const isValid = Object.keys(errors).length === 0;
-    if (!isValid) {
-      showToastMsg('error', 'Please fix the validation errors before submitting.');
-      return;
-    }
+    if (!isValid) return;
 
     setLoading(true);
 
@@ -308,8 +305,8 @@ export default function Auth() {
               </div>
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70"
+                disabled={loading || Object.keys(errors).length > 0}
+                className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in...' : 'Sign in'} <span className="font-sans font-light">&rarr;</span>
               </button>
@@ -391,8 +388,8 @@ export default function Auth() {
               </div>
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70"
+                disabled={loading || Object.keys(errors).length > 0}
+                className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating account...' : 'Create account'} <span className="font-sans font-light">&rarr;</span>
               </button>
