@@ -38,7 +38,7 @@ function SourceToggle({ value, onChange }) {
   );
 }
 
-export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
+export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile }) {
   const [source, setSource] = useState('call');
   const [formData, setFormData] = useState({
     firstName: '',
@@ -50,7 +50,7 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit }) {
     payer: 'Aetna',
     memberId: '',
     groupNumber: '',
-    npi: '1487624930',
+    npi: profile?.npi || '',
     cptCodes: [],
   });
   

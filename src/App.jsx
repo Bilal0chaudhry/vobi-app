@@ -217,6 +217,7 @@ export default function App() {
           onClose={() => setShowNewVobModal(false)}
           onSubmit={handleSubmitNewVob}
           onPortalSubmit={handlePortalSubmit}
+          profile={profile}
         />
       )}
     </div>
