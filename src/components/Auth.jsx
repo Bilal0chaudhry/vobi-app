@@ -46,6 +46,7 @@ function BuildingIcon() {
 }
 
 import { supabase } from '../utils/supabase';
+import Toast from './ui/Toast';
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -54,12 +55,55 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [organization, setOrganization] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  
+  const [errors, setErrors] = useState({});
+  const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
+
+  const showToastMsg = (type, message) => {
+    setToast({ show: false, type, message: '' });
+    setTimeout(() => setToast({ show: true, type, message }), 10);
+  };
+
+  React.useEffect(() => {
+    const newErrors = {};
+    if (isSignUp) {
+      if (fullName) {
+        if (fullName.length < 2) newErrors.fullName = 'Must be at least 2 characters';
+        else if (fullName.length > 50) newErrors.fullName = 'Cannot exceed 50 characters';
+        else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(fullName)) {
+          newErrors.fullName = 'Letters and single spaces only';
+        }
+      }
+      if (organization) {
+        if (organization.length < 2) newErrors.organization = 'Must be at least 2 characters';
+        else if (organization.length > 100) newErrors.organization = 'Cannot exceed 100 characters';
+        else if (!/^[a-zA-Z0-9]+(?:[\s.,&][a-zA-Z0-9]+)*$/.test(organization)) {
+          newErrors.organization = 'No special symbols or trailing spaces';
+        }
+      }
+    }
+    
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    if (password && password.length < 8) {
+      newErrors.password = 'Must be at least 8 characters';
+    }
+
+    setErrors(newErrors);
+  }, [fullName, organization, email, password, isSignUp]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const isValid = Object.keys(errors).length === 0;
+    if (!isValid) {
+      showToastMsg('error', 'Please fix the validation errors before submitting.');
+      return;
+    }
+
     setLoading(true);
-    setErrorMsg('');
 
     try {
       if (isSignUp) {
@@ -76,8 +120,11 @@ export default function Auth() {
         if (error) throw error;
         
         if (!data.session) {
-          setErrorMsg("Account created! Please check your email to confirm your address before signing in.");
+          showToastMsg('success', 'Account created! Please check your email.');
           setIsSignUp(false);
+          setFullName('');
+          setOrganization('');
+          setPassword('');
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -87,7 +134,7 @@ export default function Auth() {
         if (error) throw error;
       }
     } catch (err) {
-      setErrorMsg(err.message);
+      showToastMsg('error', err.message);
     } finally {
       setLoading(false);
     }
@@ -100,12 +147,19 @@ export default function Auth() {
       });
       if (error) throw error;
     } catch (err) {
-      setErrorMsg(err.message);
+      showToastMsg('error', err.message);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white animate-fade-in">
+    <div className="min-h-screen w-full flex bg-white animate-fade-in relative">
+      {toast.show && (
+        <Toast 
+          type={toast.type} 
+          message={toast.message} 
+          onClose={() => setToast({ show: false, type: 'success', message: '' })} 
+        />
+      )}
       {/* Left Panel - Dark (Exactly 50%) */}
       <div className="hidden md:flex w-1/2 bg-[#0a0f1c] relative flex-col justify-between p-8 lg:p-12 xl:p-16 overflow-hidden shrink-0">
         {/* Subtle background glow originating from the left */}
@@ -210,11 +264,7 @@ export default function Auth() {
             <div className="flex-1 h-px bg-[#e5e7eb]"></div>
           </div>
 
-          {errorMsg && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
-              {errorMsg}
-            </div>
-          )}
+
 
           {/* Form Wrapper for smooth opacity transition */}
           <div className="relative">
@@ -231,9 +281,10 @@ export default function Auth() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@clinic.com"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-[#f1f5f9] rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]"
+                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.email ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
+                {errors.email && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.email}</p>}
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between ml-1 pr-1">
@@ -250,9 +301,10 @@ export default function Auth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-[#f1f5f9] rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]"
+                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.password ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
+                {errors.password && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.password}</p>}
               </div>
               <button
                 type="submit"
@@ -280,9 +332,10 @@ export default function Auth() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Alicia Reyes"
-                      className="w-full pl-9 pr-3 py-3 bg-white border border-[#f1f5f9] rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]"
+                      className={`w-full pl-9 pr-3 py-3 bg-white border ${errors.fullName ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                     />
                   </div>
+                  {errors.fullName && <p className="text-red-500 text-[11px] ml-3 mt-1">{errors.fullName}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[13px] font-medium text-gray-700 ml-1">Organization</label>
@@ -296,9 +349,10 @@ export default function Auth() {
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
                       placeholder="Northside..."
-                      className="w-full pl-9 pr-3 py-3 bg-white border border-[#f1f5f9] rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]"
+                      className={`w-full pl-9 pr-3 py-3 bg-white border ${errors.organization ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                     />
                   </div>
+                  {errors.organization && <p className="text-red-500 text-[11px] ml-3 mt-1">{errors.organization}</p>}
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -313,9 +367,10 @@ export default function Auth() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@clinic.com"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-[#f1f5f9] rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]"
+                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.email ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
+                {errors.email && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.email}</p>}
               </div>
               <div className="space-y-1.5">
                 <label className="text-[13px] font-medium text-gray-700 ml-1">Password</label>
@@ -329,9 +384,10 @@ export default function Auth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-[#f1f5f9] rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]"
+                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.password ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
+                {errors.password && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.password}</p>}
               </div>
               <button
                 type="submit"
