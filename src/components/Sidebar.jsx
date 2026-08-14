@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconDashboard, IconCallHistory, IconSettings } from './icons';
+import { IconDashboard, IconCallHistory, IconSettings, IconShield } from './icons';
 import VobiLogo from './VobiLogo';
 
 const NAV_ITEMS = [
@@ -8,7 +8,12 @@ const NAV_ITEMS = [
   { key: 'settings', label: 'Settings', Icon: IconSettings },
 ];
 
-export default function Sidebar({ currentView, onNavigate }) {
+export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout }) {
+  const items = [...NAV_ITEMS];
+  if (isAdmin) {
+    items.push({ key: 'admin', label: 'Admin', Icon: IconShield });
+  }
+
   return (
     <aside className="fixed top-0 left-0 h-screen w-[200px] bg-white border-r border-gray-200 flex flex-col z-30">
       <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex flex-col items-start gap-0.5">
@@ -23,7 +28,7 @@ export default function Sidebar({ currentView, onNavigate }) {
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
-        {NAV_ITEMS.map(({ key, label, Icon }) => {
+        {items.map(({ key, label, Icon }) => {
           const isActive = currentView === key || (key === 'dashboard' && currentView === 'liveView');
           return (
             <button
