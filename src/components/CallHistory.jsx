@@ -1,5 +1,5 @@
 import React from 'react';
-import Badge from './ui/Badge';
+import { JobBadge } from './ui/Badge';
 import PageHeader from './PageHeader';
 
 export default function CallHistory({ jobs, onNewVerification }) {
@@ -34,7 +34,7 @@ export default function CallHistory({ jobs, onNewVerification }) {
 
             <div className="text-sm text-gray-500">{job.submitted}</div>
 
-            <Badge status={job.status} />
+            <JobBadge status={job.status} />
           </div>
         ))}
       </div>

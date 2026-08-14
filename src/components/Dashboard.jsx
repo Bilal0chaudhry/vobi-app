@@ -1,5 +1,5 @@
 import React from 'react';
-import Badge from './ui/Badge';
+import { JobBadge } from './ui/Badge';
 import CptBadge from './ui/CptBadge';
 import PageHeader from './PageHeader';
 import Button from './ui/Button';
@@ -87,7 +87,7 @@ export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
                 </td>
                 <td className="px-4 py-3.5 text-sm text-gray-500">{job.submitted}</td>
                 <td className="px-4 py-3.5">
-                  <Badge status={job.status} />
+                  <JobBadge status={job.status} />
                 </td>
                 <td className="px-4 py-3.5">
                   <Button

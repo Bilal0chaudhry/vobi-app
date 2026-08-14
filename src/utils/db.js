@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
 
-// Map database snake_case to frontend camelCase
 function mapJobToFrontend(j) {
   return {
     id: j.id,
@@ -26,7 +25,6 @@ export async function fetchJobs() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching jobs:', error);
     return [];
   }
   return data.map(mapJobToFrontend);
@@ -52,7 +50,6 @@ export async function createJob(jobData, userId) {
     .single();
 
   if (error) {
-    console.error('Error creating job:', error);
     throw error;
   }
   return mapJobToFrontend(data);
@@ -75,7 +72,6 @@ export async function updateJob(jobId, updates) {
     .single();
 
   if (error) {
-    console.error('Error updating job:', error);
     throw error;
   }
   return mapJobToFrontend(data);
@@ -90,7 +86,6 @@ export async function updateProfile(userId, updates) {
     .single();
 
   if (error) {
-    console.error('Error updating profile:', error);
     throw error;
   }
   return data;
@@ -104,10 +99,9 @@ export async function fetchSettings(userId) {
     .maybeSingle();
 
   if (error) {
-    console.error('Error fetching settings:', error);
     return null;
   }
-  return data; // Might be null if user hasn't saved settings yet
+  return data;
 }
 
 export async function updateSettings(userId, settingsData) {
@@ -118,7 +112,6 @@ export async function updateSettings(userId, settingsData) {
     .single();
 
   if (error) {
-    console.error('Error updating settings:', error);
     throw error;
   }
   return data;

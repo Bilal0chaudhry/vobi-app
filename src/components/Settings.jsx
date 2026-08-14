@@ -65,11 +65,11 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
     }
   }, [settings]);
 
-  // Hardcore Validation Rules
+  // Validation Rules
   useEffect(() => {
     const newErrors = {};
     
-    // Name: 2-50 chars, strict letters and single spaces only
+    // Name Validation
     if (fullName) {
       if (fullName.length < 2) newErrors.fullName = 'Name must be at least 2 characters';
       else if (fullName.length > 50) newErrors.fullName = 'Name cannot exceed 50 characters';
@@ -78,7 +78,7 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
       }
     }
 
-    // Organization: 2-100 chars, strict alphanumeric with safe punctuation
+    // Organization Validation
     if (organization) {
       if (organization.length < 2) newErrors.organization = 'Practice name must be at least 2 characters';
       else if (organization.length > 100) newErrors.organization = 'Practice name cannot exceed 100 characters';
@@ -87,17 +87,17 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
       }
     }
 
-    // NPI: Exactly 10 digits
+    // NPI Validation
     if (defaultNpi && !/^\d{10}$/.test(defaultNpi)) {
       newErrors.defaultNpi = 'NPI must be exactly 10 digits';
     }
 
-    // Tax ID: XX-XXXXXXX
+    // Tax ID Validation
     if (taxId && !/^\d{2}-\d{7}$/.test(taxId)) {
       newErrors.taxId = 'Tax ID must be in format XX-XXXXXXX';
     }
 
-    // Callback Number: (XXX) XXX-XXXX
+    // Callback Validation
     if (callbackNumber && !/^\(\d{3}\)\s\d{3}-\d{4}$/.test(callbackNumber)) {
       newErrors.callbackNumber = 'Callback must be (XXX) XXX-XXXX';
     }
@@ -105,7 +105,7 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
     setErrors(newErrors);
   }, [fullName, organization, defaultNpi, taxId, callbackNumber]);
 
-  // Auto-formatters for Inputs
+  // Input Auto-Formatters
   const handleNpiChange = (val) => setDefaultNpi(val.replace(/\D/g, '').slice(0, 10));
 
   const handleTaxIdChange = (val) => {

@@ -24,8 +24,6 @@ export default function App() {
   const [showNewVobModal, setShowNewVobModal] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [activeJob, setActiveJob] = useState(null);
-  
-  // Admin State
   const [adminProfiles, setAdminProfiles] = useState([]);
 
   useEffect(() => {
@@ -56,7 +54,6 @@ export default function App() {
       try {
         const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
         if (error) {
-          console.error("Profile fetch error:", error);
           setProfile({ id: session.user.id, status: 'pending', error: error.message });
         } else {
           setProfile(data);
@@ -64,14 +61,12 @@ export default function App() {
           setUserSettings(settingsData || { id: session.user.id });
         }
       } catch (err) {
-        console.error("Profile catch error:", err);
         setProfile({ id: session.user.id, status: 'pending', error: err.message });
       }
     };
 
     fetchUserData();
 
-    // Listen for profile changes
     const profileChannel = supabase
       .channel('public:profiles')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${session.user.id}` }, payload => {
@@ -82,7 +77,6 @@ export default function App() {
     return () => supabase.removeChannel(profileChannel);
   }, [session]);
 
-  // Load jobs and real-time subscription
   useEffect(() => {
     if (!session || !profile || profile.status !== 'approved') {
       setJobs([]);
@@ -96,7 +90,6 @@ export default function App() {
 
     loadJobs();
 
-    // Subscribe to real-time changes
     const channel = supabase
       .channel('public:jobs')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
@@ -107,7 +100,6 @@ export default function App() {
     return () => supabase.removeChannel(channel);
   }, [session, profile]);
 
-  // Load Admin Profiles and real-time subscription
   useEffect(() => {
     if (!profile?.is_admin) {
       setAdminProfiles([]);
@@ -215,7 +207,6 @@ export default function App() {
     }
   };
 
-  // Gatekeeping Logic
   if (isLoading) {
     return <SplashScreen onFinish={() => setIsLoading(false)} />;
   }
@@ -224,12 +215,10 @@ export default function App() {
     return <Auth />;
   }
 
-  // Waiting for profile to load
   if (!profile) {
     return <SplashScreen onFinish={() => {}} />;
   }
 
-  // Enforce profile status restrictions
   if (profile.status === 'pending') {
     return <PendingScreen onLogout={handleLogout} error={profile.error} />;
   }

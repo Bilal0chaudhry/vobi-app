@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import LiveFeed from "./LiveFeed";
 import VerificationChecklist from "./VerificationChecklist";
-import Badge from "./ui/Badge";
+import { JobBadge } from "./ui/Badge";
 import Button from "./ui/Button";
 import { formatTime } from "../utils/formatters";
 import { endCall, pollMessages, startCall } from "../utils/api";
@@ -241,7 +241,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
           <Button onClick={handleEndCall} disabled={callStatus === "Completed"} variant="danger">
             End Call
           </Button>
-          <Badge status={callStatus} />
+          <JobBadge status={callStatus} />
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg">
             <IconClock className="w-3.5 h-3.5 text-gray-500" />
             <span className="text-sm font-mono font-semibold text-gray-700">{formatTime(elapsed)}</span>

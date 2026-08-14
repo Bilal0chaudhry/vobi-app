@@ -1,17 +1,16 @@
 import React from 'react';
 import { approveProfile, rejectProfile } from '../utils/admin';
+import { ProfileBadge } from './ui/Badge';
 import PageHeader from './PageHeader';
 
 export default function AdminDashboard({ onLogout, profiles }) {
   const handleApprove = async (id) => {
     await approveProfile(id);
-    // Realtime subscription in App.jsx will automatically refresh the list
   };
 
   const handleReject = async (id) => {
     if (confirm("Are you sure you want to reject this user?")) {
       await rejectProfile(id);
-      // Realtime subscription in App.jsx will automatically refresh the list
     }
   };
 
@@ -54,18 +53,8 @@ export default function AdminDashboard({ onLogout, profiles }) {
                       {profile.organization || '-'}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                        ${profile.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : ''}
-                        ${profile.status === 'pending' ? 'bg-amber-100 text-amber-800' : ''}
-                        ${profile.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
-                      `}>
-                        {profile.status}
-                      </span>
-                      {profile.is_admin && (
-                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          Admin
-                        </span>
-                      )}
+                      <ProfileBadge status={profile.status} />
+                      {profile.is_admin && <span className="ml-2"><ProfileBadge status="admin" role={true} /></span>}
                     </td>
                     <td className="px-6 py-4 text-right">
                       {profile.status === 'pending' && (

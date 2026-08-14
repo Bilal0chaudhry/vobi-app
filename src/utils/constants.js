@@ -15,5 +15,3 @@ export const PAYER_PHONES = {
   'Medicare': '1-800-633-4227',
   'UnitedHealthcare': '1-800-842-2656',
 };
-
-export const initialJobs = [];

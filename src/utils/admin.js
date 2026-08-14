@@ -7,7 +7,6 @@ export async function fetchProfiles() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching profiles:', error);
     return [];
   }
   return data;
@@ -20,7 +19,6 @@ export async function approveProfile(userId) {
     .eq('id', userId);
 
   if (error) {
-    console.error('Error approving profile:', error);
     throw error;
   }
 }
@@ -32,7 +30,6 @@ export async function rejectProfile(userId) {
     .eq('id', userId);
 
   if (error) {
-    console.error('Error rejecting profile:', error);
     throw error;
   }
 }
