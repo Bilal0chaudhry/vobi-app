@@ -56,15 +56,63 @@ export default function Settings({ profile, onProfileUpdate }) {
     }
   }, [profile]);
 
+  // Hardcore Validation Rules
   useEffect(() => {
     const newErrors = {};
-    if (fullName && fullName.length < 2) newErrors.fullName = 'Name must be at least 2 characters';
-    if (organization && organization.length < 2) newErrors.organization = 'Practice name must be at least 2 characters';
-    if (defaultNpi && !/^\d{10}$/.test(defaultNpi)) newErrors.defaultNpi = 'NPI must be exactly 10 digits';
-    if (taxId && !/^\d{2}-\d{7}$/.test(taxId)) newErrors.taxId = 'Tax ID must be in format XX-XXXXXXX';
-    if (callbackNumber && !/^\(\d{3}\)\s\d{3}-\d{4}$/.test(callbackNumber)) newErrors.callbackNumber = 'Callback must be (XXX) XXX-XXXX';
+    
+    // Name: 2-50 chars, no numbers or weird symbols
+    if (fullName) {
+      if (fullName.length < 2) newErrors.fullName = 'Name must be at least 2 characters';
+      else if (fullName.length > 50) newErrors.fullName = 'Name cannot exceed 50 characters';
+      else if (!/^[a-zA-Z\s\-']+$/.test(fullName)) newErrors.fullName = 'Name can only contain letters, spaces, hyphens, and apostrophes';
+    }
+
+    // Organization: 2-100 chars
+    if (organization) {
+      if (organization.length < 2) newErrors.organization = 'Practice name must be at least 2 characters';
+      else if (organization.length > 100) newErrors.organization = 'Practice name cannot exceed 100 characters';
+      else if (!/^[a-zA-Z0-9\s\-',.&]+$/.test(organization)) newErrors.organization = 'Contains invalid characters';
+    }
+
+    // NPI: Exactly 10 digits
+    if (defaultNpi && !/^\d{10}$/.test(defaultNpi)) {
+      newErrors.defaultNpi = 'NPI must be exactly 10 digits';
+    }
+
+    // Tax ID: XX-XXXXXXX
+    if (taxId && !/^\d{2}-\d{7}$/.test(taxId)) {
+      newErrors.taxId = 'Tax ID must be in format XX-XXXXXXX';
+    }
+
+    // Callback Number: (XXX) XXX-XXXX
+    if (callbackNumber && !/^\(\d{3}\)\s\d{3}-\d{4}$/.test(callbackNumber)) {
+      newErrors.callbackNumber = 'Callback must be (XXX) XXX-XXXX';
+    }
+    
     setErrors(newErrors);
   }, [fullName, organization, defaultNpi, taxId, callbackNumber]);
+
+  // Auto-formatters for Inputs
+  const handleNpiChange = (val) => {
+    setDefaultNpi(val.replace(/\D/g, '').slice(0, 10)); // Only digits, max 10
+  };
+
+  const handleTaxIdChange = (val) => {
+    const cleaned = val.replace(/\D/g, '').slice(0, 9);
+    const match = cleaned.match(/^(\d{0,2})(\d{0,7})$/);
+    if (!match) { setTaxId(''); return; }
+    if (!match[2]) { setTaxId(match[1]); return; }
+    setTaxId(`${match[1]}-${match[2]}`);
+  };
+
+  const handlePhoneChange = (val) => {
+    const cleaned = val.replace(/\D/g, '').slice(0, 10);
+    const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+    if (!match) { setCallbackNumber(''); return; }
+    if (!match[2]) { setCallbackNumber(match[1].length === 3 ? `(${match[1]}) ` : match[1]); return; }
+    if (!match[3]) { setCallbackNumber(`(${match[1]}) ${match[2]}`); return; }
+    setCallbackNumber(`(${match[1]}) ${match[2]}-${match[3]}`);
+  };
 
   const hasChanges = 
     fullName !== (profile?.full_name || '') ||
@@ -121,9 +169,9 @@ export default function Settings({ profile, onProfileUpdate }) {
           <div className="grid grid-cols-2 gap-6">
             <InputField id="settings-fullName"     label="Full Name"           value={fullName}       onChange={setFullName}       error={errors.fullName} />
             <InputField id="settings-organization" label="Practice Name"       value={organization}   onChange={setOrganization}   error={errors.organization} />
-            <InputField id="settings-npi"          label="Default provider NPI" value={defaultNpi}      onChange={setDefaultNpi}      error={errors.defaultNpi} placeholder="e.g. 1487624930" />
-            <InputField id="settings-taxId"        label="Tax ID"              value={taxId}           onChange={setTaxId}           error={errors.taxId} placeholder="e.g. 84-2910337" />
-            <InputField id="settings-callback"     label="Callback number"     value={callbackNumber}  onChange={setCallbackNumber}  error={errors.callbackNumber} placeholder="e.g. (312) 555-0184" />
+            <InputField id="settings-npi"          label="Default provider NPI" value={defaultNpi}      onChange={handleNpiChange}    error={errors.defaultNpi} placeholder="e.g. 1487624930" />
+            <InputField id="settings-taxId"        label="Tax ID"              value={taxId}           onChange={handleTaxIdChange}  error={errors.taxId} placeholder="e.g. 84-2910337" />
+            <InputField id="settings-callback"     label="Callback number"     value={callbackNumber}  onChange={handlePhoneChange}  error={errors.callbackNumber} placeholder="e.g. (312) 555-0184" />
           </div>
         </div>
 
