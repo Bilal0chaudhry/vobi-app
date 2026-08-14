@@ -191,7 +191,7 @@ export default function App() {
 
   // Enforce profile status restrictions
   if (profile.status === 'pending') {
-    return <PendingScreen onLogout={handleLogout} />;
+    return <PendingScreen onLogout={handleLogout} error={profile.error} />;
   }
   
   if (profile.status === 'rejected') {
