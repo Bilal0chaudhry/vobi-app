@@ -44,8 +44,20 @@ export default function App() {
     if (!session) return;
     
     const fetchProfile = async () => {
-      const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-      setProfile(data);
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        if (error) {
+          console.error("Profile fetch error:", error);
+          // If the profile doesn't exist or table is missing, mock a pending profile
+          // so the UI doesn't hang on a blank screen.
+          setProfile({ id: session.user.id, status: 'pending', error: error.message });
+        } else {
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error("Profile catch error:", err);
+        setProfile({ id: session.user.id, status: 'pending', error: err.message });
+      }
     };
 
     fetchProfile();
