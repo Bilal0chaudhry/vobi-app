@@ -6,7 +6,7 @@ export default function Toast({ type, message, duration = 4000, onClose }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsExiting(true);
-      setTimeout(onClose, 300); // wait for exit animation to complete
+      setTimeout(onClose, 300);
     }, duration);
     return () => clearTimeout(timer);
   }, [duration, onClose]);
@@ -33,7 +33,6 @@ export default function Toast({ type, message, duration = 4000, onClose }) {
         <span className={`text-sm font-bold ${textColor}`}>{message}</span>
       </div>
       
-      {/* Shrinking Loading Bar */}
       <div className="h-1 w-full bg-gray-50">
         <div 
           className={`h-full ${barColor} toast-progress`} 

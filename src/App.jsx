@@ -13,7 +13,6 @@ import { PendingScreen, RejectedScreen } from './components/StatusScreens';
 import { supabase } from './utils/supabase';
 import { fetchJobs, createJob, updateJob, fetchSettings } from './utils/db';
 import { fetchProfiles } from './utils/admin';
-
 import { checkHealth } from './utils/api';
 
 export default function App() {
@@ -31,7 +30,6 @@ export default function App() {
   const [jobsLoaded, setJobsLoaded] = useState(false);
   const [adminProfilesLoaded, setAdminProfilesLoaded] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
-  const [profileChecked, setProfileChecked] = useState(false);
 
   useEffect(() => {
     checkHealth().then(res => setBackendStatus(!!res));
@@ -40,7 +38,6 @@ export default function App() {
       setSession(session);
       setIsAuthenticated(!!session);
       setSessionChecked(true);
-      if (!session) setProfileChecked(true);
     });
 
     const {
@@ -53,7 +50,6 @@ export default function App() {
         setProfile(null);
         setUserSettings(null);
         setAdminProfiles([]);
-        setProfileChecked(true);
       }
     });
 
@@ -62,7 +58,6 @@ export default function App() {
 
   useEffect(() => {
     if (!session) return;
-    setProfileChecked(false);
     
     const fetchUserData = async () => {
       try {
@@ -76,8 +71,6 @@ export default function App() {
         }
       } catch (err) {
         setProfile({ id: session.user.id, status: 'pending', error: err.message });
-      } finally {
-        setProfileChecked(true);
       }
     };
 
@@ -206,7 +199,6 @@ export default function App() {
         return <CallHistory jobs={jobs} />;
       case 'settings':
         return <Settings 
-          session={session} 
           profile={profile} 
           settings={userSettings} 
           onProfileUpdate={(p) => setProfile(p)} 
@@ -241,7 +233,7 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
-    return <Auth initialBackendStatus={backendStatus} />;
+    return <Auth initialBackendStatus={backendStatus} onBackendChange={setBackendStatus} />;
   }
 
   if (profile.status === 'pending') {

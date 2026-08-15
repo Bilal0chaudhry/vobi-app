@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Base ── */
 * {
   margin: 0;
   padding: 0;
@@ -16,7 +15,6 @@ body {
   min-height: 100vh;
 }
 
-/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -31,7 +29,6 @@ body {
   background: #94a3b8;
 }
 
-/* ── Custom animations ── */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -43,22 +40,14 @@ body {
   animation: shimmer 2s infinite;
 }
 
-/* ── Log entry animations ── */
 @keyframes logSlideIn {
-  0% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 .log-entry {
   animation: logSlideIn 0.35s ease-out;
 }
 
-/* ── Modal overlay ── */
 @keyframes overlayIn {
   0% { opacity: 0; }
   100% { opacity: 1; }
@@ -74,7 +63,6 @@ body {
   animation: panelSlideIn 0.3s ease-out;
 }
 
-/* ── Checklist item transition ── */
 @keyframes checkComplete {
   0% { transform: scale(0.8); opacity: 0; }
   50% { transform: scale(1.15); }
@@ -84,7 +72,6 @@ body {
   animation: checkComplete 0.4s ease-out;
 }
 
-/* ── Toggle switch ── */
 .toggle-switch {
   @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 cursor-pointer;
 }
@@ -104,7 +91,6 @@ body {
   @apply translate-x-1;
 }
 
-/* ── Toast Notifications ── */
 @keyframes slideInRight {
   0% { transform: translateX(100%) scale(0.95); opacity: 0; }
   100% { transform: translateX(0) scale(1); opacity: 1; }

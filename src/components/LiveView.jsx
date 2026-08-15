@@ -78,7 +78,6 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
     try {
       await endCall();
     } catch (error) {
-      /* silently continue */
     }
     setCallStatus("Completed");
     setShowToast(true);
@@ -186,7 +185,6 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
           }
         }
       } catch (err) {
-        /* retry on next tick */
       }
       if (!stopped) setTimeout(poll, 500);
     };

@@ -6,7 +6,6 @@ export default function SplashScreen({ isReady = true, onFinish }) {
   const [timePassed, setTimePassed] = useState(false);
 
   useEffect(() => {
-    // The splash screen shows the infinite heartbeat for AT LEAST 2.5s
     const timer = setTimeout(() => {
       setTimePassed(true);
     }, 2500);
@@ -65,23 +64,17 @@ export default function SplashScreen({ isReady = true, onFinish }) {
       <div className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0a0f1c] text-white transition-opacity duration-700 ease-in-out ${
         fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}>
-        {/* Deep background ambient glows */}
         <div className="absolute w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* Preload Auth Logo */}
         <img src={vobiLogoLight} alt="preload" className="hidden" aria-hidden="true" />
 
         <div className="relative flex flex-col items-center justify-center w-full max-w-lg px-8 glow-container">
           
-          {/* Infinite Heartbeat EKG Line */}
           <div className="w-full h-32 md:h-40 z-40 relative">
             <svg viewBox="0 0 400 100" className="w-full h-full overflow-visible" fill="none">
               <defs>
                 <linearGradient id="v-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#38bdf8" />   {/* sky-400 */}
-                  <stop offset="50%" stopColor="#818cf8" />  {/* indigo-400 */}
-                  <stop offset="100%" stopColor="#2dd4bf" /> {/* teal-400 */}
                 </linearGradient>
               </defs>
               <path
@@ -95,7 +88,6 @@ export default function SplashScreen({ isReady = true, onFinish }) {
             </svg>
           </div>
           
-          {/* Subtle loading text to anchor the animation */}
           <p className="text-[10px] uppercase tracking-[0.3em] font-semibold text-slate-500 mt-2 animate-pulse">
             Connecting...
           </p>
