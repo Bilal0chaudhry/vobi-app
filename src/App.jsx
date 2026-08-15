@@ -183,6 +183,7 @@ export default function App() {
   };
 
   const handleLogout = async () => {
+    setIsLoading(true);
     await supabase.auth.signOut();
   };
 
