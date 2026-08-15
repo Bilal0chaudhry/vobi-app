@@ -5,12 +5,20 @@ import PageHeader from '../ui/PageHeader';
 
 export default function AdminDashboard({ onLogout, profiles }) {
   const handleApprove = async (id) => {
-    await approveProfile(id);
+    try {
+      await approveProfile(id);
+    } catch (err) {
+      alert("Failed to approve: " + err.message);
+    }
   };
 
   const handleReject = async (id) => {
     if (confirm("Are you sure you want to reject this user?")) {
-      await rejectProfile(id);
+      try {
+        await rejectProfile(id);
+      } catch (err) {
+        alert("Failed to reject: " + err.message);
+      }
     }
   };
 
@@ -67,7 +75,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                           </button>
                           <button
                             onClick={() => handleReject(profile.id)}
-                            className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
+                            className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
                           >
                             Reject
                           </button>
