@@ -1,6 +1,6 @@
 import React from 'react';
-import { IconDashboard, IconCallHistory, IconSettings, IconShield } from './icons';
-import VobiLogo from './VobiLogo';
+import { IconDashboard, IconCallHistory, IconSettings, IconShield } from '../ui/icons';
+import VobiLogo from '../ui/VobiLogo';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', Icon: IconDashboard },

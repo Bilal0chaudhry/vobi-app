@@ -1,5 +1,5 @@
 import React from 'react';
-import vobiLogo from '../assets/vobi-logo.png';
+import vobiLogo from '../../assets/vobi-logo.png';
 
 export default function VobiLogo({ size = 'md', className = '' }) {
   const logoHeights = {

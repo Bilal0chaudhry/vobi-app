@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconShield, IconAlertCircle } from './icons';
+import { IconShield, IconAlertCircle } from '../ui/icons';
 
 export function PendingScreen({ onLogout }) {
   return (

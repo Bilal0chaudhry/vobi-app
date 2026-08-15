@@ -1,7 +1,7 @@
 import React from 'react';
-import { approveProfile, rejectProfile } from '../utils/admin';
-import { ProfileBadge } from './ui/Badge';
-import PageHeader from './PageHeader';
+import { approveProfile, rejectProfile } from '../../utils/db';
+import { ProfileBadge } from '../ui/Badge';
+import PageHeader from '../ui/PageHeader';
 
 export default function AdminDashboard({ onLogout, profiles }) {
   const handleApprove = async (id) => {

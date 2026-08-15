@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconX } from '../icons';
+import { IconX } from './icons';
 
 export default function Modal({ isOpen, onClose, title, description, children, maxWidth = 'max-w-md' }) {
   if (!isOpen) return null;

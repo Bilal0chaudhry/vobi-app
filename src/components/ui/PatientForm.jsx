@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import InputField from './InputField';
 import Select from './Select';
-import { IconX } from '../icons';
+import { IconX } from './icons';
 import { PAYERS } from '../../utils/constants';
 
 export default function PatientForm({ 

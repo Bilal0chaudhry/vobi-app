@@ -1,9 +1,9 @@
 import React from 'react';
-import { JobBadge } from './ui/Badge';
-import CptBadge from './ui/CptBadge';
-import PageHeader from './PageHeader';
-import Button from './ui/Button';
-import { IconSignal, IconCheckCircle, IconZap, IconClock, IconArrowOut } from './icons';
+import { JobBadge } from '../ui/Badge';
+import CptBadge from '../ui/CptBadge';
+import PageHeader from '../ui/PageHeader';
+import Button from '../ui/Button';
+import { IconSignal, IconCheckCircle, IconZap, IconClock, IconArrowOut } from '../ui/icons';
 
 export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
   const activeJobs = jobs.filter(j => j.status !== 'Completed').length;

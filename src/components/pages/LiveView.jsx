@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import LiveFeed from "./LiveFeed";
-import VerificationChecklist from "./VerificationChecklist";
-import { JobBadge } from "./ui/Badge";
-import Button from "./ui/Button";
-import { formatTime } from "../utils/formatters";
-import { endCall, pollMessages, startCall } from "../utils/api";
-import { detectTopics, isDispute, updateChecklistFromRep } from "../utils/checklistDetector";
-import { IconArrowLeft, IconClock, IconCheckCircle } from "./icons";
+import LiveFeed from "../ui/LiveFeed";
+import VerificationChecklist from "../ui/VerificationChecklist";
+import { JobBadge } from "../ui/Badge";
+import Button from "../ui/Button";
+import { formatTime } from "../../utils/formatters";
+import { endCall, pollMessages, startCall } from "../../utils/api";
+import { detectTopics, isDispute, updateChecklistFromRep } from "../../utils/checklistDetector";
+import { IconArrowLeft, IconClock, IconCheckCircle } from "../ui/icons";
 
 const timestamp = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });

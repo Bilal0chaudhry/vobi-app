@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Button from './ui/Button';
-import InfoRow from './ui/InfoRow';
-import Section from './ui/Section';
-import BenefitCard from './ui/BenefitCard';
-import Skeleton from './ui/Skeleton';
-import PatientDetails from './ui/PatientDetails';
-import { queryAvailityEligibility } from '../utils/api';
+import Button from '../ui/Button';
+import InfoRow from '../ui/InfoRow';
+import Section from '../ui/Section';
+import BenefitCard from '../ui/BenefitCard';
+import Skeleton from '../ui/Skeleton';
+import PatientDetails from '../ui/PatientDetails';
+import { queryAvailityEligibility } from '../../utils/api';
 import { 
   IconChevronLeft, 
   IconAlertCircle, 
@@ -14,7 +14,7 @@ import {
   IconShield, 
   IconFileText, 
   IconClipboardCheck 
-} from './icons';
+} from '../ui/icons';
 
 const STATUS = {
   IDLE: 'idle',

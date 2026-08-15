@@ -1,6 +1,6 @@
 import React from 'react';
 import { IconPlus } from './icons';
-import Button from './ui/Button';
+import Button from './Button';
 
 export default function PageHeader({ title, subtitle, onNewVerification, buttonId = 'btn-new-verification' }) {
   return (

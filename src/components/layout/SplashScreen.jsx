@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import vobiLogoLight from '../assets/vobi-logo.png';
+import vobiLogoLight from '../../assets/vobi-logo.png';
 
 export default function SplashScreen({ isReady = true, onFinish }) {
   const [fadeOut, setFadeOut] = useState(false);

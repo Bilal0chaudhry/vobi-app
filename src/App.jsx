@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import CallHistory from './components/CallHistory';
-import Settings from './components/Settings';
-import LiveView from './components/LiveView';
-import NewVobModal from './components/NewVobModal';
-import SplashScreen from './components/SplashScreen';
-import PortalVobPage from './components/PortalVobPage';
-import Auth from './components/Auth';
-import AdminDashboard from './components/AdminDashboard';
-import { PendingScreen, RejectedScreen } from './components/StatusScreens';
+import Sidebar from './components/layout/Sidebar';
+import Dashboard from './components/pages/Dashboard';
+import CallHistory from './components/pages/CallHistory';
+import Settings from './components/pages/Settings';
+import LiveView from './components/pages/LiveView';
+import NewVobModal from './components/ui/NewVobModal';
+import SplashScreen from './components/layout/SplashScreen';
+import PortalVobPage from './components/pages/PortalVobPage';
+import Auth from './components/auth/Auth';
+import AdminDashboard from './components/pages/AdminDashboard';
+import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
 import { supabase } from './utils/supabase';
-import { fetchJobs, createJob, updateJob, fetchSettings } from './utils/db';
-import { fetchProfiles } from './utils/admin';
+import { fetchJobs, createJob, updateJob, fetchSettings, fetchProfiles } from './utils/db';
 import { checkHealth } from './utils/api';
 
 export default function App() {

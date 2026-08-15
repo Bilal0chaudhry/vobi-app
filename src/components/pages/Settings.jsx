@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import PageHeader from './PageHeader';
-import InputField from './ui/InputField';
-import Button from './ui/Button';
-import Toast from './ui/Toast';
-import { updateProfile, updateSettings } from '../utils/db';
-import { validateName, validateOrganization, validateNpi, validateTaxId, validatePhone, formatTaxId, formatPhone } from '../utils/validation';
+import PageHeader from '../ui/PageHeader';
+import InputField from '../ui/InputField';
+import Button from '../ui/Button';
+import Toast from '../ui/Toast';
+import { updateProfile, updateSettings } from '../../utils/db';
+import { validateName, validateOrganization, validateNpi, validateTaxId, validatePhone, formatTaxId, formatPhone } from '../../utils/validation';
 
 function Toggle({ id, checked, onChange }) {
   return (

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { IconPhone, IconBrowser, IconPlay, IconAlertCircle, IconSpin } from './icons';
-import Button from './ui/Button';
-import Modal from './ui/Modal';
-import PatientForm from './ui/PatientForm';
+import Button from './Button';
+import Modal from './Modal';
+import PatientForm from './PatientForm';
 
 function SourceToggle({ value, onChange }) {
   return (

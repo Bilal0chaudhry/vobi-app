@@ -1,6 +1,6 @@
 import React from 'react';
-import { JobBadge } from './ui/Badge';
-import PageHeader from './PageHeader';
+import { JobBadge } from '../ui/Badge';
+import PageHeader from '../ui/PageHeader';
 
 export default function CallHistory({ jobs, onNewVerification }) {
   return (

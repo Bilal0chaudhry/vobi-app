@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import vobiLogoLight from '../assets/vobi-logo.png';
-import Toast from './ui/Toast';
-import { validateName, validateOrganization } from '../utils/validation';
-import { supabase } from '../utils/supabase';
-import { checkHealth } from '../utils/api';
-import { IconGoogle, IconAuthCheck, IconEnvelope, IconLock, IconUser, IconBuilding } from './icons';
+import vobiLogoLight from '../../assets/vobi-logo.png';
+import Toast from '../ui/Toast';
+import { validateName, validateOrganization } from '../../utils/validation';
+import { supabase } from '../../utils/supabase';
+import { checkHealth } from '../../utils/api';
+import { IconGoogle, IconAuthCheck, IconEnvelope, IconLock, IconUser, IconBuilding } from '../ui/icons';
 
 export default function Auth({ initialBackendStatus, onBackendChange }) {
   const [isSignUp, setIsSignUp] = useState(false);

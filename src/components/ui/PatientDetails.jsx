@@ -1,7 +1,7 @@
 import React from 'react';
 import Section from './Section';
 import InfoRow from './InfoRow';
-import { IconUser } from '../icons';
+import { IconUser } from './icons';
 
 export default function PatientDetails({ patient, subscriber, fallbackJob }) {
   return (
