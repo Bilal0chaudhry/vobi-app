@@ -32,6 +32,10 @@ ALLOWED_ORIGINS = [
 ]
 
 API_KEY = os.getenv("VOBI_API_KEY", "")
+if not API_KEY:
+    print("❌ FATAL: VOBI_API_KEY is not set in the environment. Refusing to start without security.")
+    sys.exit(1)
+
 limiter = Limiter(key_func=get_remote_address)
 
 
@@ -62,10 +66,19 @@ async def security_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
         return await call_next(request)
 
-    if API_KEY and request.headers.get("X-API-Key") != API_KEY:
+    if request.headers.get("X-API-Key") != API_KEY:
         return JSONResponse(status_code=403, content={"detail": "Unauthorized"})
 
-    return await call_next(request)
+    response = await call_next(request)
+    
+    # Inject enterprise-grade OWASP security headers
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none';"
+    
+    return response
 
 
 active_call = None
