@@ -28,6 +28,8 @@ export default function App() {
   const [activeJob, setActiveJob] = useState(null);
   const [adminProfiles, setAdminProfiles] = useState([]);
   const [backendStatus, setBackendStatus] = useState(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [profileChecked, setProfileChecked] = useState(false);
 
   useEffect(() => {
     checkHealth().then(res => setBackendStatus(!!res));
@@ -35,6 +37,8 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsAuthenticated(!!session);
+      setSessionChecked(true);
+      if (!session) setProfileChecked(true);
     });
 
     const {
@@ -42,10 +46,12 @@ export default function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setIsAuthenticated(!!session);
+      setSessionChecked(true);
       if (!session) {
         setProfile(null);
         setUserSettings(null);
         setAdminProfiles([]);
+        setProfileChecked(true);
       }
     });
 
@@ -54,6 +60,7 @@ export default function App() {
 
   useEffect(() => {
     if (!session) return;
+    setProfileChecked(false);
     
     const fetchUserData = async () => {
       try {
@@ -67,6 +74,8 @@ export default function App() {
         }
       } catch (err) {
         setProfile({ id: session.user.id, status: 'pending', error: err.message });
+      } finally {
+        setProfileChecked(true);
       }
     };
 
@@ -212,16 +221,14 @@ export default function App() {
     }
   };
 
-  if (isLoading) {
-    return <SplashScreen isReady={backendStatus !== null} onFinish={() => setIsLoading(false)} />;
+  const isFullyLoaded = backendStatus !== null && sessionChecked && profileChecked;
+
+  if (isLoading || !isFullyLoaded) {
+    return <SplashScreen isReady={isFullyLoaded} onFinish={() => setIsLoading(false)} />;
   }
 
   if (!isAuthenticated) {
     return <Auth initialBackendStatus={backendStatus} />;
-  }
-
-  if (!profile) {
-    return <SplashScreen onFinish={() => {}} />;
   }
 
   if (profile.status === 'pending') {
