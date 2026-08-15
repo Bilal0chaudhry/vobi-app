@@ -1,11 +1,15 @@
+import { supabase } from './supabase';
+
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
-const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 async function fetchWithConfig(endpoint, options = {}) {
+  const { data } = await supabase.auth.getSession();
+  const token = data?.session?.access_token || "";
+
   const res = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
-      "X-API-Key": API_KEY,
+      "Authorization": token ? `Bearer ${token}` : "",
       ...options.headers,
     },
     ...options,

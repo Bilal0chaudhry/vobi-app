@@ -5,6 +5,7 @@ import signal
 import warnings
 from contextlib import asynccontextmanager
 from collections import defaultdict
+import requests
 
 os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -31,9 +32,11 @@ ALLOWED_ORIGINS = [
     "http://localhost:4173",
 ]
 
-API_KEY = os.getenv("VOBI_API_KEY", "")
-if not API_KEY:
-    print("❌ FATAL: VOBI_API_KEY is not set in the environment. Refusing to start without security.")
+SUPABASE_URL = os.getenv("VITE_SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.getenv("VITE_SUPABASE_ANON_KEY", "")
+
+if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    print("❌ FATAL: Supabase environment variables missing. Refusing to start without security.")
     sys.exit(1)
 
 limiter = Limiter(key_func=get_remote_address)
@@ -66,10 +69,30 @@ async def security_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
         return await call_next(request)
 
-    if request.headers.get("X-API-Key") != API_KEY:
-        return JSONResponse(status_code=403, content={"detail": "Unauthorized"})
+    # Health check is public
+    if request.url.path == "/health":
+        response = await call_next(request)
+    else:
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return JSONResponse(status_code=401, content={"detail": "Missing or invalid Authorization header"})
 
-    response = await call_next(request)
+        token = auth_header.split(" ")[1]
+        
+        # Verify JWT against Supabase
+        try:
+            res = await asyncio.to_thread(
+                requests.get,
+                f"{SUPABASE_URL}/auth/v1/user",
+                headers={"Authorization": f"Bearer {token}", "apikey": SUPABASE_ANON_KEY},
+                timeout=5
+            )
+            if res.status_code != 200:
+                return JSONResponse(status_code=401, content={"detail": "Invalid or expired session"})
+        except Exception:
+            return JSONResponse(status_code=500, content={"detail": "Auth verification failed"})
+
+        response = await call_next(request)
     
     # Inject enterprise-grade OWASP security headers
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"

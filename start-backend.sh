@@ -24,7 +24,6 @@ done
 echo "  ✅ Tunnel ready: $URL"
 
 echo "VITE_API_BASE=$URL" > .env.local
-echo "VITE_API_KEY=$API_KEY" >> .env.local
 
 echo "  📦 Building & deploying..."
 npm run deploy --silent 2>/dev/null
