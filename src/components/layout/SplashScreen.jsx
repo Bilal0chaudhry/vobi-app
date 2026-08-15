@@ -75,6 +75,9 @@ export default function SplashScreen({ isReady = true, onFinish }) {
             <svg viewBox="0 0 400 100" className="w-full h-full overflow-visible" fill="none">
               <defs>
                 <linearGradient id="v-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="50%" stopColor="#2dd4bf" />
+                  <stop offset="100%" stopColor="#818cf8" />
                 </linearGradient>
               </defs>
               <path
