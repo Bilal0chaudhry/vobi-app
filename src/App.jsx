@@ -232,19 +232,19 @@ export default function App() {
 
   return (
     <>
-      {(!isAuthenticated && isFullyLoaded && !isLoading) && (
+      {(!isAuthenticated && isFullyLoaded) && (
         <Auth initialBackendStatus={backendStatus} onBackendChange={setBackendStatus} />
       )}
 
-      {(isAuthenticated && isFullyLoaded && !isLoading && profile?.status === 'pending') && (
+      {(isAuthenticated && isFullyLoaded && profile?.status === 'pending') && (
         <PendingScreen onLogout={handleLogout} />
       )}
       
-      {(isAuthenticated && isFullyLoaded && !isLoading && profile?.status === 'rejected') && (
+      {(isAuthenticated && isFullyLoaded && profile?.status === 'rejected') && (
         <RejectedScreen onLogout={handleLogout} />
       )}
 
-      {(isAuthenticated && isFullyLoaded && !isLoading && profile?.status === 'approved') && (
+      {(isAuthenticated && isFullyLoaded && profile?.status === 'approved') && (
         <div className="flex min-h-screen bg-slate-50">
           <Sidebar 
             currentView={currentView} 
