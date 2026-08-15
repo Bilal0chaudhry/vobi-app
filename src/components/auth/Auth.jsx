@@ -24,16 +24,26 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
 
   useEffect(() => {
     let mounted = true;
+    let failureCount = 0;
+
     const verifyBackend = async () => {
       const res = await checkHealth();
       if (mounted) {
-        const online = !!res;
-        setIsBackendOnline(online);
-        onBackendChange?.(online);
+        if (res) {
+          failureCount = 0;
+          setIsBackendOnline(true);
+          onBackendChange?.(true);
+        } else {
+          failureCount++;
+          if (failureCount >= 3) {
+            setIsBackendOnline(false);
+            onBackendChange?.(false);
+          }
+        }
       }
     };
     verifyBackend();
-    const interval = setInterval(verifyBackend, 5000);
+    const interval = setInterval(verifyBackend, 10000);
     return () => {
       mounted = false;
       clearInterval(interval);
