@@ -211,7 +211,7 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
               </>
             ) : (
               <>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.8)]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse-dot shadow-[0_0_12px_rgba(248,113,113,0.8)]" />
                 <span className="text-[10px] font-bold text-red-400/90 tracking-[0.15em] uppercase">Voice Agent Offline</span>
               </>
             )}
