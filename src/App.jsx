@@ -34,6 +34,7 @@ export default function App() {
     checkHealth().then(res => setBackendStatus(!!res));
     
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setIsLoading(true);
       setSession(session);
       setIsAuthenticated(!!session);
       setSessionChecked(true);
@@ -42,6 +43,7 @@ export default function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) setIsLoading(true);
       setSession(session);
       setIsAuthenticated(!!session);
       setSessionChecked(true);
