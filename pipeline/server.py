@@ -17,6 +17,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import asyncio
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 from models import PatientData, AvailityRequest
 from utils.broadcaster import Broadcaster
 from services.availity import fetch_eligibility
@@ -28,9 +32,7 @@ ALLOWED_ORIGINS = [
 ]
 
 API_KEY = os.getenv("VOBI_API_KEY", "")
-RATE_LIMIT_WINDOW = 60
-RATE_LIMITS = {"/start-call": 5, "/end-call": 10, "/messages": 120, "/availity/eligibility": 10}
-rate_limit_store = defaultdict(list)
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -43,6 +45,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,17 +65,6 @@ async def security_middleware(request: Request, call_next):
     if API_KEY and request.headers.get("X-API-Key") != API_KEY:
         return JSONResponse(status_code=403, content={"detail": "Unauthorized"})
 
-    path = request.url.path
-    max_requests = RATE_LIMITS.get(path)
-    if max_requests:
-        now = time.time()
-        client = request.client.host if request.client else "unknown"
-        key = f"{client}:{path}"
-        rate_limit_store[key] = [t for t in rate_limit_store[key] if now - t < RATE_LIMIT_WINDOW]
-        if len(rate_limit_store[key]) >= max_requests:
-            return JSONResponse(status_code=429, content={"detail": "Too many requests"})
-        rate_limit_store[key].append(now)
-
     return await call_next(request)
 
 
@@ -88,7 +81,8 @@ def cleanup_call():
 
 
 @app.post("/start-call")
-async def start_call(data: PatientData):
+@limiter.limit("5/minute")
+async def start_call(data: PatientData, request: Request):
     global active_call, broadcaster, stop_event
 
     if active_call is not None and not active_call.done():
@@ -122,7 +116,8 @@ async def start_call(data: PatientData):
 
 
 @app.post("/end-call")
-async def end_call():
+@limiter.limit("10/minute")
+async def end_call(request: Request):
     global active_call, stop_event
 
     if stop_event is not None:
@@ -141,16 +136,19 @@ async def end_call():
 
 
 @app.get("/health")
-async def health_check():
+@limiter.limit("60/minute")
+async def health_check(request: Request):
     return {"status": "ok"}
 
 @app.post("/availity/eligibility")
-async def availity_eligibility(data: AvailityRequest):
+@limiter.limit("10/minute")
+async def availity_eligibility(data: AvailityRequest, request: Request):
     return fetch_eligibility(data)
 
 
 @app.get("/messages")
-async def get_messages(since: int = 0):
+@limiter.limit("2/second")
+async def get_messages(request: Request, since: int = 0):
     new_messages = broadcaster.get_messages_since(since)
     return {
         "messages": new_messages,
