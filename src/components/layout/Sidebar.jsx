@@ -68,17 +68,48 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
 
       <div className="px-5 py-4 border-t border-gray-100 relative" ref={menuRef}>
         {showSignOut && (
-          <div className="absolute bottom-[calc(100%+8px)] left-4 w-[calc(100%-32px)] bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200/60 overflow-hidden z-50 animate-fade-in origin-bottom">
-            <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+          <div 
+            className="absolute bottom-[calc(100%+12px)] left-4 w-[calc(100%-32px)] z-50 animate-fade-in origin-bottom rounded-2xl overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 100%)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: 'inset 0px 1px 1px rgba(255, 255, 255, 0.9), inset 0px -1px 1px rgba(0, 0, 0, 0.05), 0 10px 40px rgba(0,0,0,0.15)',
+              borderTop: '1px solid rgba(255,255,255,0.8)',
+              borderLeft: '1px solid rgba(255,255,255,0.6)',
+              borderRight: '1px solid rgba(255,255,255,0.3)',
+              borderBottom: '1px solid rgba(255,255,255,0.2)',
+            }}
+          >
+            <div className="px-4 py-3 border-b border-slate-200/40 bg-slate-50/30">
                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Signed in as</p>
-               <p className="text-xs font-medium text-slate-700 truncate">{profile?.email || 'admin@vobi.com'}</p>
+               <div className="relative w-full overflow-hidden cursor-default">
+                 <p 
+                   className="text-xs font-semibold text-slate-700 whitespace-nowrap block transition-all duration-[800ms] ease-out"
+                   style={{ WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)' }}
+                   onMouseEnter={(e) => {
+                     const cw = e.currentTarget.parentElement.clientWidth;
+                     const tw = e.currentTarget.scrollWidth;
+                     e.currentTarget.style.WebkitMaskImage = 'linear-gradient(to right, black 100%, transparent 100%)';
+                     if (tw > cw) {
+                       e.currentTarget.style.transform = `translateX(-${tw - cw}px)`;
+                     }
+                   }}
+                   onMouseLeave={(e) => {
+                     e.currentTarget.style.WebkitMaskImage = 'linear-gradient(to right, black 85%, transparent 100%)';
+                     e.currentTarget.style.transform = 'translateX(0)';
+                   }}
+                 >
+                   {profile?.email || 'admin@vobi.com'}
+                 </p>
+               </div>
             </div>
             <button
               onClick={() => {
                 setShowSignOut(false);
                 onLogout();
               }}
-              className="w-full flex items-center justify-between px-4 py-3.5 text-[13px] font-bold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group"
+              className="w-full flex items-center justify-between px-4 py-3.5 text-[13px] font-bold text-red-600 hover:bg-red-50/50 hover:text-red-700 transition-all duration-200 group"
             >
               <span>Sign out</span>
               <span className="opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all duration-300 ease-out">
