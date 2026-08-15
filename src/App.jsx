@@ -227,44 +227,48 @@ export default function App() {
     (!session || profile?.status !== 'approved' || jobsLoaded) &&
     (!profile?.is_admin || adminProfilesLoaded);
 
-  if (isLoading || !isFullyLoaded) {
-    return <SplashScreen isReady={isFullyLoaded} onFinish={() => setIsLoading(false)} />;
-  }
-
-  if (!isAuthenticated) {
-    return <Auth initialBackendStatus={backendStatus} onBackendChange={setBackendStatus} />;
-  }
-
-  if (profile.status === 'pending') {
-    return <PendingScreen onLogout={handleLogout} />;
-  }
-  
-  if (profile.status === 'rejected') {
-    return <RejectedScreen onLogout={handleLogout} />;
-  }
-
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar 
-        currentView={currentView} 
-        onNavigate={handleNavigate} 
-        isAdmin={profile.is_admin} 
-        onLogout={handleLogout} 
-        profile={profile}
-      />
-
-      <main className="ml-[200px] flex-1 p-6">
-        {renderView()}
-      </main>
-
-      {showNewVobModal && (
-        <NewVobModal
-          onClose={() => setShowNewVobModal(false)}
-          onSubmit={handleSubmitNewVob}
-          onPortalSubmit={handlePortalSubmit}
-          profile={profile}
-        />
+    <>
+      {(!isAuthenticated && isFullyLoaded && !isLoading) && (
+        <Auth initialBackendStatus={backendStatus} onBackendChange={setBackendStatus} />
       )}
-    </div>
+
+      {(isAuthenticated && isFullyLoaded && !isLoading && profile?.status === 'pending') && (
+        <PendingScreen onLogout={handleLogout} />
+      )}
+      
+      {(isAuthenticated && isFullyLoaded && !isLoading && profile?.status === 'rejected') && (
+        <RejectedScreen onLogout={handleLogout} />
+      )}
+
+      {(isAuthenticated && isFullyLoaded && !isLoading && profile?.status === 'approved') && (
+        <div className="flex min-h-screen bg-slate-50">
+          <Sidebar 
+            currentView={currentView} 
+            onNavigate={handleNavigate} 
+            isAdmin={profile.is_admin} 
+            onLogout={handleLogout} 
+            profile={profile}
+          />
+
+          <main className="ml-[200px] flex-1 p-6">
+            {renderView()}
+          </main>
+
+          {showNewVobModal && (
+            <NewVobModal
+              onClose={() => setShowNewVobModal(false)}
+              onSubmit={handleSubmitNewVob}
+              onPortalSubmit={handlePortalSubmit}
+              profile={profile}
+            />
+          )}
+        </div>
+      )}
+
+      {(isLoading || !isFullyLoaded) && (
+        <SplashScreen isReady={isFullyLoaded} onFinish={() => setIsLoading(false)} />
+      )}
+    </>
   );
 }
