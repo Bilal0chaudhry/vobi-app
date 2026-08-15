@@ -48,3 +48,7 @@ export function endCall() {
 export function pollMessages(since = 0) {
   return fetchWithConfig(`/messages?since=${since}`);
 }
+
+export function checkHealth() {
+  return fetchWithConfig("/health").catch(() => null);
+}

@@ -48,6 +48,7 @@ function BuildingIcon() {
 }
 
 import { supabase } from '../utils/supabase';
+import { checkHealth } from '../utils/api';
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -56,6 +57,7 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [organization, setOrganization] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isBackendOnline, setIsBackendOnline] = useState(false);
   
   const [errors, setErrors] = useState({});
   const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
@@ -64,6 +66,22 @@ export default function Auth() {
     setToast({ show: false, type, message: '' });
     setTimeout(() => setToast({ show: true, type, message }), 10);
   };
+
+  React.useEffect(() => {
+    let mounted = true;
+    
+    const verifyBackend = async () => {
+      const res = await checkHealth();
+      if (mounted) setIsBackendOnline(!!res);
+    };
+    
+    verifyBackend();
+    const interval = setInterval(verifyBackend, 5000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   React.useEffect(() => {
     const newErrors = {};
@@ -222,9 +240,18 @@ export default function Auth() {
           </div>
 
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1e293b]/50 border border-[#334155]/50 mb-6 lg:mb-8 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.2)] w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
-            <span className="text-[10px] font-bold text-slate-300 tracking-[0.15em] uppercase">Voice Agent Online</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1e293b]/50 border border-[#334155]/50 mb-6 lg:mb-8 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.2)] w-fit transition-all duration-500">
+            {isBackendOnline ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
+                <span className="text-[10px] font-bold text-emerald-400/90 tracking-[0.15em] uppercase">Voice Agent Online</span>
+              </>
+            ) : (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.8)]" />
+                <span className="text-[10px] font-bold text-red-400/90 tracking-[0.15em] uppercase">Voice Agent Offline</span>
+              </>
+            )}
           </div>
 
           <h1 className="text-[28px] lg:text-[32px] xl:text-[36px] font-semibold text-white leading-[1.2] tracking-[-0.02em] mb-4 drop-shadow-sm">

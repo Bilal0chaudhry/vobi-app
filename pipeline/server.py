@@ -140,6 +140,10 @@ async def end_call():
     return {"message": "Call ended successfully"}
 
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.post("/availity/eligibility")
 async def availity_eligibility(data: AvailityRequest):
     return fetch_eligibility(data)
