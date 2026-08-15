@@ -109,7 +109,7 @@ export default function App() {
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [session, profile]);
+  }, [session, profile?.status]);
 
   useEffect(() => {
     if (!profile?.is_admin) {
