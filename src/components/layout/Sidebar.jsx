@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { IconDashboard, IconCallHistory, IconSettings, IconShield } from '../ui/icons';
 import VobiLogo from '../ui/VobiLogo';
 
@@ -9,6 +9,19 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, profile }) {
+  const [showSignOut, setShowSignOut] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowSignOut(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const items = [...NAV_ITEMS];
   if (isAdmin) {
     items.push({ key: 'admin', label: 'Admin', Icon: IconShield });
@@ -53,16 +66,33 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t border-gray-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold">
+      <div className="px-4 py-4 border-t border-gray-100 relative" ref={menuRef}>
+        {showSignOut && (
+          <div className="absolute bottom-full left-4 mb-2 w-[calc(100%-32px)] bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-gray-100 overflow-hidden animate-fade-in z-50 origin-bottom">
+            <button
+              onClick={() => {
+                setShowSignOut(false);
+                onLogout();
+              }}
+              className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
+        
+        <button 
+          onClick={() => setShowSignOut(!showSignOut)}
+          className={`w-full flex items-center gap-2.5 p-2 -mx-2 rounded-xl transition-all duration-200 ${showSignOut ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+        >
+          <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">
             {initials}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 text-left flex-1">
             <p className="text-xs font-semibold text-gray-800 truncate">{fullName}</p>
             <p className="text-[10px] text-gray-500 truncate">{org}</p>
           </div>
-        </div>
+        </button>
       </div>
     </aside>
   );
