@@ -83,23 +83,25 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
           >
             <div className="px-4 py-3 border-b border-slate-200/40 bg-slate-50/30">
                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Signed in as</p>
-               <div className="relative w-full overflow-hidden cursor-default">
-                 <p 
-                   className="text-xs font-semibold text-slate-700 whitespace-nowrap block transition-all duration-[800ms] ease-out"
-                   style={{ WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)' }}
-                   onMouseEnter={(e) => {
-                     const cw = e.currentTarget.parentElement.clientWidth;
-                     const tw = e.currentTarget.scrollWidth;
-                     e.currentTarget.style.WebkitMaskImage = 'linear-gradient(to right, black 100%, transparent 100%)';
-                     if (tw > cw) {
-                       e.currentTarget.style.transform = `translateX(-${tw - cw}px)`;
-                     }
-                   }}
-                   onMouseLeave={(e) => {
-                     e.currentTarget.style.WebkitMaskImage = 'linear-gradient(to right, black 85%, transparent 100%)';
-                     e.currentTarget.style.transform = 'translateX(0)';
-                   }}
-                 >
+               <div 
+                 className="relative w-full overflow-hidden cursor-default transition-all duration-[800ms]"
+                 style={{ WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)' }}
+                 onMouseEnter={(e) => {
+                   const p = e.currentTarget.querySelector('p');
+                   const cw = e.currentTarget.clientWidth;
+                   const tw = p.scrollWidth;
+                   e.currentTarget.style.WebkitMaskImage = 'linear-gradient(to right, black 95%, transparent 100%)';
+                   if (tw > cw) {
+                     p.style.transform = `translateX(-${tw - cw}px)`;
+                   }
+                 }}
+                 onMouseLeave={(e) => {
+                   const p = e.currentTarget.querySelector('p');
+                   e.currentTarget.style.WebkitMaskImage = 'linear-gradient(to right, black 85%, transparent 100%)';
+                   p.style.transform = 'translateX(0)';
+                 }}
+               >
+                 <p className="text-xs font-semibold text-slate-700 whitespace-nowrap block transition-transform duration-[800ms] ease-out">
                    {profile?.email || 'admin@vobi.com'}
                  </p>
                </div>
