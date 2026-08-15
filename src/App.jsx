@@ -28,6 +28,8 @@ export default function App() {
   const [activeJob, setActiveJob] = useState(null);
   const [adminProfiles, setAdminProfiles] = useState([]);
   const [backendStatus, setBackendStatus] = useState(null);
+  const [jobsLoaded, setJobsLoaded] = useState(false);
+  const [adminProfilesLoaded, setAdminProfilesLoaded] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [profileChecked, setProfileChecked] = useState(false);
 
@@ -93,13 +95,16 @@ export default function App() {
 
   useEffect(() => {
     if (!session || !profile || profile.status !== 'approved') {
+      setJobsLoaded(true);
       setJobs([]);
       return;
     }
 
+    setJobsLoaded(false);
     const loadJobs = async () => {
       const data = await fetchJobs();
       setJobs(data);
+      setJobsLoaded(true);
     };
 
     loadJobs();
@@ -116,13 +121,16 @@ export default function App() {
 
   useEffect(() => {
     if (!profile?.is_admin) {
+      setAdminProfilesLoaded(true);
       setAdminProfiles([]);
       return;
     }
 
+    setAdminProfilesLoaded(false);
     const loadAdminProfiles = async () => {
       const data = await fetchProfiles();
       setAdminProfiles(data);
+      setAdminProfilesLoaded(true);
     };
 
     loadAdminProfiles();
@@ -221,7 +229,12 @@ export default function App() {
     }
   };
 
-  const isFullyLoaded = backendStatus !== null && sessionChecked && profileChecked;
+  const isFullyLoaded = 
+    backendStatus !== null && 
+    sessionChecked && 
+    (!session || profile !== null) &&
+    (!session || profile?.status !== 'approved' || jobsLoaded) &&
+    (!profile?.is_admin || adminProfilesLoaded);
 
   if (isLoading || !isFullyLoaded) {
     return <SplashScreen isReady={isFullyLoaded} onFinish={() => setIsLoading(false)} />;
