@@ -14,6 +14,8 @@ import { supabase } from './utils/supabase';
 import { fetchJobs, createJob, updateJob, fetchSettings } from './utils/db';
 import { fetchProfiles } from './utils/admin';
 
+import { checkHealth } from './utils/api';
+
 export default function App() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -25,8 +27,11 @@ export default function App() {
   const [jobs, setJobs] = useState([]);
   const [activeJob, setActiveJob] = useState(null);
   const [adminProfiles, setAdminProfiles] = useState([]);
+  const [backendStatus, setBackendStatus] = useState(null);
 
   useEffect(() => {
+    checkHealth().then(res => setBackendStatus(!!res));
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsAuthenticated(!!session);
@@ -208,11 +213,11 @@ export default function App() {
   };
 
   if (isLoading) {
-    return <SplashScreen onFinish={() => setIsLoading(false)} />;
+    return <SplashScreen isReady={backendStatus !== null} onFinish={() => setIsLoading(false)} />;
   }
 
   if (!isAuthenticated) {
-    return <Auth />;
+    return <Auth initialBackendStatus={backendStatus} />;
   }
 
   if (!profile) {

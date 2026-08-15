@@ -1,18 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import vobiLogoLight from '../assets/vobi-logo.png';
 
-export default function SplashScreen({ onFinish }) {
+export default function SplashScreen({ isReady = true, onFinish }) {
   const [fadeOut, setFadeOut] = useState(false);
+  const [timePassed, setTimePassed] = useState(false);
 
   useEffect(() => {
-    // The splash screen shows the infinite heartbeat for 2.5s before transitioning
+    // The splash screen shows the infinite heartbeat for AT LEAST 2.5s
     const timer = setTimeout(() => {
-      setFadeOut(true);
-      setTimeout(onFinish, 700);
+      setTimePassed(true);
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [onFinish]);
+  }, []);
+
+  useEffect(() => {
+    if (timePassed && isReady) {
+      setFadeOut(true);
+      const finishTimer = setTimeout(onFinish, 700);
+      return () => clearTimeout(finishTimer);
+    }
+  }, [timePassed, isReady, onFinish]);
 
   return (
     <>
