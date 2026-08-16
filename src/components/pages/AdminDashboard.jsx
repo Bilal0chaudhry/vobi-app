@@ -117,7 +117,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                 <th className="w-2/5 px-6 py-4 font-semibold text-gray-900">User</th>
                 <th className="w-1/4 px-6 py-4 font-semibold text-gray-900">Organization</th>
                 <th className="w-1/6 px-6 py-4 font-semibold text-gray-900">Status</th>
-                <th className="w-1/6 px-6 py-4 font-semibold text-gray-900 text-right">Actions</th>
+                <th className="w-1/6 px-6 py-4 font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -140,8 +140,8 @@ export default function AdminDashboard({ onLogout, profiles }) {
                       <ProfileBadge status={profile.status} />
                       {profile.is_admin && <span className="ml-2"><ProfileBadge status="admin" role={true} /></span>}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 min-h-[36px]">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-start gap-2 min-h-[36px]">
                         {profile.status === 'pending' && (
                           <>
                             <button
@@ -162,7 +162,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                         {profile.status === 'approved' && !profile.is_admin && deletingId !== profile.id && (
                           <button 
                             onClick={() => setDeletingId(profile.id)} 
-                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 focus:opacity-100 outline-none animate-pop-in-1"
+                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 focus:opacity-100 outline-none"
                             title="Delete Account"
                           >
                             <IconTrash />
