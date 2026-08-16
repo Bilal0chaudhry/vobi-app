@@ -135,3 +135,8 @@ export async function rejectProfile(userId) {
   const { error } = await supabase.from('profiles').update({ status: 'rejected' }).eq('id', userId);
   if (error) throw error;
 }
+
+export async function deleteAccount(userId) {
+  const { error } = await supabase.rpc('admin_delete_user', { user_id: userId });
+  if (error) throw error;
+}

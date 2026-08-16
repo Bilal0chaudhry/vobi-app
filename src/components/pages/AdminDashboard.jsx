@@ -1,11 +1,31 @@
 import React, { useState } from 'react';
-import { approveProfile, rejectProfile } from '../../utils/db';
+import { approveProfile, rejectProfile, deleteAccount } from '../../utils/db';
 import { ProfileBadge } from '../ui/Badge';
 import PageHeader from '../ui/PageHeader';
 import Toast from '../ui/Toast';
 
+const IconTrash = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
+
+const IconCheck = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+const IconCross = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
 export default function AdminDashboard({ onLogout, profiles }) {
   const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
+  const [deletingId, setDeletingId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const showToastMsg = (type, message) => {
     setToast({ show: false, type, message: '' });
@@ -32,8 +52,34 @@ export default function AdminDashboard({ onLogout, profiles }) {
     }
   };
 
+  const confirmDelete = async (id) => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount(id);
+      showToastMsg('success', 'Account completely deleted.');
+      setDeletingId(null);
+    } catch (err) {
+      showToastMsg('error', "Failed to delete: " + err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in relative">
+      <style>
+        {`
+          @keyframes slideInRightBounce {
+            0% { transform: translateX(20px); opacity: 0; }
+            70% { transform: translateX(-4px); }
+            100% { transform: translateX(0); opacity: 1; }
+          }
+          .animate-slide-in-right-bounce {
+            animation: slideInRightBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+        `}
+      </style>
+      
       {toast.show && (
         <Toast 
           type={toast.type} 
@@ -52,9 +98,9 @@ export default function AdminDashboard({ onLogout, profiles }) {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative">
           <table className="w-full text-left text-sm table-fixed">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 border-b border-gray-200 relative z-20">
               <tr>
                 <th className="w-2/5 px-6 py-4 font-semibold text-gray-900">User</th>
                 <th className="w-1/4 px-6 py-4 font-semibold text-gray-900">Organization</th>
@@ -69,36 +115,78 @@ export default function AdminDashboard({ onLogout, profiles }) {
                 </tr>
               ) : (
                 profiles.map(profile => (
-                  <tr key={profile.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 truncate">
-                      <div className="font-medium text-gray-900 truncate">{profile.full_name || 'No Name Provided'}</div>
-                      <div className="text-gray-500 truncate">{profile.email}</div>
+                  <tr key={profile.id} className="hover:bg-gray-50 relative group transition-colors">
+                    
+                    {/* The sliding overlay wrapper for the actual content */}
+                    <td colSpan="4" className="p-0">
+                      <div className={`flex w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${deletingId === profile.id ? '-translate-x-[120px] opacity-40 grayscale pointer-events-none' : 'translate-x-0'}`}>
+                        <div className="w-2/5 px-6 py-4 truncate flex-shrink-0">
+                          <div className="font-medium text-gray-900 truncate">{profile.full_name || 'No Name Provided'}</div>
+                          <div className="text-gray-500 truncate">{profile.email}</div>
+                        </div>
+                        <div className="w-1/4 px-6 py-4 text-gray-600 truncate flex-shrink-0 flex items-center">
+                          {profile.organization || '-'}
+                        </div>
+                        <div className="w-1/6 px-6 py-4 flex-shrink-0 flex items-center">
+                          <ProfileBadge status={profile.status} />
+                          {profile.is_admin && <span className="ml-2"><ProfileBadge status="admin" role={true} /></span>}
+                        </div>
+                        <div className="w-1/6 px-6 py-4 text-right flex-shrink-0 flex items-center justify-end h-full">
+                          {profile.status === 'pending' && (
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleApprove(profile.id)}
+                                className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleReject(profile.id)}
+                                className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors shadow-sm"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                          
+                          {/* The initial tiny delete icon that shows on hover */}
+                          {profile.status === 'approved' && !profile.is_admin && deletingId !== profile.id && (
+                            <button 
+                              onClick={() => setDeletingId(profile.id)} 
+                              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 ml-auto focus:opacity-100 outline-none"
+                              title="Delete Account"
+                            >
+                              <IconTrash />
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600 truncate">
-                      {profile.organization || '-'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <ProfileBadge status={profile.status} />
-                      {profile.is_admin && <span className="ml-2"><ProfileBadge status="admin" role={true} /></span>}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {profile.status === 'pending' && (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleApprove(profile.id)}
-                            className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors"
+
+                    {/* The Action Buttons that slide in from the right when the row shrinks */}
+                    {deletingId === profile.id && (
+                      <div className="absolute right-0 top-0 bottom-0 w-[120px] flex items-center justify-end px-6 animate-slide-in-right-bounce z-10">
+                        <div className="flex items-center gap-2">
+                          <button 
+                            disabled={isDeleting}
+                            onClick={() => confirmDelete(profile.id)} 
+                            className="w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all duration-300 shadow-sm active:scale-95 disabled:opacity-50"
+                            title="Confirm Delete"
                           >
-                            Approve
+                            <IconCheck />
                           </button>
-                          <button
-                            onClick={() => handleReject(profile.id)}
-                            className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                          <button 
+                            disabled={isDeleting}
+                            onClick={() => setDeletingId(null)} 
+                            className="w-9 h-9 rounded-full bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-all duration-300 shadow-sm active:scale-95 disabled:opacity-50"
+                            title="Cancel"
                           >
-                            Reject
+                            <IconCross />
                           </button>
                         </div>
-                      )}
-                    </td>
+                      </div>
+                    )}
+
                   </tr>
                 ))
               )}
