@@ -140,10 +140,10 @@ export default function AdminDashboard({ onLogout, profiles }) {
                       <ProfileBadge status={profile.status} />
                       {profile.is_admin && <span className="ml-2"><ProfileBadge status="admin" role={true} /></span>}
                     </td>
-                    <td className="px-6 py-4 text-right h-[72px] relative overflow-hidden">
-                      <div className="flex items-center justify-end w-full h-full relative">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2 min-h-[36px]">
                         {profile.status === 'pending' && (
-                          <div className={`flex items-center justify-end gap-2 transition-all duration-300 ${deletingId === profile.id ? 'opacity-0 scale-95 pointer-events-none absolute' : 'opacity-100 scale-100'}`}>
+                          <>
                             <button
                               onClick={() => handleApprove(profile.id)}
                               className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
@@ -156,23 +156,21 @@ export default function AdminDashboard({ onLogout, profiles }) {
                             >
                               Reject
                             </button>
-                          </div>
+                          </>
                         )}
                         
-                        {/* The initial tiny delete icon that shows on hover */}
-                        {profile.status === 'approved' && !profile.is_admin && (
+                        {profile.status === 'approved' && !profile.is_admin && deletingId !== profile.id && (
                           <button 
                             onClick={() => setDeletingId(profile.id)} 
-                            className={`opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 focus:opacity-100 outline-none absolute right-6 ${deletingId === profile.id ? 'opacity-0 scale-50 pointer-events-none' : 'scale-100'}`}
+                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 focus:opacity-100 outline-none animate-pop-in-1"
                             title="Delete Account"
                           >
                             <IconTrash />
                           </button>
                         )}
 
-                        {/* In-place popping confirmation buttons */}
                         {deletingId === profile.id && (
-                          <div className="absolute right-6 flex items-center gap-2">
+                          <>
                             <button 
                               disabled={isDeleting}
                               onClick={() => confirmDelete(profile.id)} 
@@ -189,7 +187,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                             >
                               <IconCross />
                             </button>
-                          </div>
+                          </>
                         )}
                       </div>
                     </td>
