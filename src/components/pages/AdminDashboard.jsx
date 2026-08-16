@@ -77,6 +77,18 @@ export default function AdminDashboard({ onLogout, profiles }) {
           .animate-slide-in-right-bounce {
             animation: slideInRightBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           }
+          @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          .animate-pop-in-1 {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          }
+          .animate-pop-in-2 {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s forwards;
+            opacity: 0;
+          }
         `}
       </style>
       
@@ -117,75 +129,70 @@ export default function AdminDashboard({ onLogout, profiles }) {
                 profiles.map(profile => (
                   <tr key={profile.id} className="hover:bg-gray-50 relative group transition-colors">
                     
-                    {/* The sliding overlay wrapper for the actual content */}
-                    <td colSpan="4" className="p-0">
-                      <div className={`flex w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${deletingId === profile.id ? '-translate-x-[120px] opacity-40 grayscale pointer-events-none' : 'translate-x-0'}`}>
-                        <div className="w-2/5 px-6 py-4 truncate flex-shrink-0">
-                          <div className="font-medium text-gray-900 truncate">{profile.full_name || 'No Name Provided'}</div>
-                          <div className="text-gray-500 truncate">{profile.email}</div>
-                        </div>
-                        <div className="w-1/4 px-6 py-4 text-gray-600 truncate flex-shrink-0 flex items-center">
-                          {profile.organization || '-'}
-                        </div>
-                        <div className="w-1/6 px-6 py-4 flex-shrink-0 flex items-center">
-                          <ProfileBadge status={profile.status} />
-                          {profile.is_admin && <span className="ml-2"><ProfileBadge status="admin" role={true} /></span>}
-                        </div>
-                        <div className="w-1/6 px-6 py-4 text-right flex-shrink-0 flex items-center justify-end h-full">
-                          {profile.status === 'pending' && (
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => handleApprove(profile.id)}
-                                className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => handleReject(profile.id)}
-                                className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors shadow-sm"
-                              >
-                                Reject
-                              </button>
-                            </div>
-                          )}
-                          
-                          {/* The initial tiny delete icon that shows on hover */}
-                          {profile.status === 'approved' && !profile.is_admin && deletingId !== profile.id && (
-                            <button 
-                              onClick={() => setDeletingId(profile.id)} 
-                              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 ml-auto focus:opacity-100 outline-none"
-                              title="Delete Account"
+                    <td className="px-6 py-4 truncate">
+                      <div className="font-medium text-gray-900 truncate">{profile.full_name || 'No Name Provided'}</div>
+                      <div className="text-gray-500 truncate">{profile.email}</div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 truncate">
+                      {profile.organization || '-'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <ProfileBadge status={profile.status} />
+                      {profile.is_admin && <span className="ml-2"><ProfileBadge status="admin" role={true} /></span>}
+                    </td>
+                    <td className="px-6 py-4 text-right h-[72px] relative overflow-hidden">
+                      <div className="flex items-center justify-end w-full h-full relative">
+                        {profile.status === 'pending' && (
+                          <div className={`flex items-center justify-end gap-2 transition-all duration-300 ${deletingId === profile.id ? 'opacity-0 scale-95 pointer-events-none absolute' : 'opacity-100 scale-100'}`}>
+                            <button
+                              onClick={() => handleApprove(profile.id)}
+                              className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
                             >
-                              <IconTrash />
+                              Approve
                             </button>
-                          )}
-                        </div>
+                            <button
+                              onClick={() => handleReject(profile.id)}
+                              className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors shadow-sm"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                        
+                        {/* The initial tiny delete icon that shows on hover */}
+                        {profile.status === 'approved' && !profile.is_admin && (
+                          <button 
+                            onClick={() => setDeletingId(profile.id)} 
+                            className={`opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 focus:opacity-100 outline-none absolute right-6 ${deletingId === profile.id ? 'opacity-0 scale-50 pointer-events-none' : 'scale-100'}`}
+                            title="Delete Account"
+                          >
+                            <IconTrash />
+                          </button>
+                        )}
+
+                        {/* In-place popping confirmation buttons */}
+                        {deletingId === profile.id && (
+                          <div className="absolute right-6 flex items-center gap-2">
+                            <button 
+                              disabled={isDeleting}
+                              onClick={() => confirmDelete(profile.id)} 
+                              className="w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-1"
+                              title="Confirm Delete"
+                            >
+                              <IconCheck />
+                            </button>
+                            <button 
+                              disabled={isDeleting}
+                              onClick={() => setDeletingId(null)} 
+                              className="w-9 h-9 rounded-full bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-2"
+                              title="Cancel"
+                            >
+                              <IconCross />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
-
-                    {/* The Action Buttons that slide in from the right when the row shrinks */}
-                    {deletingId === profile.id && (
-                      <div className="absolute right-0 top-0 bottom-0 w-[120px] flex items-center justify-end px-6 animate-slide-in-right-bounce z-10">
-                        <div className="flex items-center gap-2">
-                          <button 
-                            disabled={isDeleting}
-                            onClick={() => confirmDelete(profile.id)} 
-                            className="w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all duration-300 shadow-sm active:scale-95 disabled:opacity-50"
-                            title="Confirm Delete"
-                          >
-                            <IconCheck />
-                          </button>
-                          <button 
-                            disabled={isDeleting}
-                            onClick={() => setDeletingId(null)} 
-                            className="w-9 h-9 rounded-full bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-all duration-300 shadow-sm active:scale-95 disabled:opacity-50"
-                            title="Cancel"
-                          >
-                            <IconCross />
-                          </button>
-                        </div>
-                      </div>
-                    )}
 
                   </tr>
                 ))
