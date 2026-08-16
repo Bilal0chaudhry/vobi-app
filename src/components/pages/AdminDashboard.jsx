@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { approveProfile, rejectProfile } from '../../utils/db';
 import { ProfileBadge } from '../ui/Badge';
 import PageHeader from '../ui/PageHeader';
+import Toast from '../ui/Toast';
 
 export default function AdminDashboard({ onLogout, profiles }) {
+  const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
+
+  const showToastMsg = (type, message) => {
+    setToast({ show: false, type, message: '' });
+    setTimeout(() => setToast({ show: true, type, message }), 10);
+  };
+
   const handleApprove = async (id) => {
     try {
       await approveProfile(id);
+      showToastMsg('success', 'User has been approved.');
     } catch (err) {
-      alert("Failed to approve: " + err.message);
+      showToastMsg('error', "Failed to approve: " + err.message);
     }
   };
 
@@ -16,14 +25,22 @@ export default function AdminDashboard({ onLogout, profiles }) {
     if (confirm("Are you sure you want to reject this user?")) {
       try {
         await rejectProfile(id);
+        showToastMsg('success', 'User has been rejected.');
       } catch (err) {
-        alert("Failed to reject: " + err.message);
+        showToastMsg('error', "Failed to reject: " + err.message);
       }
     }
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in relative">
+      {toast.show && (
+        <Toast 
+          type={toast.type} 
+          message={toast.message} 
+          onClose={() => setToast({ show: false, type: 'success', message: '' })} 
+        />
+      )}
       <div className="flex items-start justify-between mb-6">
         <PageHeader
           title="Admin Dashboard"
