@@ -1,6 +1,9 @@
 import { supabase } from './supabase';
 
 function mapJobToFrontend(j) {
+  const cd = Array.isArray(j.call_data) ? j.call_data[0] : j.call_data;
+  const pd = Array.isArray(j.portal_data) ? j.portal_data[0] : j.portal_data;
+
   return {
     id: j.id,
     patientFirstName: j.patient_first_name,
@@ -10,9 +13,9 @@ function mapJobToFrontend(j) {
     npi: j.npi,
     cptCodes: j.cpt_codes,
     status: j.status,
-    availityResult: j.availity_result ?? null,
-    logs: j.call_logs || [],
-    checklist: j.checklist || {},
+    availityResult: pd?.availity_result ?? j.availity_result ?? null,
+    logs: cd?.call_logs || j.call_logs || [],
+    checklist: cd?.checklist || j.checklist || {},
     source: j.source,
     createdAt: j.created_at,
   };
@@ -31,11 +34,11 @@ export async function fetchJobsList() {
   return data.map(mapJobToFrontend);
 }
 
-// Full query for opening a specific job — includes call_logs, checklist, availity_result
+// Full query for opening a specific job — includes call_data, portal_data
 export async function fetchJobById(jobId) {
   const { data, error } = await supabase
     .from('jobs')
-    .select('*')
+    .select('*, call_data(*), portal_data(*)')
     .eq('id', jobId)
     .single();
 
@@ -46,7 +49,8 @@ export async function fetchJobById(jobId) {
 }
 
 export async function createJob(jobData, userId) {
-  const { data, error } = await supabase
+  // 1. Insert base metadata
+  const { data: job, error: jobError } = await supabase
     .from('jobs')
     .insert({
       user_id: userId,
@@ -58,39 +62,47 @@ export async function createJob(jobData, userId) {
       cpt_codes: jobData.cptCodes,
       status: jobData.status || 'Pending',
       source: jobData.source || 'call',
-      availity_result: jobData.availityResult || null,
-      call_logs: jobData.logs || [],
-      checklist: jobData.checklist || {},
     })
     .select()
     .single();
 
-  if (error) {
-    throw error;
+  if (jobError) throw jobError;
+
+  // 2. Insert into appropriate child table
+  if (job.source === 'call') {
+    await supabase.from('call_data').insert({
+      job_id: job.id,
+      call_logs: jobData.logs || [],
+      checklist: jobData.checklist || {},
+    });
+  } else if (job.source === 'portal') {
+    await supabase.from('portal_data').insert({
+      job_id: job.id,
+      availity_result: jobData.availityResult || '{}',
+    });
   }
-  return mapJobToFrontend(data);
+
+  return fetchJobById(job.id);
 }
 
 export async function updateJob(jobId, updates) {
-  const dbUpdates = {};
-  if (updates.status !== undefined) dbUpdates.status = updates.status;
-  if (updates.availityResult !== undefined) dbUpdates.availity_result = updates.availityResult;
-  if (updates.logs !== undefined) dbUpdates.call_logs = updates.logs;
-  if (updates.checklist !== undefined) dbUpdates.checklist = updates.checklist;
-
-  if (Object.keys(dbUpdates).length === 0) return null;
-
-  const { data, error } = await supabase
-    .from('jobs')
-    .update(dbUpdates)
-    .eq('id', jobId)
-    .select()
-    .single();
-
-  if (error) {
-    throw error;
+  if (updates.status !== undefined) {
+    await supabase.from('jobs').update({ status: updates.status }).eq('id', jobId);
   }
-  return mapJobToFrontend(data);
+
+  if (updates.availityResult !== undefined) {
+    await supabase.from('portal_data').update({ availity_result: updates.availityResult }).eq('job_id', jobId);
+  }
+
+  const callUpdates = {};
+  if (updates.logs !== undefined) callUpdates.call_logs = updates.logs;
+  if (updates.checklist !== undefined) callUpdates.checklist = updates.checklist;
+
+  if (Object.keys(callUpdates).length > 0) {
+    await supabase.from('call_data').update(callUpdates).eq('job_id', jobId);
+  }
+
+  return fetchJobById(jobId);
 }
 
 export async function updateProfile(userId, updates) {
