@@ -33,8 +33,34 @@ export default function PatientForm({
     updateField('cptCodes', currentCodes.filter((c) => c !== code));
   };
 
+  const fillDemoData = (e) => {
+    e.preventDefault();
+    onChange({
+      ...formData,
+      firstName: 'James',
+      lastName: 'Jones',
+      dob: '1991-02-02',
+      payer: 'Cigna',
+      memberId: '23456789100',
+      npi: '1999999984',
+      providerOrgName: 'Vobi Healthcare LLC',
+      groupNumber: '00123874',
+      cptCodes: formData.cptCodes || []
+    });
+  };
+
   return (
     <div className="space-y-5">
+      <div className="flex justify-end mb-2">
+        <button
+          type="button"
+          onClick={fillDemoData}
+          className="text-xs text-brand-600 font-semibold hover:text-brand-800 transition-colors"
+        >
+          Fill Demo Data
+        </button>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <InputField id="input-firstName" label="Patient first name" value={formData.firstName || ''} onChange={(val) => updateField('firstName', val)} />
         <InputField id="input-lastName" label="Patient last name" value={formData.lastName || ''} onChange={(val) => updateField('lastName', val)} />
@@ -42,22 +68,7 @@ export default function PatientForm({
 
       <div className="grid grid-cols-2 gap-3">
         <InputField id="input-dob" label="Date of birth" type="date" value={formData.dob || ''} onChange={(val) => updateField('dob', val)} max="9999-12-31" />
-        <Select
-          id="input-gender"
-          label="Gender"
-          value={formData.gender || 'U'}
-          onChange={(e) => updateField('gender', e.target.value)}
-          options={[
-            { value: 'M', label: 'Male' },
-            { value: 'F', label: 'Female' },
-            { value: 'U', label: 'Unknown' },
-          ]}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <InputField id="input-state" label="State (e.g. NY)" value={formData.stateCode || ''} onChange={(val) => updateField('stateCode', val)} />
-        <InputField id="input-zip" label="Zip Code" value={formData.zipCode || ''} onChange={(val) => updateField('zipCode', val)} />
+        <InputField id="input-memberId" label="Member ID" value={formData.memberId || ''} onChange={(val) => updateField('memberId', val)} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -68,11 +79,11 @@ export default function PatientForm({
           onChange={(e) => updateField('payer', e.target.value)}
           options={PAYERS.map(p => ({ value: p, label: p }))}
         />
-        <InputField id="input-memberId" label="Member ID" value={formData.memberId || ''} onChange={(val) => updateField('memberId', val)} />
+        <InputField id="input-groupNumber" label="Group Number (Optional)" value={formData.groupNumber || ''} onChange={(val) => updateField('groupNumber', val)} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <InputField id="input-groupNumber" label="Group Number (Optional)" value={formData.groupNumber || ''} onChange={(val) => updateField('groupNumber', val)} />
+        <InputField id="input-providerOrgName" label="Provider Org Name" value={formData.providerOrgName || ''} onChange={(val) => updateField('providerOrgName', val)} placeholder="e.g. Vobi Healthcare LLC" />
         <InputField id="input-npi" label="Provider NPI" value={formData.npi || '1487624930'} onChange={(val) => updateField('npi', val)} />
       </div>
 

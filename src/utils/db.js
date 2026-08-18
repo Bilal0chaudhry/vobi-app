@@ -13,7 +13,7 @@ function mapJobToFrontend(j) {
     npi: j.npi,
     cptCodes: j.cpt_codes,
     status: j.status,
-    availityResult: pd?.availity_result ?? j.availity_result ?? null,
+    stediResult: pd?.stedi_result ?? j.stedi_result ?? null,
     logs: cd?.call_logs || j.call_logs || [],
     checklist: cd?.checklist || j.checklist || {},
     source: j.source,
@@ -80,7 +80,7 @@ export async function createJob(jobData, userId) {
   } else if (job.source === 'portal') {
     await supabase.from('portal_data').insert({
       job_id: job.id,
-      availity_result: jobData.availityResult || '{}',
+      stedi_result: jobData.stediResult || '{}',
     });
   }
 
@@ -97,9 +97,9 @@ export async function updateJob(jobId, updates) {
     );
   }
 
-  if (updates.availityResult !== undefined) {
+  if (updates.stediResult !== undefined) {
     promises.push(
-      supabase.from('portal_data').update({ availity_result: updates.availityResult }).eq('job_id', jobId)
+      supabase.from('portal_data').update({ stedi_result: updates.stediResult }).eq('job_id', jobId)
     );
   }
 

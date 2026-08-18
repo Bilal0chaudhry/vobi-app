@@ -105,68 +105,128 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
             fullWidth
           >
             <IconRefresh className="w-4 h-4" />
-            Retry with Same Details
-          </Button>
-        </div>
-      )}
+    <div className="max-w-3xl mx-auto animate-fade-in">
+      <div className="mb-6 flex items-center justify-between">
+        <PageHeader
+          title="Portal Verification Result"
+          subtitle={`Reference: ${job.id}`}
+        />
+        <Button variant="secondary" onClick={onBack}>
+          Close
+        </Button>
+      </div>
 
-      {/* Success State */}
-      {!isError && result && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <IconCheckCircleSolid className="w-5 h-5 text-emerald-600 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-emerald-700">
-                {result.eligibilityStatus || 'Active Coverage Confirmed'}
-              </p>
-              {result.planName && (
-                <p className="text-xs text-emerald-600">Plan: {result.planName}</p>
-              )}
+      <div className="flex gap-6 items-start">
+        <div className="w-64 shrink-0 space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Request Summary</h3>
+            <div className="space-y-4">
+              <div>
+                <span className="text-gray-400 text-xs">Patient</span>
+                <p className="font-semibold text-gray-800">{job.patientFirstName} {job.patientLastName}</p>
+              </div>
+              <div>
+                <span className="text-gray-400 text-xs">DOB</span>
+                <p className="font-medium text-gray-800">{job.dob}</p>
+              </div>
+              <div>
+                <span className="text-gray-400 text-xs">Payer</span>
+                <p className="font-medium text-gray-800">{job.insurance}</p>
+              </div>
+              <div>
+                <span className="text-gray-400 text-xs">Member ID</span>
+                <p className="font-medium text-gray-800">{job.memberId}</p>
+              </div>
+              <div>
+                <span className="text-gray-400 text-xs">Provider Org</span>
+                <p className="font-medium text-gray-800">{job.providerOrgName || 'N/A'}</p>
+              </div>
             </div>
           </div>
-
-          <PatientDetails
-            patient={patient}
-            subscriber={subscriber}
-            fallbackJob={job}
-          />
-
-          <Section title="Coverage" icon={<IconShield />}>
-            <InfoRow label="Plan Name" value={coverage.planName || result.planName} />
-            <InfoRow label="Plan Type" value={coverage.planType} />
-            <InfoRow label="Effective Date" value={coverage.effectiveDate} />
-            <InfoRow label="Term Date" value={coverage.termDate} />
-            <InfoRow label="In-Network Deductible" value={coverage.deductibleInNetwork != null ? `$${coverage.deductibleInNetwork}` : undefined} />
-            <InfoRow label="Deductible Met" value={coverage.deductibleMet != null ? `$${coverage.deductibleMet}` : undefined} />
-            <InfoRow label="Out-of-Pocket Max" value={coverage.oopMax != null ? `$${coverage.oopMax}` : undefined} />
-            <InfoRow label="Coinsurance" value={coverage.coinsurance != null ? `${coverage.coinsurance}%` : undefined} />
-            <InfoRow label="Copay" value={coverage.copay != null ? `$${coverage.copay}` : undefined} />
-          </Section>
-
-          {benefits.length > 0 && (
-            <Section title={`Benefits (${benefits.length})`} icon={<IconFileText />}>
-              <div className="py-2">
-                {benefits.map((b, i) => (
-                  <BenefitCard key={i} benefit={b} />
-                ))}
-              </div>
-            </Section>
-          )}
-
-          <Section title="CPT Codes Verified" icon={<IconClipboardCheck />}>
-            <div className="py-2 flex flex-wrap gap-2">
-              {job.cptCodes.map((code) => (
-                <span
-                  key={code}
-                  className="inline-flex items-center px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-xs font-semibold border border-brand-100"
-                >
-                  {code}
-                </span>
-              ))}
-            </div>
-          </Section>
         </div>
-      )}
+
+        <div className="flex-1 space-y-5">
+          {isError ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <IconAlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-red-700 mb-0.5">Portal Lookup Failed</p>
+                  <p className="text-xs text-red-600 mb-3">
+                    The electronic clearinghouse (Stedi) could not complete the verification. This might be due to mismatched patient details or payer downtime.
+                  </p>
+                  <Button variant="secondary" onClick={() => onRetry(job)}>
+                    <IconRefresh className="w-4 h-4 mr-2" />
+                    Retry Verification
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : !hasResult ? (
+            <div className="p-12 text-center bg-gray-50 rounded-xl border border-gray-200">
+              <p className="text-sm text-gray-500">No portal results available for this request.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm">
+                <IconCheckCircleSolid className="w-6 h-6 text-emerald-600 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-emerald-800">
+                    {coverage.status || 'Active Coverage'}
+                  </p>
+                  {coverage.planType && (
+                    <p className="text-xs font-medium text-emerald-600 mt-0.5">
+                      {coverage.planType}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <PatientDetails 
+                patient={patient} 
+                subscriber={patient} 
+                fallbackJob={job} 
+              />
+
+              <Section title="Coverage Overview" icon={<IconShield />}>
+                <InfoRow label="Plan Type" value={coverage.planType} />
+                <InfoRow label="Effective Date" value={coverage.effectiveDate} />
+                <InfoRow label="General Copay" value={coverage.copay != null ? `$${coverage.copay}` : undefined} />
+                <InfoRow label="In-Network Deductible (Ind.)" value={coverage.deductibleInNetwork != null ? `$${coverage.deductibleInNetwork}` : undefined} />
+                <InfoRow label="Family Deductible" value={coverage.familyDeductible != null ? `$${coverage.familyDeductible}` : undefined} />
+                <InfoRow label="Out-of-Pocket Max (Ind.)" value={coverage.oopMaxIndividual != null ? `$${coverage.oopMaxIndividual}` : undefined} />
+                <InfoRow label="Out-of-Pocket Max (Fam.)" value={coverage.oopMaxFamily != null ? `$${coverage.oopMaxFamily}` : undefined} />
+                <InfoRow label="Coinsurance" value={coverage.coinsurance != null ? `${coverage.coinsurance}%` : undefined} />
+              </Section>
+
+              {benefits.length > 0 && (
+                <Section title={`Detailed Benefits (${benefits.length})`} icon={<IconFileText />}>
+                  <div className="py-2">
+                    {benefits.map((b, i) => (
+                      <BenefitCard key={i} benefit={b} />
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {job.cptCodes && job.cptCodes.length > 0 && (
+                <Section title="CPT Codes Requested" icon={<IconClipboardCheck />}>
+                  <div className="py-2 flex flex-wrap gap-2">
+                    {job.cptCodes.map((code) => (
+                      <span
+                        key={code}
+                        className="inline-flex items-center px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-xs font-semibold border border-brand-100 shadow-sm"
+                      >
+                        {code}
+                      </span>
+                    ))}
+                  </div>
+                </Section>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

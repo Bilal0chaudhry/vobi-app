@@ -28,8 +28,8 @@ async function fetchWithConfig(endpoint, options = {}) {
   return res.json();
 }
 
-export function queryAvailityEligibility(job) {
-  return fetchWithConfig("/availity/eligibility", {
+export function queryPortalEligibility(job) {
+  return fetchWithConfig("/portal/eligibility", {
     method: "POST",
     body: JSON.stringify({
       payer: job.insurance,
@@ -38,7 +38,7 @@ export function queryAvailityEligibility(job) {
       patientLastName: job.patientLastName,
       dob: job.dob,
       npi: job.npi,
-      cptCodes: job.cptCodes,
+      providerOrgName: job.providerOrgName,
     }),
   });
 }

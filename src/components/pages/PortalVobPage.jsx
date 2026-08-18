@@ -5,7 +5,7 @@ import Section from '../ui/Section';
 import BenefitCard from '../ui/BenefitCard';
 import Skeleton from '../ui/Skeleton';
 import PatientDetails from '../ui/PatientDetails';
-import { queryAvailityEligibility } from '../../utils/api';
+import { queryPortalEligibility } from '../../utils/api';
 import { 
   IconChevronLeft, 
   IconAlertCircle, 
@@ -22,14 +22,6 @@ const STATUS = {
   ERROR: 'error',
 };
 
-/**
- * PortalVobPage — active portal lookup page.
- * Always runs a fresh API call on mount.
- * Only used for: new portal requests, and retries from PortalResultPage.
- * onBack: called on back button — caller decides destination.
- * onJobUpdate: saves result/error to DB and updates job status.
- * onComplete: called after the lookup finishes (success or error) — caller decides where to go.
- */
 export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) {
   const [status, setStatus] = useState(STATUS.LOADING);
   const [result, setResult] = useState(null);
@@ -39,10 +31,10 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
     setStatus(STATUS.LOADING);
     setError(null);
     try {
-      const data = await queryAvailityEligibility(job);
+      const data = await queryPortalEligibility(job);
       setResult(data);
       setStatus(STATUS.SUCCESS);
-      await onJobUpdate?.(job.id, { status: 'Verified (Portal)', availityResult: data });
+      await onJobUpdate?.(job.id, { status: 'Verified (Portal)', stediResult: data });
       onComplete?.();
     } catch (err) {
       setError(err.message);
@@ -52,13 +44,11 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
     }
   };
 
-  // Always fetch on mount — this page is only shown for active lookups / retries
   useEffect(() => {
     runLookup();
   }, []);
 
   const patient = result?.patient || {};
-  const subscriber = result?.subscriber || {};
   const coverage = result?.coverage || {};
   const benefits = result?.benefits || [];
 
@@ -89,7 +79,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
           <div className="flex items-center gap-3 mb-5 p-4 bg-brand-50 border border-brand-200 rounded-xl">
             <span className="w-4 h-4 rounded-full border-2 border-brand-600 border-t-transparent animate-spin shrink-0" />
             <p className="text-sm font-medium text-brand-700">
-              Querying eligibility portal…
+              Querying Stedi eligibility portal…
             </p>
           </div>
           <Skeleton />
@@ -123,34 +113,33 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
             <IconCheckCircleSolid className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-emerald-700">
-                {result.eligibilityStatus || 'Active Coverage Confirmed'}
+                {coverage.status || 'Active Coverage Confirmed'}
               </p>
-              {result.planName && (
-                <p className="text-xs text-emerald-600">Plan: {result.planName}</p>
+              {coverage.planType && (
+                <p className="text-xs text-emerald-600">Plan: {coverage.planType}</p>
               )}
             </div>
           </div>
 
           <PatientDetails 
             patient={patient} 
-            subscriber={subscriber} 
+            subscriber={patient} 
             fallbackJob={job} 
           />
 
-          <Section title="Coverage" icon={<IconShield />}>
-            <InfoRow label="Plan Name" value={coverage.planName || result.planName} />
+          <Section title="Coverage Overview" icon={<IconShield />}>
             <InfoRow label="Plan Type" value={coverage.planType} />
             <InfoRow label="Effective Date" value={coverage.effectiveDate} />
-            <InfoRow label="Term Date" value={coverage.termDate} />
-            <InfoRow label="In-Network Deductible" value={coverage.deductibleInNetwork != null ? `$${coverage.deductibleInNetwork}` : undefined} />
-            <InfoRow label="Deductible Met" value={coverage.deductibleMet != null ? `$${coverage.deductibleMet}` : undefined} />
-            <InfoRow label="Out-of-Pocket Max" value={coverage.oopMax != null ? `$${coverage.oopMax}` : undefined} />
+            <InfoRow label="General Copay" value={coverage.copay != null ? `$${coverage.copay}` : undefined} />
+            <InfoRow label="In-Network Deductible (Ind.)" value={coverage.deductibleInNetwork != null ? `$${coverage.deductibleInNetwork}` : undefined} />
+            <InfoRow label="Family Deductible" value={coverage.familyDeductible != null ? `$${coverage.familyDeductible}` : undefined} />
+            <InfoRow label="Out-of-Pocket Max (Ind.)" value={coverage.oopMaxIndividual != null ? `$${coverage.oopMaxIndividual}` : undefined} />
+            <InfoRow label="Out-of-Pocket Max (Fam.)" value={coverage.oopMaxFamily != null ? `$${coverage.oopMaxFamily}` : undefined} />
             <InfoRow label="Coinsurance" value={coverage.coinsurance != null ? `${coverage.coinsurance}%` : undefined} />
-            <InfoRow label="Copay" value={coverage.copay != null ? `$${coverage.copay}` : undefined} />
           </Section>
 
           {benefits.length > 0 && (
-            <Section title={`Benefits (${benefits.length})`} icon={<IconFileText />}>
+            <Section title={`Detailed Benefits (${benefits.length})`} icon={<IconFileText />}>
               <div className="py-2">
                 {benefits.map((b, i) => (
                   <BenefitCard key={i} benefit={b} />
@@ -159,18 +148,20 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
             </Section>
           )}
 
-          <Section title="CPT Codes Verified" icon={<IconClipboardCheck />}>
-            <div className="py-2 flex flex-wrap gap-2">
-              {job.cptCodes.map((code) => (
-                <span
-                  key={code}
-                  className="inline-flex items-center px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-xs font-semibold border border-brand-100"
-                >
-                  {code}
-                </span>
-              ))}
-            </div>
-          </Section>
+          {job.cptCodes && job.cptCodes.length > 0 && (
+            <Section title="CPT Codes Verified" icon={<IconClipboardCheck />}>
+              <div className="py-2 flex flex-wrap gap-2">
+                {job.cptCodes.map((code) => (
+                  <span
+                    key={code}
+                    className="inline-flex items-center px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-xs font-semibold border border-brand-100"
+                  >
+                    {code}
+                  </span>
+                ))}
+              </div>
+            </Section>
+          )}
         </div>
       )}
     </div>

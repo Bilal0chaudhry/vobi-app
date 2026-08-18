@@ -22,9 +22,9 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from models import PatientData, AvailityRequest
+from models import PatientData, PortalRequest
 from utils.broadcaster import Broadcaster
-from services.availity import fetch_eligibility
+from services.stedi import fetch_eligibility
 
 ALLOWED_ORIGINS = [
     "https://bilal0chaudhry.github.io",
@@ -176,9 +176,9 @@ async def end_call(request: Request):
 async def health_check(request: Request):
     return {"status": "ok"}
 
-@app.post("/availity/eligibility")
+@app.post("/portal/eligibility")
 @limiter.limit("10/minute")
-async def availity_eligibility(data: AvailityRequest, request: Request):
+async def check_eligibility(data: PortalRequest, request: Request):
     return fetch_eligibility(data)
 
 
