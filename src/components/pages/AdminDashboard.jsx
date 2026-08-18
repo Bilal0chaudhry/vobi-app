@@ -1,26 +1,9 @@
 import React, { useState } from 'react';
 import { approveProfile, rejectProfile, deleteAccount } from '../../utils/db';
 import { ProfileBadge } from '../ui/Badge';
+import { IconCheck, IconX, IconTrash } from '../ui/icons';
 import PageHeader from '../ui/PageHeader';
 import Toast from '../ui/Toast';
-
-const IconTrash = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-  </svg>
-);
-
-const IconCheck = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-  </svg>
-);
-
-const IconCross = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
 
 export default function AdminDashboard({ onLogout, profiles }) {
   const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
@@ -185,7 +168,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                               className="w-9 h-9 rounded-full bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-2"
                               title="Cancel"
                             >
-                              <IconCross />
+                              <IconX />
                             </button>
                           </>
                         )}

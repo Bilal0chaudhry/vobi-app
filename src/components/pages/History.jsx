@@ -8,7 +8,7 @@ const TABS = [
   { key: 'call', label: 'Call' },
 ];
 
-export default function History({ jobs, onOpenJob, onNewVerification }) {
+export default function History({ jobs, onOpenJob, onNewVerification, onDeleteJob }) {
   const [activeTab, setActiveTab] = useState('all');
   const [indicatorStyle, setIndicatorStyle] = useState({});
   const tabRefs = useRef({});
@@ -84,7 +84,7 @@ export default function History({ jobs, onOpenJob, onNewVerification }) {
           </div>
         ) : (
           filteredJobs.map((job, idx) => (
-            <JobCard key={job.id} job={job} onOpen={onOpenJob} index={idx} />
+            <JobCard key={job.id} job={job} onOpen={onOpenJob} onDelete={onDeleteJob} index={idx} />
           ))
         )}
       </div>

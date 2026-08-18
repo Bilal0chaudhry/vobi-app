@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { JobBadge, SourceBadge } from './Badge';
 import CptBadge from './CptBadge';
+import { IconTrash, IconCheck, IconX } from './icons';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -14,8 +15,10 @@ function timeAgo(dateStr) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export default function JobCard({ job, onOpen, index = 0 }) {
+export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
   const [, setTick] = useState(0);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setTick((t) => t + 1), 30000); // Update every 30 seconds
@@ -26,13 +29,18 @@ export default function JobCard({ job, onOpen, index = 0 }) {
 
   return (
     <div
-      className={`group relative bg-white rounded-xl border overflow-hidden transition-all duration-300 animate-slide-up cursor-pointer
-        ${isActive
+      className={`group relative bg-white rounded-xl border overflow-hidden transition-all duration-300 animate-slide-up ${
+        isConfirmingDelete ? 'cursor-default border-red-200 shadow-md shadow-red-500/5 bg-red-50/10' : 'cursor-pointer'
+      } ${!isConfirmingDelete && isActive
           ? 'border-brand-200 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-500/5'
-          : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+          : !isConfirmingDelete ? 'border-gray-200 hover:border-gray-300 hover:shadow-md' : ''
         }`}
       style={{ animationDelay: `${index * 40}ms` }}
-      onClick={() => onOpen(job)}
+      onClick={(e) => {
+        if (!isConfirmingDelete) {
+          onOpen(job);
+        }
+      }}
     >
       {/* Active indicator strip */}
       {isActive && (
@@ -92,11 +100,52 @@ export default function JobCard({ job, onOpen, index = 0 }) {
           <JobBadge status={job.status} />
         </div>
 
-        {/* Open Arrow */}
-        <div className="shrink-0 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-[-4px] group-hover:translate-x-0 transition-all duration-300">
-          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
+        {/* Actions */}
+        <div className="shrink-0 w-24 flex items-center justify-end">
+          {!isConfirmingDelete ? (
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-4px] group-hover:translate-x-0">
+              {onDelete && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsConfirmingDelete(true);
+                  }}
+                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors outline-none"
+                  title="Delete request"
+                >
+                  <IconTrash className="w-4 h-4" />
+                </button>
+              )}
+              <div className="w-6 flex items-center justify-center pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+              <button 
+                disabled={isDeleting}
+                onClick={async () => {
+                  setIsDeleting(true);
+                  await onDelete(job.id);
+                  // Job will be removed from state, component unmounts
+                }} 
+                className="w-8 h-8 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-1"
+                title="Confirm Delete"
+              >
+                {isDeleting ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <IconCheck className="w-3.5 h-3.5" />}
+              </button>
+              <button 
+                disabled={isDeleting}
+                onClick={() => setIsConfirmingDelete(false)} 
+                className="w-8 h-8 rounded-full bg-gray-50 text-gray-400 border border-gray-200 flex items-center justify-center hover:bg-gray-100 hover:text-gray-600 transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-2"
+                title="Cancel"
+              >
+                <IconX className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

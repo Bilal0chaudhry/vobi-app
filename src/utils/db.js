@@ -168,3 +168,8 @@ export async function deleteAccount(userId) {
   const { error } = await supabase.rpc('admin_delete_user', { user_id: userId });
   if (error) throw error;
 }
+
+export async function deleteJob(jobId) {
+  const { error } = await supabase.from('jobs').delete().eq('id', jobId);
+  if (error) throw error;
+}

@@ -11,7 +11,7 @@ import Auth from './components/auth/Auth';
 import AdminDashboard from './components/pages/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
 import { supabase } from './utils/supabase';
-import { fetchJobsList, fetchJobById, createJob, updateJob, fetchSettings, fetchProfiles } from './utils/db';
+import { fetchJobsList, fetchJobById, createJob, updateJob, deleteJob, fetchSettings, fetchProfiles } from './utils/db';
 import { checkHealth } from './utils/api';
 
 export default function App() {
@@ -199,6 +199,15 @@ export default function App() {
     await updateJob(jobId, updates);
   };
 
+  const handleDeleteJob = async (jobId) => {
+    try {
+      await deleteJob(jobId);
+      setJobs(prev => prev.filter(j => j.id !== jobId));
+    } catch (err) {
+      alert("Failed to delete the request.");
+    }
+  };
+
   const handleLogout = async () => {
     setIsLoading(true);
     await supabase.auth.signOut();
@@ -213,7 +222,7 @@ export default function App() {
       case 'dashboard':
         return <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
       case 'callHistory':
-        return <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
+        return <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} onDeleteJob={handleDeleteJob} />;
       case 'settings':
         return <Settings 
           profile={profile} 
