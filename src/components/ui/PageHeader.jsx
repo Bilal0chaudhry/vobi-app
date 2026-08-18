@@ -2,7 +2,7 @@ import React from 'react';
 import { IconPlus } from './icons';
 import Button from './Button';
 
-export default function PageHeader({ title, subtitle, onNewVerification, buttonId = 'btn-new-verification' }) {
+export default function PageHeader({ title, subtitle, onNewVerification, buttonId = 'btn-new-verification', isAtCapacity = false }) {
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
@@ -10,10 +10,17 @@ export default function PageHeader({ title, subtitle, onNewVerification, buttonI
         {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
       </div>
       {onNewVerification && (
-        <Button id={buttonId} onClick={onNewVerification}>
-          <IconPlus />
-          New Verification
-        </Button>
+        <div title={isAtCapacity ? "Maximum of 10 active requests reached. Please wait for one to complete." : ""}>
+          <Button 
+            id={buttonId} 
+            onClick={onNewVerification}
+            disabled={isAtCapacity}
+            className={isAtCapacity ? 'opacity-50' : ''}
+          >
+            <IconPlus />
+            New Verification
+          </Button>
+        </div>
       )}
     </div>
   );

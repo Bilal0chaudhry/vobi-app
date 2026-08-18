@@ -4,7 +4,8 @@ import JobCard from '../ui/JobCard';
 import { IconSignal, IconCheckCircle, IconZap, IconClock } from '../ui/icons';
 
 export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
-  const activeJobs = jobs.filter(j => j.status !== 'Completed' && j.status !== 'Verified (Portal)' && j.status !== 'Portal Error').length;
+  const activeJobsList = jobs.filter(j => j.status !== 'Completed' && j.status !== 'Verified (Portal)' && j.status !== 'Portal Error');
+  const activeJobs = activeJobsList.length;
   const verifiedJobs = jobs.filter(j => j.status === 'Completed' || j.status === 'Verified (Portal)').length;
   
   const STATS = [
@@ -20,6 +21,7 @@ export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
         title="Dashboard"
         subtitle="Active and recent verification jobs"
         onNewVerification={onNewVerification}
+        isAtCapacity={activeJobs >= 10}
       />
 
       <div className="grid grid-cols-4 gap-4 mb-6">
@@ -38,19 +40,30 @@ export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-bold text-gray-900">Verification requests</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Latest first</p>
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-gray-900">Active requests</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Currently processing (Max 10)</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+              activeJobs >= 10 
+                ? 'bg-red-50 text-red-700 border-red-200' 
+                : 'bg-brand-50 text-brand-700 border-brand-200'
+            }`}>
+              {activeJobs} / 10 Capacity
+            </span>
+          </div>
         </div>
 
         <div className="p-3 space-y-2">
-          {jobs.length === 0 ? (
+          {activeJobsList.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-sm text-gray-500">No verification requests yet</p>
-              <p className="text-xs text-gray-400 mt-1">Click "New Verification" to get started</p>
+              <p className="text-sm text-gray-500">No active verification requests</p>
+              <p className="text-xs text-gray-400 mt-1">Click "New Verification" to start processing</p>
             </div>
           ) : (
-            jobs.map((job, idx) => (
+            activeJobsList.map((job, idx) => (
               <JobCard key={job.id} job={job} onOpen={onOpenJob} index={idx} />
             ))
           )}

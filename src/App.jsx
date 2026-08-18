@@ -29,6 +29,18 @@ export default function App() {
   const [jobsLoaded, setJobsLoaded] = useState(false);
   const [adminProfilesLoaded, setAdminProfilesLoaded] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [showCapacityToast, setShowCapacityToast] = useState(false);
+
+  const activeJobsCount = jobs.filter(j => j.status !== 'Completed' && j.status !== 'Verified (Portal)' && j.status !== 'Portal Error').length;
+
+  const handleNewVerificationClick = () => {
+    if (activeJobsCount >= 10) {
+      setShowCapacityToast(true);
+      setTimeout(() => setShowCapacityToast(false), 4000);
+    } else {
+      setShowNewVobModal(true);
+    }
+  };
 
   useEffect(() => {
     checkHealth().then(res => setBackendStatus(!!res));
@@ -199,9 +211,9 @@ export default function App() {
 
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
+        return <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
       case 'callHistory':
-        return <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
+        return <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
       case 'settings':
         return <Settings 
           profile={profile} 
@@ -212,7 +224,7 @@ export default function App() {
       case 'liveView':
         return activeJob
           ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
-          : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
+          : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
       case 'portalVob':
         return activeJob
           ? <PortalVobPage
@@ -220,7 +232,7 @@ export default function App() {
               onBack={handleBackToDashboard}
               onJobUpdate={handleJobUpdate}
             />
-          : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
+          : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
       default:
         return null;
     }
@@ -268,6 +280,28 @@ export default function App() {
               onPortalSubmit={handlePortalSubmit}
               profile={profile}
             />
+          )}
+
+          {/* Capacity Toast Notification */}
+          {showCapacityToast && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
+              <div className="bg-gray-900 text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3">
+                <div className="bg-amber-500/20 text-amber-500 p-1.5 rounded-lg">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold">Queue is full</h4>
+                  <p className="text-xs text-gray-300 mt-0.5">You must wait for an active request to complete before making a new one.</p>
+                </div>
+                <button onClick={() => setShowCapacityToast(false)} className="ml-4 text-gray-400 hover:text-white transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}

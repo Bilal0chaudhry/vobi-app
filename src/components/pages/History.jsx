@@ -27,6 +27,8 @@ export default function History({ jobs, onOpenJob, onNewVerification }) {
     ? jobs
     : jobs.filter(j => j.source === activeTab);
 
+  const activeJobs = jobs.filter(j => j.status !== 'Completed' && j.status !== 'Verified (Portal)' && j.status !== 'Portal Error').length;
+
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -34,6 +36,7 @@ export default function History({ jobs, onOpenJob, onNewVerification }) {
         subtitle="All verification requests"
         onNewVerification={onNewVerification}
         buttonId="btn-new-verification-history"
+        isAtCapacity={activeJobs >= 10}
       />
 
       {/* Animated Tab Bar */}
