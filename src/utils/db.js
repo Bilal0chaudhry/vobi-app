@@ -13,7 +13,7 @@ function mapJobToFrontend(j) {
     availityResult: j.availity_result,
     logs: j.call_logs || [],
     checklist: j.checklist || {},
-    source: j.availity_result ? 'portal' : 'live',
+    source: j.source,
     createdAt: j.created_at,
   };
 }
@@ -42,6 +42,7 @@ export async function createJob(jobData, userId) {
       npi: jobData.npi,
       cpt_codes: jobData.cptCodes,
       status: jobData.status || 'Pending',
+      source: jobData.source || 'call',
       availity_result: jobData.availityResult || null,
       call_logs: jobData.logs || [],
       checklist: jobData.checklist || {},
