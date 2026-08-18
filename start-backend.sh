@@ -19,6 +19,14 @@ while true; do
   if [ ! -z "$URL" ]; then
     break
   fi
+  
+  if grep -q "failed to request quick Tunnel" cloudflared.log || ! kill -0 $TUNNEL_PID 2>/dev/null; then
+    echo "  ⚠️ Cloudflare tunnel failed to start. Retrying..."
+    kill $TUNNEL_PID 2>/dev/null
+    rm -f cloudflared.log
+    ./cloudflared tunnel --url http://localhost:8000 2>cloudflared.log &
+    TUNNEL_PID=$!
+  fi
   sleep 1
 done
 echo "  ✅ Tunnel ready: $URL"
