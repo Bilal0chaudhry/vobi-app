@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { JobBadge, SourceBadge } from './Badge';
 import CptBadge from './CptBadge';
 
@@ -15,6 +15,13 @@ function timeAgo(dateStr) {
 }
 
 export default function JobCard({ job, onOpen, index = 0 }) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 30000); // Update every 30 seconds
+    return () => clearInterval(timer);
+  }, []);
+
   const isActive = job.status !== 'Completed' && job.status !== 'Verified (Portal)' && job.status !== 'Portal Error';
 
   return (
