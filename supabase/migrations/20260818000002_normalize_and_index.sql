@@ -25,7 +25,9 @@ BEGIN
 END
 $$;
 
+ALTER TABLE jobs ALTER COLUMN source DROP DEFAULT;
 ALTER TABLE jobs ALTER COLUMN source TYPE job_source USING source::job_source;
+ALTER TABLE jobs ALTER COLUMN source SET DEFAULT 'call'::job_source;
 
 
 -- 3. ENUM for jobs.status — prevent invalid values
@@ -39,6 +41,7 @@ BEGIN
       'On Hold',
       'Completed',
       'Portal Lookup',
+      'Portal Error',
       'Verified (Portal)',
       'API Fast-Path'
     );
@@ -46,4 +49,6 @@ BEGIN
 END
 $$;
 
+ALTER TABLE jobs ALTER COLUMN status DROP DEFAULT;
 ALTER TABLE jobs ALTER COLUMN status TYPE job_status USING status::job_status;
+ALTER TABLE jobs ALTER COLUMN status SET DEFAULT 'Pending'::job_status;
