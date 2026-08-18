@@ -15,7 +15,7 @@ TUNNEL_PID=$!
 
 echo "  🌐 Starting tunnel..."
 while true; do
-  URL=$(grep -oE "https://[a-zA-Z0-9-]+\.trycloudflare\.com" cloudflared.log | head -1)
+  URL=$(grep -oE "https://[a-zA-Z0-9-]+\.trycloudflare\.com" cloudflared.log | grep -v "api.trycloudflare.com" | head -1)
   if [ ! -z "$URL" ]; then
     break
   fi
