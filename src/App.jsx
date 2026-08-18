@@ -11,7 +11,7 @@ import Auth from './components/auth/Auth';
 import AdminDashboard from './components/pages/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
 import { supabase } from './utils/supabase';
-import { fetchJobs, createJob, updateJob, fetchSettings, fetchProfiles } from './utils/db';
+import { fetchJobsList, fetchJobById, createJob, updateJob, fetchSettings, fetchProfiles } from './utils/db';
 import { checkHealth } from './utils/api';
 
 export default function App() {
@@ -96,7 +96,7 @@ export default function App() {
 
     setJobsLoaded(false);
     const loadJobs = async () => {
-      const data = await fetchJobs();
+      const data = await fetchJobsList();
       setJobs(data);
       setJobsLoaded(true);
     };
@@ -166,9 +166,12 @@ export default function App() {
     }
   };
 
-  const handleOpenJob = (job) => {
-    setActiveJob(job);
-    setCurrentView(job.source === 'portal' ? 'portalVob' : 'liveView');
+  const handleOpenJob = async (job) => {
+    // Fetch full job detail (including call_logs, checklist, availity_result)
+    const fullJob = await fetchJobById(job.id);
+    const resolved = fullJob || job;
+    setActiveJob(resolved);
+    setCurrentView(resolved.source === 'portal' ? 'portalVob' : 'liveView');
   };
 
   const handleBackToDashboard = () => {

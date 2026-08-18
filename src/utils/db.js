@@ -10,7 +10,7 @@ function mapJobToFrontend(j) {
     npi: j.npi,
     cptCodes: j.cpt_codes,
     status: j.status,
-    availityResult: j.availity_result,
+    availityResult: j.availity_result ?? null,
     logs: j.call_logs || [],
     checklist: j.checklist || {},
     source: j.source,
@@ -18,16 +18,31 @@ function mapJobToFrontend(j) {
   };
 }
 
-export async function fetchJobs() {
+// Lightweight query for Dashboard & Call History — skips heavy JSONB columns
+export async function fetchJobsList() {
   const { data, error } = await supabase
     .from('jobs')
-    .select('*')
+    .select('id, patient_first_name, patient_last_name, insurance, member_id, npi, cpt_codes, status, source, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
     return [];
   }
   return data.map(mapJobToFrontend);
+}
+
+// Full query for opening a specific job — includes call_logs, checklist, availity_result
+export async function fetchJobById(jobId) {
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('id', jobId)
+    .single();
+
+  if (error) {
+    return null;
+  }
+  return mapJobToFrontend(data);
 }
 
 export async function createJob(jobData, userId) {
