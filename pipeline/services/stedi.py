@@ -15,8 +15,21 @@ def fetch_eligibility(data: PortalRequest):
     # Format DOB from YYYY-MM-DD to YYYYMMDD for Stedi
     dob_formatted = data.dob.replace("-", "")
 
+    # Map frontend payer names to Stedi's numerical Trading Partner Service IDs
+    payer_map = {
+        "Cigna": "62308",
+        "Aetna": "60054",
+        "UnitedHealthcare": "87726",
+        "Humana": "61101",
+        "Blue Cross Blue Shield": "SB720",
+        "Medicare": "CMS",
+        "Medicaid": "MEDICAID"
+    }
+    
+    stedi_payer_id = payer_map.get(data.payer, data.payer)
+
     payload = {
-        "tradingPartnerServiceId": data.payer,
+        "tradingPartnerServiceId": stedi_payer_id,
         "provider": {
             "organizationName": data.providerOrgName,
             "npi": data.npi
