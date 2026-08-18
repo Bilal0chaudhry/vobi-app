@@ -21,16 +21,18 @@ function mapJobToFrontend(j) {
   };
 }
 
-// Lightweight query for Dashboard & Call History — skips heavy JSONB columns
-export async function fetchJobsList() {
-  const { data, error } = await supabase
+// Lightweight query for Dashboard & History — skips heavy JSONB columns
+export async function fetchJobsList(userId) {
+  const query = supabase
     .from('jobs')
     .select('id, patient_first_name, patient_last_name, insurance, member_id, npi, cpt_codes, status, source, created_at')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    return [];
-  }
+  // Explicit filter lets Postgres use idx_jobs_user_created directly
+  if (userId) query.eq('user_id', userId);
+
+  const { data, error } = await query;
+  if (error) return [];
   return data.map(mapJobToFrontend);
 }
 
@@ -86,12 +88,19 @@ export async function createJob(jobData, userId) {
 }
 
 export async function updateJob(jobId, updates) {
+  // Fire all writes in parallel for speed
+  const promises = [];
+
   if (updates.status !== undefined) {
-    await supabase.from('jobs').update({ status: updates.status }).eq('id', jobId);
+    promises.push(
+      supabase.from('jobs').update({ status: updates.status }).eq('id', jobId)
+    );
   }
 
   if (updates.availityResult !== undefined) {
-    await supabase.from('portal_data').update({ availity_result: updates.availityResult }).eq('job_id', jobId);
+    promises.push(
+      supabase.from('portal_data').update({ availity_result: updates.availityResult }).eq('job_id', jobId)
+    );
   }
 
   const callUpdates = {};
@@ -99,10 +108,12 @@ export async function updateJob(jobId, updates) {
   if (updates.checklist !== undefined) callUpdates.checklist = updates.checklist;
 
   if (Object.keys(callUpdates).length > 0) {
-    await supabase.from('call_data').update(callUpdates).eq('job_id', jobId);
+    promises.push(
+      supabase.from('call_data').update(callUpdates).eq('job_id', jobId)
+    );
   }
 
-  return fetchJobById(jobId);
+  await Promise.all(promises);
 }
 
 export async function updateProfile(userId, updates) {

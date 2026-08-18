@@ -111,7 +111,7 @@ export default function App() {
 
     setJobsLoaded(false);
     const loadJobs = async () => {
-      const data = await fetchJobsList();
+      const data = await fetchJobsList(session.user.id);
       setJobs(data);
       setJobsLoaded(true);
     };

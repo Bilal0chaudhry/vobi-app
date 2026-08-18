@@ -46,8 +46,27 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
   const [showToast, setShowToast] = useState(false);
   const feedRef = useRef(null);
 
+  const debounceRef = useRef(null);
+  const prevStatusRef = useRef(callStatus);
+
+  // Debounce log/checklist writes to DB (every 2s), but flush immediately on status change
   useEffect(() => {
-    onJobUpdate?.(job.id, { logs, checklist, status: callStatus });
+    const statusChanged = prevStatusRef.current !== callStatus;
+    prevStatusRef.current = callStatus;
+
+    if (statusChanged) {
+      // Status changes are critical — flush immediately
+      clearTimeout(debounceRef.current);
+      onJobUpdate?.(job.id, { logs, checklist, status: callStatus });
+    } else {
+      // Batch log/checklist updates
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onJobUpdate?.(job.id, { logs, checklist, status: callStatus });
+      }, 2000);
+    }
+
+    return () => clearTimeout(debounceRef.current);
   }, [logs, checklist, callStatus]);
 
   useEffect(() => {
