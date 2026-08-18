@@ -117,3 +117,20 @@ body {
 .toast-progress {
   animation: progressShrink linear forwards;
 }
+
+@keyframes popIn {
+  0% { transform: scale(0.8) translateY(4px); opacity: 0; }
+  60% { transform: scale(1.15) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.animate-pop-in-1 {
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+
+.animate-pop-in-2 {
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 0.05s;
+  opacity: 0;
+}

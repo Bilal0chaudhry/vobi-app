@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { JobBadge, SourceBadge } from './Badge';
 import CptBadge from './CptBadge';
 import { IconTrash, IconCheck, IconX } from './icons';
@@ -19,6 +19,17 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
   const [, setTick] = useState(0);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isConfirmingDelete && cardRef.current && !cardRef.current.contains(event.target)) {
+        setIsConfirmingDelete(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isConfirmingDelete]);
 
   useEffect(() => {
     const timer = setInterval(() => setTick((t) => t + 1), 30000); // Update every 30 seconds
@@ -29,6 +40,7 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
 
   return (
     <div
+      ref={cardRef}
       className={`group relative bg-white rounded-xl border overflow-hidden transition-all duration-300 animate-slide-up ${
         isConfirmingDelete ? 'cursor-default border-red-200 shadow-md shadow-red-500/5 bg-red-50/10' : 'cursor-pointer'
       } ${!isConfirmingDelete && isActive
@@ -116,11 +128,6 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
                   <IconTrash className="w-4 h-4" />
                 </button>
               )}
-              <div className="w-6 flex items-center justify-center pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
             </div>
           ) : (
             <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>

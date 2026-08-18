@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { approveProfile, rejectProfile, deleteAccount } from '../../utils/db';
 import { ProfileBadge } from '../ui/Badge';
 import { IconCheck, IconX, IconTrash } from '../ui/icons';
@@ -14,6 +14,18 @@ export default function AdminDashboard({ onLogout, profiles }) {
     setToast({ show: false, type, message: '' });
     setTimeout(() => setToast({ show: true, type, message }), 10);
   };
+
+  const tableRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (deletingId && tableRef.current && !tableRef.current.contains(event.target)) {
+        setDeletingId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [deletingId]);
 
   const handleApprove = async (id) => {
     try {
@@ -60,18 +72,6 @@ export default function AdminDashboard({ onLogout, profiles }) {
           .animate-slide-in-right-bounce {
             animation: slideInRightBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           }
-          @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-          }
-          .animate-pop-in-1 {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-          }
-          .animate-pop-in-2 {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s forwards;
-            opacity: 0;
-          }
         `}
       </style>
       
@@ -92,7 +92,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" ref={tableRef}>
         <div className="overflow-x-auto relative">
           <table className="w-full text-left text-sm table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200 relative z-20">
