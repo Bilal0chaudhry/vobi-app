@@ -142,35 +142,46 @@ export default function AdminDashboard({ onLogout, profiles }) {
                           </>
                         )}
                         
-                        {profile.status === 'approved' && !profile.is_admin && deletingId !== profile.id && (
-                          <button 
-                            onClick={() => setDeletingId(profile.id)} 
-                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 focus:opacity-100 outline-none"
-                            title="Delete Account"
-                          >
-                            <IconTrash />
-                          </button>
-                        )}
-
-                        {deletingId === profile.id && (
-                          <>
-                            <button 
-                              disabled={isDeleting}
-                              onClick={() => confirmDelete(profile.id)} 
-                              className="w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-1"
-                              title="Confirm Delete"
+                        {profile.status === 'approved' && !profile.is_admin && (
+                          <div className="relative w-24 h-9 flex items-center justify-start">
+                            <div 
+                              className={`absolute left-0 flex items-center gap-1 transition-all duration-300 transform
+                                ${deletingId !== profile.id
+                                  ? 'opacity-0 group-hover:opacity-100 translate-x-[-4px] group-hover:translate-x-0'
+                                  : 'opacity-0 translate-x-[-4px] pointer-events-none'
+                                }`}
                             >
-                              <IconCheck />
-                            </button>
-                            <button 
-                              disabled={isDeleting}
-                              onClick={() => setDeletingId(null)} 
-                              className="w-9 h-9 rounded-full bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-2"
-                              title="Cancel"
+                              <button 
+                                onClick={() => setDeletingId(profile.id)} 
+                                className="text-gray-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 outline-none transition-colors"
+                                title="Delete Account"
+                              >
+                                <IconTrash />
+                              </button>
+                            </div>
+                            
+                            <div 
+                              className={`absolute left-0 flex items-center gap-2 transition-all duration-300 transform origin-left
+                                ${deletingId === profile.id ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
                             >
-                              <IconX />
-                            </button>
-                          </>
+                              <button 
+                                disabled={isDeleting}
+                                onClick={() => confirmDelete(profile.id)} 
+                                className={`w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 ${deletingId === profile.id ? 'animate-pop-in-1' : ''}`}
+                                title="Confirm Delete"
+                              >
+                                <IconCheck />
+                              </button>
+                              <button 
+                                disabled={isDeleting}
+                                onClick={() => setDeletingId(null)} 
+                                className={`w-9 h-9 rounded-full bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 ${deletingId === profile.id ? 'animate-pop-in-2' : ''}`}
+                                title="Cancel"
+                              >
+                                <IconX />
+                              </button>
+                            </div>
+                          </div>
                         )}
                       </div>
                     </td>

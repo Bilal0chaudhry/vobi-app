@@ -113,46 +113,53 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
         </div>
 
         {/* Actions */}
-        <div className="shrink-0 w-24 flex items-center justify-end">
-          {!isConfirmingDelete ? (
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-4px] group-hover:translate-x-0">
-              {onDelete && (
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsConfirmingDelete(true);
-                  }}
-                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors outline-none"
-                  title="Delete request"
-                >
-                  <IconTrash className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+        <div className="relative shrink-0 w-24 h-10 flex items-center justify-end">
+          {onDelete && (
+            <div 
+              className={`absolute right-0 flex items-center gap-1 transition-all duration-300 transform
+                ${!isConfirmingDelete 
+                  ? 'opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0' 
+                  : 'opacity-0 translate-x-4 pointer-events-none'
+                }`}
+            >
               <button 
-                disabled={isDeleting}
-                onClick={async () => {
-                  setIsDeleting(true);
-                  await onDelete(job.id);
-                  // Job will be removed from state, component unmounts
-                }} 
-                className="w-8 h-8 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-1"
-                title="Confirm Delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsConfirmingDelete(true);
+                }}
+                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors outline-none"
+                title="Delete request"
               >
-                {isDeleting ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <IconCheck className="w-3.5 h-3.5" />}
-              </button>
-              <button 
-                disabled={isDeleting}
-                onClick={() => setIsConfirmingDelete(false)} 
-                className="w-8 h-8 rounded-full bg-gray-50 text-gray-400 border border-gray-200 flex items-center justify-center hover:bg-gray-100 hover:text-gray-600 transition-all shadow-sm active:scale-95 disabled:opacity-50 animate-pop-in-2"
-                title="Cancel"
-              >
-                <IconX className="w-3.5 h-3.5" />
+                <IconTrash className="w-4 h-4" />
               </button>
             </div>
           )}
+
+          <div 
+            className={`absolute right-0 flex items-center gap-1.5 transition-all duration-300 transform origin-right
+              ${isConfirmingDelete ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              disabled={isDeleting}
+              onClick={async () => {
+                setIsDeleting(true);
+                await onDelete(job.id);
+              }} 
+              className={`w-8 h-8 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 ${isConfirmingDelete ? 'animate-pop-in-1' : ''}`}
+              title="Confirm Delete"
+            >
+              {isDeleting ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <IconCheck className="w-3.5 h-3.5" />}
+            </button>
+            <button 
+              disabled={isDeleting}
+              onClick={() => setIsConfirmingDelete(false)} 
+              className={`w-8 h-8 rounded-full bg-gray-50 text-gray-400 border border-gray-200 flex items-center justify-center hover:bg-gray-100 hover:text-gray-600 transition-all shadow-sm active:scale-95 disabled:opacity-50 ${isConfirmingDelete ? 'animate-pop-in-2' : ''}`}
+              title="Cancel"
+            >
+              <IconX className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
