@@ -24,8 +24,9 @@ const STATUS = {
 };
 
 export default function PortalVobPage({ job, onBack, onJobUpdate }) {
-  const [status, setStatus] = useState(STATUS.IDLE);
-  const [result, setResult] = useState(null);
+  const hasExistingResult = !!job.availityResult;
+  const [status, setStatus] = useState(hasExistingResult ? STATUS.SUCCESS : STATUS.IDLE);
+  const [result, setResult] = useState(hasExistingResult ? job.availityResult : null);
   const [error, setError] = useState(null);
 
   const runLookup = async () => {
@@ -44,7 +45,9 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
   };
 
   useEffect(() => {
-    runLookup();
+    if (!hasExistingResult) {
+      runLookup();
+    }
   }, []);
 
   const patient = result?.patient || {};

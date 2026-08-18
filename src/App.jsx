@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './components/pages/Dashboard';
-import CallHistory from './components/pages/CallHistory';
+import History from './components/pages/History';
 import Settings from './components/pages/Settings';
 import LiveView from './components/pages/LiveView';
 import NewVobModal from './components/ui/NewVobModal';
@@ -201,7 +201,7 @@ export default function App() {
       case 'dashboard':
         return <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
       case 'callHistory':
-        return <CallHistory jobs={jobs} />;
+        return <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={() => setShowNewVobModal(true)} />;
       case 'settings':
         return <Settings 
           profile={profile} 

@@ -4,7 +4,7 @@ import VobiLogo from '../ui/VobiLogo';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', Icon: IconDashboard },
-  { key: 'callHistory', label: 'Call History', Icon: IconCallHistory },
+  { key: 'callHistory', label: 'History', Icon: IconCallHistory },
   { key: 'settings', label: 'Settings', Icon: IconSettings },
 ];
 
