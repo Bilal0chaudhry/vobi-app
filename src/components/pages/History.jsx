@@ -27,7 +27,7 @@ export default function History({ jobs, onOpenJob, onNewVerification }) {
     ? jobs
     : jobs.filter(j => j.source === activeTab);
 
-  const activeJobs = jobs.filter(j => j.status !== 'Completed' && j.status !== 'Verified (Portal)' && j.status !== 'Portal Error').length;
+  const activeJobs = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status)).length;
 
   return (
     <div className="animate-fade-in">

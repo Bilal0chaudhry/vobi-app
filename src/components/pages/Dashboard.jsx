@@ -4,7 +4,7 @@ import JobCard from '../ui/JobCard';
 import { IconSignal, IconCheckCircle, IconZap, IconClock } from '../ui/icons';
 
 export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
-  const activeJobsList = jobs.filter(j => j.status !== 'Completed' && j.status !== 'Verified (Portal)' && j.status !== 'Portal Error');
+  const activeJobsList = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status));
   const activeJobs = activeJobsList.length;
   const verifiedJobs = jobs.filter(j => j.status === 'Completed' || j.status === 'Verified (Portal)').length;
   

@@ -31,7 +31,7 @@ export default function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [showCapacityToast, setShowCapacityToast] = useState(false);
 
-  const activeJobsCount = jobs.filter(j => j.status !== 'Completed' && j.status !== 'Verified (Portal)' && j.status !== 'Portal Error').length;
+  const activeJobsCount = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status)).length;
 
   const handleNewVerificationClick = () => {
     if (activeJobsCount >= 10) {

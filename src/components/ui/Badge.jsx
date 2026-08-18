@@ -5,6 +5,9 @@ const jobConfig = {
   'On Hold': { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', animate: true },
   'API Fast-Path': { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500', animate: false },
   'Completed': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', animate: false },
+  'Verified (Portal)': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', animate: false },
+  'Portal Error': { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500', animate: false },
+  'Call Error': { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500', animate: false },
 };
 
 export function JobBadge({ status }) {

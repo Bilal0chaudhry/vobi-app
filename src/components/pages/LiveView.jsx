@@ -66,7 +66,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
             id: "error", timestamp: timestamp(), type: "system", source: "SYSTEM",
             message: err.message || "Call rejected: All representatives are busy.",
           }]);
-          setCallStatus("Completed");
+          setCallStatus("Call Error");
         }
       };
 
