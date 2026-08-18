@@ -4,6 +4,11 @@ echo ""
 echo "  🚀 Starting Vobi..."
 echo ""
 
+# Clean up any zombie processes from previous interrupted runs
+killall cloudflared 2>/dev/null
+killall python 2>/dev/null
+pkill -f server.py 2>/dev/null
+
 API_KEY=$(openssl rand -hex 32)
 export VOBI_API_KEY="$API_KEY"
 
@@ -12,6 +17,9 @@ echo "  🔑 API key generated"
 rm -f cloudflared.log
 ./cloudflared tunnel --url http://localhost:8000 2>cloudflared.log &
 TUNNEL_PID=$!
+
+# Ensure tunnel is killed if user presses Ctrl+C at any point
+trap "echo -e '\n  ✋ Shutting down...'; kill $TUNNEL_PID 2>/dev/null; exit" INT
 
 echo "  🌐 Starting tunnel..."
 while true; do
@@ -54,8 +62,6 @@ echo "  🌐 https://bilal0chaudhry.github.io/vobi-app/"
 echo "  📞 Waiting for calls..."
 echo "  ════════════════════════════════════════════"
 echo ""
-
-trap "echo -e '\n  ✋ Shutting down...'; kill $TUNNEL_PID; exit" INT
 
 cd pipeline
 .venv/bin/python server.py
