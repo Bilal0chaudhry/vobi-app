@@ -10,6 +10,7 @@ import PortalVobPage from './components/pages/PortalVobPage';
 import Auth from './components/auth/Auth';
 import AdminDashboard from './components/pages/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
+import Toast from './components/ui/Toast';
 import { supabase } from './utils/supabase';
 import { fetchJobsList, fetchJobById, createJob, updateJob, deleteJob, fetchSettings, fetchProfiles } from './utils/db';
 import { checkHealth } from './utils/api';
@@ -30,6 +31,7 @@ export default function App() {
   const [adminProfilesLoaded, setAdminProfilesLoaded] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [showCapacityToast, setShowCapacityToast] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
 
   const activeJobsCount = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status)).length;
 
@@ -203,8 +205,9 @@ export default function App() {
     try {
       await deleteJob(jobId);
       setJobs(prev => prev.filter(j => j.id !== jobId));
+      setToast({ show: true, type: 'success', message: 'Request deleted successfully' });
     } catch (err) {
-      alert("Failed to delete the request.");
+      setToast({ show: true, type: 'error', message: 'Failed to delete request' });
     }
   };
 
@@ -256,6 +259,14 @@ export default function App() {
 
   return (
     <>
+      {toast.show && (
+        <Toast 
+          type={toast.type} 
+          message={toast.message} 
+          onClose={() => setToast({ show: false, type: 'success', message: '' })} 
+        />
+      )}
+
       {(!isAuthenticated && isFullyLoaded) && (
         <Auth initialBackendStatus={backendStatus} onBackendChange={setBackendStatus} />
       )}
