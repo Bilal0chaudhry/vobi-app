@@ -12,6 +12,10 @@ export default function PatientForm({
   const [cptInput, setCptInput] = useState('');
   const cptRef = useRef(null);
 
+  // Live validation helpers
+  const isNpiValid = !formData.npi || /^\d{10}$/.test(formData.npi);
+  const isDobValid = !formData.dob || /^\d{4}-\d{2}-\d{2}$/.test(formData.dob);
+
   const updateField = (field, value) => {
     onChange({ ...formData, [field]: value });
   };
@@ -67,7 +71,10 @@ export default function PatientForm({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <InputField id="input-dob" label="Date of birth" type="date" value={formData.dob || ''} onChange={(val) => updateField('dob', val)} max="9999-12-31" />
+        <div>
+          <InputField id="input-dob" label="Date of birth" type="date" value={formData.dob || ''} onChange={(val) => updateField('dob', val)} max="9999-12-31" />
+          {!isDobValid && <p className="text-[10px] text-red-500 mt-1">Must be a valid date.</p>}
+        </div>
         <InputField id="input-memberId" label="Member ID" value={formData.memberId || ''} onChange={(val) => updateField('memberId', val)} />
       </div>
 
@@ -84,7 +91,10 @@ export default function PatientForm({
 
       <div className="grid grid-cols-2 gap-3">
         <InputField id="input-providerOrgName" label="Provider Org Name" value={formData.providerOrgName || ''} onChange={(val) => updateField('providerOrgName', val)} placeholder="e.g. Vobi Healthcare LLC" />
-        <InputField id="input-npi" label="Provider NPI" value={formData.npi || '1487624930'} onChange={(val) => updateField('npi', val)} />
+        <div>
+          <InputField id="input-npi" label="Provider NPI" value={formData.npi || ''} onChange={(val) => updateField('npi', val)} placeholder="10-digit NPI" />
+          {!isNpiValid && formData.npi && <p className="text-[10px] text-red-500 mt-1">NPI must be exactly 10 digits.</p>}
+        </div>
       </div>
 
       {showCptCodes && (

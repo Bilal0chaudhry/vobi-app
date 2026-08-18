@@ -57,7 +57,18 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.memberId || (source === 'call' && formData.cptCodes.length === 0)) return;
+    if (
+      !formData.firstName || 
+      !formData.lastName || 
+      !formData.memberId || 
+      !formData.dob || 
+      !formData.npi || 
+      (source === 'portal' && !formData.providerOrgName) ||
+      (source === 'call' && formData.cptCodes.length === 0)
+    ) {
+      setError("Please fill out all required fields (DOB, NPI, etc).");
+      return;
+    }
 
     const jobData = {
       id: `VOB-${Date.now()}`,
@@ -84,7 +95,15 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile
     onSubmit(jobData);
   };
 
-  const isValid = formData.firstName && formData.lastName && formData.memberId && (source === 'portal' || formData.cptCodes.length > 0);
+  const isValid = Boolean(
+    formData.firstName && 
+    formData.lastName && 
+    formData.memberId && 
+    formData.dob && 
+    formData.npi && 
+    (source === 'call' || formData.providerOrgName) &&
+    (source === 'portal' || formData.cptCodes.length > 0)
+  );
 
   const description =
     source === 'call'

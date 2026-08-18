@@ -10,6 +10,8 @@ function mapJobToFrontend(j) {
     patientLastName: j.patient_last_name,
     insurance: j.insurance,
     memberId: j.member_id,
+    dob: j.dob,
+    providerOrgName: j.provider_org_name,
     npi: j.npi,
     cptCodes: j.cpt_codes,
     status: j.status,
@@ -25,7 +27,7 @@ function mapJobToFrontend(j) {
 export async function fetchJobsList(userId) {
   const query = supabase
     .from('jobs')
-    .select('id, patient_first_name, patient_last_name, insurance, member_id, npi, cpt_codes, status, source, created_at')
+    .select('id, patient_first_name, patient_last_name, insurance, member_id, dob, provider_org_name, npi, cpt_codes, status, source, created_at')
     .order('created_at', { ascending: false });
 
   // Explicit filter lets Postgres use idx_jobs_user_created directly
@@ -60,6 +62,8 @@ export async function createJob(jobData, userId) {
       patient_last_name: jobData.patientLastName,
       insurance: jobData.insurance,
       member_id: jobData.memberId,
+      dob: jobData.dob,
+      provider_org_name: jobData.providerOrgName,
       npi: jobData.npi,
       cpt_codes: jobData.cptCodes,
       status: jobData.status || 'Pending',
