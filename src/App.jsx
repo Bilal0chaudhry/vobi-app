@@ -25,6 +25,7 @@ export default function App() {
   const [showNewVobModal, setShowNewVobModal] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [activeJob, setActiveJob] = useState(null);
+  const [backgroundCallJob, setBackgroundCallJob] = useState(null);
   const [adminProfiles, setAdminProfiles] = useState([]);
   const [backendStatus, setBackendStatus] = useState(null);
   const [jobsLoaded, setJobsLoaded] = useState(false);
@@ -154,6 +155,14 @@ export default function App() {
   }, [profile?.is_admin]);
 
   const handleNavigate = (view) => {
+    // If there's an active call in LiveView, keep it running in background
+    if (currentView === 'liveView' && activeJob) {
+      const currentJobData = jobs.find(j => j.id === activeJob.id) || activeJob;
+      const isCallActive = currentJobData.status === 'Agent on Call' || currentJobData.status === 'On Hold';
+      if (isCallActive) {
+        setBackgroundCallJob(currentJobData);
+      }
+    }
     setCurrentView(view);
     setActiveJob(null);
   };
@@ -181,6 +190,10 @@ export default function App() {
   };
 
   const handleOpenJob = async (job) => {
+    // If this job is already running in background, promote it to foreground
+    if (backgroundCallJob && backgroundCallJob.id === job.id) {
+      setBackgroundCallJob(null);
+    }
     // Fetch full job detail (including call_logs, checklist, availity_result)
     const fullJob = await fetchJobById(job.id);
     const resolved = fullJob || job;
@@ -189,8 +202,20 @@ export default function App() {
   };
 
   const handleBackToDashboard = () => {
+    // If call is still active, keep LiveView running in background
+    if (activeJob) {
+      const currentJobData = jobs.find(j => j.id === activeJob.id) || activeJob;
+      const isCallActive = currentJobData.status === 'Agent on Call' || currentJobData.status === 'On Hold';
+      if (isCallActive && currentJobData.source === 'call') {
+        setBackgroundCallJob(currentJobData);
+      }
+    }
     setActiveJob(null);
     setCurrentView('dashboard');
+  };
+
+  const handleBackgroundCallComplete = (jobId) => {
+    setBackgroundCallJob(null);
   };
 
   const handleJobComplete = async (jobId) => {
@@ -292,6 +317,21 @@ export default function App() {
           <main className="ml-[200px] flex-1 p-6">
             {renderView()}
           </main>
+
+          {/* Keep LiveView alive in background for active calls */}
+          {backgroundCallJob && currentView !== 'liveView' && (
+            <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+              <LiveView
+                job={jobs.find(j => j.id === backgroundCallJob.id) || backgroundCallJob}
+                onBack={() => {}}
+                onJobComplete={(jobId) => {
+                  handleJobComplete(jobId);
+                  handleBackgroundCallComplete(jobId);
+                }}
+                onJobUpdate={handleJobUpdate}
+              />
+            </div>
+          )}
 
           {showNewVobModal && (
             <NewVobModal
