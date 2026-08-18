@@ -28,7 +28,7 @@ export default function SplashScreen({ isReady = true, onFinish }) {
           .anim-heartbeat-line {
             stroke-dasharray: 700;
             stroke-dashoffset: 700;
-            animation: drawHeartbeat 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: drawHeartbeat 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
           }
           
           @keyframes drawHeartbeat {
@@ -36,14 +36,21 @@ export default function SplashScreen({ isReady = true, onFinish }) {
               stroke-dashoffset: 700; 
               opacity: 0;
             }
-            15% { 
+            20% { 
               opacity: 1; 
               filter: drop-shadow(0 0 10px rgba(56,189,248,0.6));
             }
-            100% { 
+            50% { 
               stroke-dashoffset: 0; 
               opacity: 1;
               filter: drop-shadow(0 0 20px rgba(56,189,248,0.9));
+            }
+            80% {
+              opacity: 1;
+            }
+            100% { 
+              stroke-dashoffset: -700; 
+              opacity: 0;
             }
           }
           
