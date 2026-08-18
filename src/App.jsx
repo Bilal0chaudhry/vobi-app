@@ -7,6 +7,7 @@ import LiveView from './components/pages/LiveView';
 import NewVobModal from './components/ui/NewVobModal';
 import SplashScreen from './components/layout/SplashScreen';
 import PortalVobPage from './components/pages/PortalVobPage';
+import PortalResultPage from './components/pages/PortalResultPage';
 import Auth from './components/auth/Auth';
 import AdminDashboard from './components/pages/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
@@ -180,7 +181,9 @@ export default function App() {
 
   const handlePortalSubmit = async (newJobData) => {
     try {
-      const newJob = await createJob({ ...newJobData, status: 'Verified (Portal)' }, session.user.id);
+      // Create with 'Portal Lookup' status — PortalVobPage will update it to
+      // 'Verified (Portal)' or 'Portal Error' once the API responds
+      const newJob = await createJob({ ...newJobData, status: 'Portal Lookup' }, session.user.id);
       setActiveJob(newJob);
       setCurrentView('portalVob');
       setShowNewVobModal(false);
@@ -198,7 +201,25 @@ export default function App() {
     const fullJob = await fetchJobById(job.id);
     const resolved = fullJob || job;
     setActiveJob(resolved);
-    setCurrentView(resolved.source === 'portal' ? 'portalVob' : 'liveView');
+
+    if (resolved.source === 'portal') {
+      // Always show the read-only result page when opening from history/dashboard
+      // Fresh new portal jobs come via handlePortalSubmit → 'portalVob' directly
+      setCurrentView('portalResult');
+    } else {
+      setCurrentView('liveView');
+    }
+  };
+
+  const handleBackToHistory = () => {
+    setActiveJob(null);
+    setCurrentView('callHistory');
+  };
+
+  const handleRetryPortal = () => {
+    // Keep activeJob — PortalVobPage will re-use the same job details
+    // After the retry, go back to the portalResult page (now with updated data)
+    setCurrentView('portalVob');
   };
 
   const handleBackToDashboard = () => {
@@ -268,8 +289,17 @@ export default function App() {
               job={jobs.find(j => j.id === activeJob.id) || activeJob}
               onBack={handleBackToDashboard}
               onJobUpdate={handleJobUpdate}
+              onComplete={() => setCurrentView('portalResult')}
             />
           : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
+      case 'portalResult':
+        return activeJob
+          ? <PortalResultPage
+              job={jobs.find(j => j.id === activeJob.id) || activeJob}
+              onBack={handleBackToHistory}
+              onRetry={handleRetryPortal}
+            />
+          : <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} onDeleteJob={handleDeleteJob} />;
       default:
         return null;
     }

@@ -17,16 +17,22 @@ import {
 } from '../ui/icons';
 
 const STATUS = {
-  IDLE: 'idle',
   LOADING: 'loading',
   SUCCESS: 'success',
   ERROR: 'error',
 };
 
-export default function PortalVobPage({ job, onBack, onJobUpdate }) {
-  const hasExistingResult = !!job.availityResult;
-  const [status, setStatus] = useState(hasExistingResult ? STATUS.SUCCESS : STATUS.IDLE);
-  const [result, setResult] = useState(hasExistingResult ? job.availityResult : null);
+/**
+ * PortalVobPage — active portal lookup page.
+ * Always runs a fresh API call on mount.
+ * Only used for: new portal requests, and retries from PortalResultPage.
+ * onBack: called on back button — caller decides destination.
+ * onJobUpdate: saves result/error to DB and updates job status.
+ * onComplete: called after the lookup finishes (success or error) — caller decides where to go.
+ */
+export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) {
+  const [status, setStatus] = useState(STATUS.LOADING);
+  const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
   const runLookup = async () => {
@@ -36,18 +42,19 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
       const data = await queryAvailityEligibility(job);
       setResult(data);
       setStatus(STATUS.SUCCESS);
-      onJobUpdate?.(job.id, { status: 'Verified (Portal)', availityResult: data });
+      await onJobUpdate?.(job.id, { status: 'Verified (Portal)', availityResult: data });
+      onComplete?.();
     } catch (err) {
       setError(err.message);
       setStatus(STATUS.ERROR);
-      onJobUpdate?.(job.id, { status: 'Portal Error' });
+      await onJobUpdate?.(job.id, { status: 'Portal Error' });
+      onComplete?.();
     }
   };
 
+  // Always fetch on mount — this page is only shown for active lookups / retries
   useEffect(() => {
-    if (!hasExistingResult) {
-      runLookup();
-    }
+    runLookup();
   }, []);
 
   const patient = result?.patient || {};
@@ -61,7 +68,9 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
         <button
           id="btn-portal-back"
           onClick={onBack}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          disabled={status === STATUS.LOADING}
+          title="Back"
         >
           <IconChevronLeft className="w-4 h-4" />
         </button>
@@ -80,7 +89,7 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
           <div className="flex items-center gap-3 mb-5 p-4 bg-brand-50 border border-brand-200 rounded-xl">
             <span className="w-4 h-4 rounded-full border-2 border-brand-600 border-t-transparent animate-spin shrink-0" />
             <p className="text-sm font-medium text-brand-700">
-              Querying eligibility API…
+              Querying eligibility portal…
             </p>
           </div>
           <Skeleton />
@@ -96,15 +105,20 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
               <p className="text-xs text-red-600">{error}</p>
             </div>
           </div>
-          <Button id="btn-portal-retry" onClick={runLookup} variant="secondary" fullWidth>
-            <IconRefresh className="w-4 h-4" />
-            Retry
-          </Button>
+          <div className="flex gap-3">
+            <Button id="btn-portal-retry" onClick={runLookup} variant="secondary" fullWidth>
+              <IconRefresh className="w-4 h-4" />
+              Retry
+            </Button>
+            <Button onClick={onBack} variant="ghost" fullWidth>
+              Back
+            </Button>
+          </div>
         </div>
       )}
 
       {status === STATUS.SUCCESS && result && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-in">
           <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
             <IconCheckCircleSolid className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
@@ -115,16 +129,6 @@ export default function PortalVobPage({ job, onBack, onJobUpdate }) {
                 <p className="text-xs text-emerald-600">Plan: {result.planName}</p>
               )}
             </div>
-            <Button
-              id="btn-portal-refresh"
-              onClick={runLookup}
-              variant="ghost"
-              size="sm"
-              className="ml-auto shrink-0"
-            >
-              <IconRefresh className="w-3.5 h-3.5" />
-              Refresh
-            </Button>
           </div>
 
           <PatientDetails 

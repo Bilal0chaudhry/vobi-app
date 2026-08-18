@@ -1,13 +1,15 @@
 import React from 'react';
 
 const jobConfig = {
-  'Agent on Call': { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500', animate: true },
-  'On Hold': { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', animate: true },
-  'API Fast-Path': { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500', animate: false },
-  'Completed': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', animate: false },
+  'Pending':         { bg: 'bg-gray-50',    text: 'text-gray-600',    dot: 'bg-gray-400',    animate: false },
+  'Agent on Call':   { bg: 'bg-violet-50',  text: 'text-violet-700',  dot: 'bg-violet-500',  animate: true  },
+  'On Hold':         { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-500',   animate: true  },
+  'Portal Lookup':   { bg: 'bg-sky-50',     text: 'text-sky-700',     dot: 'bg-sky-500',     animate: true  },
+  'API Fast-Path':   { bg: 'bg-blue-50',    text: 'text-blue-700',    dot: 'bg-blue-500',    animate: false },
+  'Completed':       { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', animate: false },
   'Verified (Portal)': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', animate: false },
-  'Portal Error': { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500', animate: false },
-  'Call Error': { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500', animate: false },
+  'Portal Error':    { bg: 'bg-red-50',     text: 'text-red-700',     dot: 'bg-red-500',     animate: false },
+  'Call Error':      { bg: 'bg-red-50',     text: 'text-red-700',     dot: 'bg-red-500',     animate: false },
 };
 
 export function JobBadge({ status }) {
