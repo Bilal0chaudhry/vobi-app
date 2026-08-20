@@ -171,7 +171,7 @@ export default function App() {
   const handleSubmitNewVob = async (newJobData) => {
     try {
       const newJob = await createJob(newJobData, session.user.id);
-      setActiveJob(newJob);
+      setActiveJob({ ...newJob, isNewCall: newJobData.isNewCall });
       setCurrentView('liveView');
       setShowNewVobModal(false);
     } catch (err) {
