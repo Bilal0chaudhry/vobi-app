@@ -292,9 +292,7 @@ export default function App() {
               onComplete={(resultData) => {
                 // Merge the Stedi result into activeJob so PortalResultPage has it immediately
                 // without waiting for a DB round-trip through the lightweight jobs list
-                if (resultData) {
-                  setActiveJob(prev => ({ ...prev, stediResult: resultData, status: 'Verified (Portal)' }));
-                }
+                setActiveJob(prev => ({ ...prev, stediResult: resultData, status: 'Verified (Portal)' }));
                 setCurrentView('portalResult');
               }}
             />
