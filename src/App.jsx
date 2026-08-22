@@ -8,6 +8,7 @@ import NewVobModal from './components/ui/NewVobModal';
 import SplashScreen from './components/layout/SplashScreen';
 import PortalVobPage from './components/pages/PortalVobPage';
 import PortalResultPage from './components/pages/PortalResultPage';
+import CallResultPage from './components/pages/CallResultPage';
 import Auth from './components/auth/Auth';
 import AdminDashboard from './components/pages/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
@@ -204,9 +205,12 @@ export default function App() {
 
     if (resolved.source === 'portal') {
       // Always show the read-only result page when opening from history/dashboard
-      // Fresh new portal jobs come via handlePortalSubmit → 'portalVob' directly
       setCurrentView('portalResult');
+    } else if (['Completed', 'Call Error'].includes(resolved.status)) {
+      // Completed/errored calls → read-only transcript page
+      setCurrentView('callResult');
     } else {
+      // Active calls → live view with polling
       setCurrentView('liveView');
     }
   };
@@ -303,6 +307,13 @@ export default function App() {
               job={{ ...activeJob, ...(jobs.find(j => j.id === activeJob.id) || {}), stediResult: activeJob.stediResult }}
               onBack={handleBackToHistory}
               onRetry={handleRetryPortal}
+            />
+          : <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} onDeleteJob={handleDeleteJob} />;
+      case 'callResult':
+        return activeJob
+          ? <CallResultPage
+              job={activeJob}
+              onBack={handleBackToHistory}
             />
           : <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} onDeleteJob={handleDeleteJob} />;
       default:

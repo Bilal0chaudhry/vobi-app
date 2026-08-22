@@ -1,7 +1,7 @@
 import React from 'react';
-import { IconCheck } from './icons';
+import { IconCheck, IconX } from './icons';
 
-export default function VerificationChecklist({ checklist, items }) {
+export default function VerificationChecklist({ checklist, items, readOnly = false }) {
   const completedCount = Object.values(checklist).filter((v) => v === 'complete').length;
   const totalCount = items.length;
 
@@ -23,17 +23,26 @@ export default function VerificationChecklist({ checklist, items }) {
 
       <div className="space-y-3 flex-1">
         {items.map(({ key, label }) => {
-          const isComplete = checklist[key] === 'complete';
+          const status = checklist[key];
+          const isComplete = status === 'complete';
+          const isNA = status === 'n/a';
+          // In read-only mode (history), pending items are "not verified"
+          const isNotVerified = readOnly && !isComplete && !isNA;
+
           return (
             <div
               key={key}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 ${
-                isComplete ? 'bg-emerald-50' : 'bg-gray-50'
+                isComplete ? 'bg-emerald-50' : isNotVerified ? 'bg-red-50/60' : 'bg-gray-50'
               }`}
             >
               {isComplete ? (
                 <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center check-complete">
                   <IconCheck className="w-3 h-3 text-white" />
+                </div>
+              ) : isNotVerified ? (
+                <div className="w-5 h-5 rounded-full bg-red-400 flex items-center justify-center">
+                  <IconX className="w-3 h-3 text-white" />
                 </div>
               ) : (
                 <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
@@ -43,7 +52,7 @@ export default function VerificationChecklist({ checklist, items }) {
 
               <span
                 className={`text-sm font-medium transition-colors duration-300 ${
-                  isComplete ? 'text-emerald-700' : 'text-gray-600'
+                  isComplete ? 'text-emerald-700' : isNotVerified ? 'text-red-600' : 'text-gray-600'
                 }`}
               >
                 {label}
@@ -51,10 +60,10 @@ export default function VerificationChecklist({ checklist, items }) {
 
               <span
                 className={`ml-auto text-[10px] font-semibold uppercase tracking-wide ${
-                  isComplete ? 'text-emerald-500' : 'text-amber-500'
+                  isComplete ? 'text-emerald-500' : isNotVerified ? 'text-red-400' : 'text-amber-500'
                 }`}
               >
-                {isComplete ? 'Complete' : 'Pending'}
+                {isComplete ? 'Complete' : isNotVerified ? 'Not Verified' : 'Pending'}
               </span>
             </div>
           );

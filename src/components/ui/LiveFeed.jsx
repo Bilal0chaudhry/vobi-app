@@ -17,13 +17,17 @@ const BUBBLE_STYLE = {
   rep:    'bg-gray-50 border-gray-200 text-gray-800',
 };
 
-export default function LiveFeed({ logs, feedRef }) {
+export default function LiveFeed({ logs, feedRef, title = 'Live call feed', showLiveIndicator = true }) {
   return (
     <div className="flex-1 bg-white rounded-xl border border-gray-200 flex flex-col min-h-0">
       <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse-dot" />
-          <h2 className="text-sm font-bold text-gray-900">Live call feed</h2>
+          {showLiveIndicator ? (
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse-dot" />
+          ) : (
+            <div className="w-2 h-2 rounded-full bg-gray-400" />
+          )}
+          <h2 className="text-sm font-bold text-gray-900">{title}</h2>
         </div>
         <span className="text-xs text-gray-400">{logs.length} events</span>
       </div>
