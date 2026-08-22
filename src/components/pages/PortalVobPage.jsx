@@ -35,12 +35,12 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
       setResult(data);
       setStatus(STATUS.SUCCESS);
       await onJobUpdate?.(job.id, { status: 'Verified (Portal)', stediResult: data });
-      onComplete?.();
+      onComplete?.(data);
     } catch (err) {
       setError(err.message);
       setStatus(STATUS.ERROR);
       await onJobUpdate?.(job.id, { status: 'Portal Error' });
-      onComplete?.();
+      onComplete?.(null);
     }
   };
 

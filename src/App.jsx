@@ -289,13 +289,20 @@ export default function App() {
               job={jobs.find(j => j.id === activeJob.id) || activeJob}
               onBack={handleBackToDashboard}
               onJobUpdate={handleJobUpdate}
-              onComplete={() => setCurrentView('portalResult')}
+              onComplete={(resultData) => {
+                // Merge the Stedi result into activeJob so PortalResultPage has it immediately
+                // without waiting for a DB round-trip through the lightweight jobs list
+                if (resultData) {
+                  setActiveJob(prev => ({ ...prev, stediResult: resultData, status: 'Verified (Portal)' }));
+                }
+                setCurrentView('portalResult');
+              }}
             />
           : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
       case 'portalResult':
         return activeJob
           ? <PortalResultPage
-              job={jobs.find(j => j.id === activeJob.id) || activeJob}
+              job={{ ...activeJob, ...(jobs.find(j => j.id === activeJob.id) || {}), stediResult: activeJob.stediResult }}
               onBack={handleBackToHistory}
               onRetry={handleRetryPortal}
             />
