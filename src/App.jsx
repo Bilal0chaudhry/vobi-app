@@ -285,11 +285,12 @@ export default function App() {
         />;
       case 'liveView':
         return activeJob
-          ? <LiveView job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
+          ? <LiveView key={activeJob.id} job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
           : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
       case 'portalVob':
         return activeJob
           ? <PortalVobPage
+              key={activeJob.id}
               job={jobs.find(j => j.id === activeJob.id) || activeJob}
               onBack={handleBackToDashboard}
               onJobUpdate={handleJobUpdate}
@@ -304,6 +305,7 @@ export default function App() {
       case 'portalResult':
         return activeJob
           ? <PortalResultPage
+              key={activeJob.id}
               job={{ ...activeJob, ...(jobs.find(j => j.id === activeJob.id) || {}), stediResult: activeJob.stediResult }}
               onBack={handleBackToHistory}
               onRetry={handleRetryPortal}
@@ -312,6 +314,7 @@ export default function App() {
       case 'callResult':
         return activeJob
           ? <CallResultPage
+              key={activeJob.id}
               job={activeJob}
               onBack={handleBackToHistory}
             />
