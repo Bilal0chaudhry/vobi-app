@@ -63,7 +63,9 @@ def fetch_eligibility(data: PortalRequest):
                 raise HTTPException(status_code=400, detail=err_json["errors"][0].get("description", "Stedi API Error"))
             else:
                 raise HTTPException(status_code=400, detail="Failed to communicate with Payer")
-        except:
+        except HTTPException:
+            raise
+        except Exception:
             raise HTTPException(status_code=500, detail="Stedi API returned an error")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to communicate with Stedi: {str(e)}")
