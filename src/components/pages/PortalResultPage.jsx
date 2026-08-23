@@ -15,18 +15,7 @@ import {
   IconAlertCircle,
   IconRefresh
 } from '../ui/icons';
-
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diff = Math.floor((now - date) / 1000);
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
+import { timeAgo } from '../../utils/formatters';
 
 export default function PortalResultPage({ job, onBack, onRetry }) {
   const hasResult = !!job.stediResult && typeof job.stediResult === 'object' && Object.keys(job.stediResult).length > 0;

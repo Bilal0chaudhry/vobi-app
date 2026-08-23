@@ -3,40 +3,20 @@ import { JobBadge, SourceBadge } from './Badge';
 import CptBadge from './CptBadge';
 import { IconTrash, IconCheck, IconX } from './icons';
 
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diff = Math.floor((now - date) / 1000);
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
+import useClickOutside from '../hooks/useClickOutside';
+import useGlobalTimer from '../hooks/useGlobalTimer';
+import { timeAgo } from '../utils/formatters';
+import { isJobActive } from '../utils/constants';
 
 export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
-  const [, setTick] = useState(0);
+  useGlobalTimer();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const cardRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isConfirmingDelete && cardRef.current && !cardRef.current.contains(event.target)) {
-        setIsConfirmingDelete(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isConfirmingDelete]);
+  useClickOutside(cardRef, () => setIsConfirmingDelete(false), isConfirmingDelete);
 
-  useEffect(() => {
-    const timer = setInterval(() => setTick((t) => t + 1), 30000); // Update every 30 seconds
-    return () => clearInterval(timer);
-  }, []);
-
-  const isActive = job.status !== 'Completed' && job.status !== 'Verified (Portal)' && job.status !== 'Portal Error';
+  const isActive = isJobActive(job);
 
   return (
     <div

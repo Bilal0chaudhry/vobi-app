@@ -1,9 +1,12 @@
 import os
 import json
+import logging
 import urllib.request
 import urllib.parse
 from fastapi import HTTPException
 from models import PortalRequest
+
+logger = logging.getLogger("vobi")
 
 def fetch_eligibility(data: PortalRequest):
     api_key = os.getenv("STEDI_API_KEY")
@@ -68,7 +71,9 @@ def fetch_eligibility(data: PortalRequest):
         except Exception:
             raise HTTPException(status_code=500, detail="Stedi API returned an error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to communicate with Stedi: {str(e)}")
+        # Log the real cause server-side only — don't forward internal details to the client
+        logger.error("Stedi network error: %s", e)
+        raise HTTPException(status_code=500, detail="Unable to reach eligibility service. Please try again.")
 
     if "errors" in res_data and len(res_data["errors"]) > 0:
         err = res_data["errors"][0]

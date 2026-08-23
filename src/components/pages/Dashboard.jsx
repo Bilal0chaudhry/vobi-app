@@ -2,9 +2,10 @@ import React from 'react';
 import PageHeader from '../ui/PageHeader';
 import JobCard from '../ui/JobCard';
 import { IconSignal, IconCheckCircle, IconZap, IconClock } from '../ui/icons';
+import { COMPLETED_STATUSES } from '../../utils/constants';
 
-export default function Dashboard({ jobs, onOpenJob, onNewVerification }) {
-  const activeJobsList = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status));
+export default function Dashboard({ jobs = [], onOpenJob, onNewVerification }) {
+  const activeJobsList = jobs.filter(j => !COMPLETED_STATUSES.includes(j.status));
   const activeJobs = activeJobsList.length;
   const verifiedJobs = jobs.filter(j => j.status === 'Completed' || j.status === 'Verified (Portal)').length;
   

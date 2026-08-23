@@ -1,11 +1,10 @@
 import os
 import sys
-import time
 import signal
+import logging
 import warnings
 from contextlib import asynccontextmanager
-from collections import defaultdict
-import requests
+import httpx
 
 os.environ["NLTK_DISABLE_IMPORT_SECURITY"] = "1"
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -36,19 +35,32 @@ SUPABASE_URL = os.getenv("VITE_SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("VITE_SUPABASE_ANON_KEY", "")
 
 if not SUPABASE_URL or not SUPABASE_ANON_KEY:
-    print("❌ FATAL: Supabase environment variables missing. Refusing to start without security.")
-    sys.exit(1)
+    sys.exit("FATAL: Supabase environment variables missing. Refusing to start without security.")
+
+logging.basicConfig(
+    level=logging.WARNING,  # suppress third-party library noise
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger("vobi")
+logger.setLevel(logging.INFO)  # our own logger emits at INFO and above
 
 limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Single shared client — one connection pool for the lifetime of the server
+    app.state.http_client = httpx.AsyncClient(timeout=5)
+
     def force_exit(*args):
-        print("\n✋ Server stopped.")
+        logger.warning("Server stopped by signal.")
         os._exit(0)
     signal.signal(signal.SIGINT, force_exit)
+
     yield
+
+    await app.state.http_client.aclose()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -79,17 +91,18 @@ async def security_middleware(request: Request, call_next):
 
         token = auth_header.split(" ")[1]
         
-        # Verify JWT against Supabase
+        # Verify JWT against Supabase and extract the authenticated user's ID
         try:
-            res = await asyncio.to_thread(
-                requests.get,
+            res = await request.app.state.http_client.get(
                 f"{SUPABASE_URL}/auth/v1/user",
                 headers={"Authorization": f"Bearer {token}", "apikey": SUPABASE_ANON_KEY},
-                timeout=5
             )
             if res.status_code != 200:
                 return JSONResponse(status_code=401, content={"detail": "Invalid or expired session"})
-        except Exception:
+            # Store authenticated user ID so route handlers can use it without a second call
+            request.state.user_id = res.json().get("id")
+        except Exception as exc:
+            logger.error("JWT auth verification failed: %s", exc)
             return JSONResponse(status_code=500, content={"detail": "Auth verification failed"})
 
         response = await call_next(request)
@@ -98,7 +111,6 @@ async def security_middleware(request: Request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none';"
     
     return response
@@ -113,7 +125,7 @@ def cleanup_call():
     global active_call, stop_event
     active_call = None
     stop_event = None
-    print("\n📞 Call ended. Ready for next call.\n")
+    logger.info("Call ended. Ready for next call.")
 
 
 @app.post("/start-call")
@@ -124,22 +136,41 @@ async def start_call(data: PatientData, request: Request):
     if active_call is not None and not active_call.done():
         raise HTTPException(status_code=400, detail="A call is already active")
 
+    # Verify the job belongs to the authenticated user (prevents IDOR)
+    authenticated_user_id = getattr(request.state, "user_id", None)
+    if not authenticated_user_id:
+        raise HTTPException(status_code=401, detail="Could not resolve authenticated user")
+
+    try:
+        bearer = request.headers.get("Authorization", "").split(" ")[-1]
+        ownership_res = await request.app.state.http_client.get(
+            f"{SUPABASE_URL}/rest/v1/jobs",
+            params={"id": f"eq.{data.id}", "user_id": f"eq.{authenticated_user_id}", "select": "id"},
+            headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {bearer}"},
+        )
+        if ownership_res.status_code != 200 or not ownership_res.json():
+            raise HTTPException(status_code=403, detail="Job not found or access denied")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("Job ownership check failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Could not verify job ownership")
+
     broadcaster.reset()
 
-    print("\n" + "=" * 50)
-    print(f"📞 INCOMING: {data.patientFirstName} {data.patientLastName} ({data.insurance})")
-    print("=" * 50)
-    print("\a", end="", flush=True)
+    # Log call arrival without PII — job ID is sufficient for correlation
+    logger.info("Incoming call request for job %s", data.id)
+    print("\a", end="", flush=True)  # audible alert to operator terminal only
 
     try:
         answer = await asyncio.to_thread(input, "Accept? (y/n): ")
         if answer.strip().lower() != "y":
-            print("❌ Rejected.\n")
+            logger.info("Call rejected by operator for job %s", data.id)
             raise HTTPException(status_code=403, detail="All representatives are busy")
     except EOFError:
         raise HTTPException(status_code=403, detail="All representatives are busy")
 
-    print("✅ Connected — speaking to VOBI.\n")
+    logger.info("Call accepted for job %s", data.id)
 
     stop_event = asyncio.Event()
 

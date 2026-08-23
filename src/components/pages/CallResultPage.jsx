@@ -4,18 +4,8 @@ import VerificationChecklist from '../ui/VerificationChecklist';
 import { JobBadge, SourceBadge } from '../ui/Badge';
 import Button from '../ui/Button';
 import { IconArrowLeft, IconCheckCircle, IconAlertCircle } from '../ui/icons';
-
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diff = Math.floor((now - date) / 1000);
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
+import { timeAgo } from '../../utils/formatters';
+import { buildChecklistItems } from '../../utils/constants';
 
 export default function CallResultPage({ job, onBack }) {
   const feedRef = useRef(null);
@@ -24,19 +14,7 @@ export default function CallResultPage({ job, onBack }) {
   const isError = job.status === 'Call Error';
   const isCompleted = job.status === 'Completed';
 
-  const checklistItems = [
-    { key: 'eligibility', label: 'Eligibility Status' },
-    { key: 'networkStatus', label: 'Network Status' },
-    { key: 'deductible', label: 'Deductible' },
-    { key: 'oopMax', label: 'Out-of-Pocket Max' },
-    { key: 'cpt1', label: `CPT ${job.cptCodes?.[0] || '—'}` },
-    ...(job.cptCodes?.length > 1 ? [{ key: 'cpt2', label: `CPT ${job.cptCodes[1]}` }] : []),
-    { key: 'copay', label: 'Copay / Coinsurance' },
-    { key: 'buyAndBill', label: 'Buy & Bill' },
-    { key: 'priorAuth', label: 'Prior Authorization' },
-    { key: 'referral', label: 'PCP Referral' },
-    { key: 'formulary', label: 'Formulary / Preferred Drug' },
-  ];
+  const checklistItems = buildChecklistItems(job);
 
   const completedCount = Object.values(checklist).filter(v => v === 'complete').length;
   const totalCount = checklistItems.length;

@@ -7,6 +7,7 @@ import { formatTime } from "../../utils/formatters";
 import { endCall, pollMessages, startCall } from "../../utils/api";
 import { detectTopics, isDispute, updateChecklistFromRep } from "../../utils/checklistDetector";
 import { IconArrowLeft, IconClock, IconCheckCircle } from "../ui/icons";
+import { buildChecklistItems } from "../../utils/constants";
 
 const timestamp = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -222,19 +223,7 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
     }
   }, [logs]);
 
-  const checklistItems = [
-    { key: "eligibility", label: "Eligibility Status" },
-    { key: "networkStatus", label: "Network Status" },
-    { key: "deductible", label: "Deductible" },
-    { key: "oopMax", label: "Out-of-Pocket Max" },
-    { key: "cpt1", label: `CPT ${job.cptCodes[0] || "—"}` },
-    ...(job.cptCodes.length > 1 ? [{ key: "cpt2", label: `CPT ${job.cptCodes[1]}` }] : []),
-    { key: "copay", label: "Copay / Coinsurance" },
-    { key: "buyAndBill", label: "Buy & Bill" },
-    { key: "priorAuth", label: "Prior Authorization" },
-    { key: "referral", label: "PCP Referral" },
-    { key: "formulary", label: "Formulary / Preferred Drug" },
-  ];
+  const checklistItems = buildChecklistItems(job);
 
   return (
     <div className="animate-fade-in h-[calc(100vh-32px)] flex flex-col">

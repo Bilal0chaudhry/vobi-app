@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import useClickOutside from '../../hooks/useClickOutside';
 import { IconDashboard, IconCallHistory, IconSettings, IconShield } from '../ui/icons';
 import VobiLogo from '../ui/VobiLogo';
 
@@ -12,15 +13,7 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
   const [showSignOut, setShowSignOut] = useState(false);
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowSignOut(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(menuRef, () => setShowSignOut(false), showSignOut);
 
   const items = [...NAV_ITEMS];
   if (isAdmin) {

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { COMPLETED_STATUSES } from '../../utils/constants';
 import PageHeader from '../ui/PageHeader';
 import JobCard from '../ui/JobCard';
 
@@ -27,7 +28,7 @@ export default function History({ jobs, onOpenJob, onNewVerification, onDeleteJo
     ? jobs
     : jobs.filter(j => j.source === activeTab);
 
-  const activeJobs = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status)).length;
+  const activeJobs = jobs.filter(j => !COMPLETED_STATUSES.includes(j.status)).length;
 
   return (
     <div className="animate-fade-in">

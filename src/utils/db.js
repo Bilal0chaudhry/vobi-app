@@ -170,12 +170,12 @@ export async function fetchProfiles() {
 }
 
 export async function approveProfile(userId) {
-  const { error } = await supabase.from('profiles').update({ status: 'approved' }).eq('id', userId);
+  const { error } = await supabase.rpc('admin_approve_user', { target_user_id: userId });
   if (error) throw error;
 }
 
 export async function rejectProfile(userId) {
-  const { error } = await supabase.from('profiles').update({ status: 'rejected' }).eq('id', userId);
+  const { error } = await supabase.rpc('admin_reject_user', { target_user_id: userId });
   if (error) throw error;
 }
 

@@ -176,7 +176,7 @@ export default function App() {
       setCurrentView('liveView');
       setShowNewVobModal(false);
     } catch (err) {
-      alert("Failed to create verification request.");
+      setToast({ show: true, type: 'error', message: 'Failed to create verification request: ' + err.message });
     }
   };
 
@@ -189,7 +189,7 @@ export default function App() {
       setCurrentView('portalVob');
       setShowNewVobModal(false);
     } catch (err) {
-      alert("Failed to create verification request.");
+      setToast({ show: true, type: 'error', message: 'Failed to create verification request: ' + err.message });
     }
   };
 

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+import useClickOutside from '../../hooks/useClickOutside';
 import { approveProfile, rejectProfile, deleteAccount } from '../../utils/db';
 import { ProfileBadge } from '../ui/Badge';
 import { IconCheck, IconX, IconTrash } from '../ui/icons';
@@ -17,15 +18,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
 
   const tableRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (deletingId && tableRef.current && !tableRef.current.contains(event.target)) {
-        setDeletingId(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [deletingId]);
+  useClickOutside(tableRef, () => setDeletingId(null), !!deletingId);
 
   const handleApprove = async (id) => {
     try {
