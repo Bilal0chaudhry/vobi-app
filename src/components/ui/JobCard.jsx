@@ -3,10 +3,10 @@ import { JobBadge, SourceBadge } from './Badge';
 import CptBadge from './CptBadge';
 import { IconTrash, IconCheck, IconX } from './icons';
 
-import useClickOutside from '../hooks/useClickOutside';
-import useGlobalTimer from '../hooks/useGlobalTimer';
-import { timeAgo } from '../utils/formatters';
-import { isJobActive } from '../utils/constants';
+import useClickOutside from '../../hooks/useClickOutside';
+import useGlobalTimer from '../../hooks/useGlobalTimer';
+import { timeAgo } from '../../utils/formatters';
+import { isJobActive } from '../../utils/constants';
 
 export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
   useGlobalTimer();
