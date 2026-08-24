@@ -362,7 +362,7 @@ export default function App() {
       )}
 
       {(isAuthenticated && isFullyLoaded && profile?.status === 'approved') && (
-        <div className="flex min-h-screen bg-page flex-col md:flex-row">
+        <div className="flex h-screen overflow-hidden bg-page flex-col md:flex-row">
           <Sidebar 
             currentView={currentView} 
             onNavigate={handleNavigate} 
@@ -375,7 +375,7 @@ export default function App() {
             onThemeChange={updateTheme}
           />
 
-          <main className="flex-1 flex flex-col min-w-0">
+          <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
             {/* Mobile Header (Hidden on md+) */}
             <div className="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border shrink-0">
               <div className="flex items-center gap-1.5">
