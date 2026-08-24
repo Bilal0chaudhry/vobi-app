@@ -212,7 +212,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
               />
               <div className="px-4 py-3">
                 {/* Benefits render as a responsive grid — 1 col mobile, 2 col sm+, 3 col lg+ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-start">
+                <div className="columns-1 sm:columns-2 lg:columns-3 gap-2">
                   {(inNetworkBenefits.length > 0 ? inNetworkBenefits : benefits).map((b, i) => (
                     <BenefitCell key={i} benefit={b} />
                   ))}
@@ -222,7 +222,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
                     <p className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wide mt-4 mb-2">
                       Out-of-Network
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-start">
+                    <div className="columns-1 sm:columns-2 lg:columns-3 gap-2">
                       {outNetworkBenefits.map((b, i) => (
                         <BenefitCell key={i} benefit={b} outOfNetwork />
                       ))}
@@ -243,7 +243,7 @@ function BenefitCell({ benefit, outOfNetwork }) {
   const hasValue = benefit.amount != null || benefit.percent != null;
   return (
     <div
-      className={`rounded-lg border px-3 py-2.5 ${
+      className={`break-inside-avoid mb-2 rounded-lg border px-3 py-2.5 ${
         outOfNetwork
           ? 'border-border bg-surface-inset'
           : 'border-border-subtle bg-surface'
