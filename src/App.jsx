@@ -13,6 +13,8 @@ import Auth from './components/auth/Auth';
 import AdminDashboard from './components/pages/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
 import Toast from './components/ui/Toast';
+import VobiLogo from './components/ui/VobiLogo';
+import { IconMenu } from './components/ui/icons';
 import { supabase } from './utils/supabase';
 import { fetchJobsList, fetchJobById, createJob, updateJob, deleteJob, fetchSettings, fetchProfiles } from './utils/db';
 import { checkHealth } from './utils/api';
@@ -35,6 +37,7 @@ export default function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [showCapacityToast, setShowCapacityToast] = useState(false);
   const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const activeJobsCount = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status)).length;
 
@@ -167,6 +170,7 @@ export default function App() {
     }
     setCurrentView(view);
     setActiveJob(null);
+    setIsSidebarOpen(false); // Close sidebar on mobile navigation
   };
 
   const handleSubmitNewVob = async (newJobData) => {
@@ -356,17 +360,35 @@ export default function App() {
       )}
 
       {(isAuthenticated && isFullyLoaded && profile?.status === 'approved') && (
-        <div className="flex min-h-screen bg-slate-50">
+        <div className="flex min-h-screen bg-slate-50 flex-col md:flex-row">
           <Sidebar 
             currentView={currentView} 
             onNavigate={handleNavigate} 
             isAdmin={profile.is_admin} 
             onLogout={handleLogout} 
             profile={profile}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
           />
 
-          <main className="ml-[200px] flex-1 p-6">
-            {renderView()}
+          <main className="flex-1 flex flex-col min-w-0">
+            {/* Mobile Header (Hidden on md+) */}
+            <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 shrink-0">
+              <div className="flex items-center gap-1.5">
+                <VobiLogo size="sm" />
+                <span className="text-sm font-bold text-gray-900 tracking-tight">Vobi</span>
+              </div>
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors -mr-2"
+              >
+                <IconMenu />
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6 flex-1">
+              {renderView()}
+            </div>
           </main>
 
           {/* Keep LiveView alive in background for active calls */}

@@ -6,7 +6,7 @@ export default function VerificationChecklist({ checklist, items, readOnly = fal
   const totalCount = items.length;
 
   return (
-    <div className="w-72 flex-shrink-0 bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
+    <div className="w-full md:w-72 flex-shrink-0 bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-bold text-gray-900">Verification checklist</h2>
         <span className="text-xs font-semibold text-brand-600">

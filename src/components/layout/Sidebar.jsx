@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import useClickOutside from '../../hooks/useClickOutside';
-import { IconDashboard, IconCallHistory, IconSettings, IconShield } from '../ui/icons';
+import { IconDashboard, IconCallHistory, IconSettings, IconShield, IconX } from '../ui/icons';
 import VobiLogo from '../ui/VobiLogo';
 
 const NAV_ITEMS = [
@@ -9,11 +9,24 @@ const NAV_ITEMS = [
   { key: 'settings', label: 'Settings', Icon: IconSettings },
 ];
 
-export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, profile }) {
+export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, profile, isOpen, onClose }) {
   const [showSignOut, setShowSignOut] = useState(false);
   const menuRef = useRef(null);
+  const sidebarRef = useRef(null);
 
   useClickOutside(menuRef, () => setShowSignOut(false), showSignOut);
+
+  // Body scroll lock on mobile when drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const items = [...NAV_ITEMS];
   if (isAdmin) {
@@ -27,12 +40,35 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
     : '??';
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-[200px] bg-white border-r border-gray-200 flex flex-col z-30">
-      <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex flex-col items-start gap-0.5">
-        <VobiLogo size="md" />
-        <p className="text-[10px] font-semibold text-brand-600 tracking-wider uppercase pl-0.5">
-          Autonomous VOB Agent
-        </p>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] md:hidden" 
+          onClick={onClose} 
+        />
+      )}
+      
+      {/* Sidebar Panel */}
+      <aside 
+        ref={sidebarRef}
+        className={`fixed top-0 left-0 h-screen w-[240px] md:w-[200px] bg-white border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${
+          isOpen ? 'translate-x-0 shadow-2xl md:shadow-none' : '-translate-x-full'
+        }`}
+      >
+      <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-0.5">
+        <div className="flex flex-col items-start gap-0.5">
+          <VobiLogo size="md" />
+          <p className="text-[10px] font-semibold text-brand-600 tracking-wider uppercase pl-0.5">
+            Autonomous VOB Agent
+          </p>
+        </div>
+        <button 
+          onClick={onClose} 
+          className="md:hidden w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+        >
+          <IconX className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="px-5 pt-4 pb-2">
@@ -137,5 +173,6 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
         </button>
       </div>
     </aside>
+    </>
   );
 }

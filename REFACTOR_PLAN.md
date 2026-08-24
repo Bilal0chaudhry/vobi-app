@@ -170,3 +170,46 @@ ALTER POLICY "Admins can update all profiles" ON profiles
 | S5 | `pipeline/server.py:L84` | Blocking requests for JWT auth exhausts thread pool | ✅ Fixed Phase 3 |
 | S6 | `src/utils/db.js` approveProfile/rejectProfile | Bare RLS only, no WITH CHECK, no SECURITY DEFINER | ✅ Fixed Phase 4 |
 | S7 | `src/App.jsx:L179,192` | alert() exposes error strings | ✅ Fixed Phase 9 |
+
+---
+
+## Responsive Audit (Frontend)
+
+**Established Breakpoint Convention:** The recent `PortalResultPage.jsx` refactor established the standard Tailwind mobile-first responsive approach (`sm:`, `md:`, `lg:` prefixes on fluid layout utilities like `grid-cols-X` instead of fixed pixel containers). We will adopt this globally.
+
+### Proposed Phase Order
+
+#### Phase 10 — Foundational Shell (High Impact, High Risk)
+- **Status:** ✅ Executed. Converted the layout to a mobile-friendly drawer (`isOpen` state) and removed the hardcoded `ml-[200px]` margin. Added a mobile top-header with a hamburger menu.
+- **Note:** `Modal.jsx` is missing a body scroll lock (pre-existing gap) — flagged but out of scope for this layout pass.
+- **`src/App.jsx`**: Hardcoded `ml-[200px]` margin on the main container assumes a static, non-collapsing sidebar. This will squish or overlap content on narrow screens. Fix: Convert to a responsive layout (e.g., flex-col on mobile, flex-row on md+).
+- **`src/components/layout/Sidebar.jsx`**: Hardcoded `w-[200px]` fixed width and `absolute/fixed` positioning assumes a desktop viewport. Fix: Make it a collapsible drawer or bottom-nav on small screens.
+
+#### Phase 11 — Shared UI Components (High Impact, Medium Risk)
+- **Status:** ✅ Executed.
+- **`src/components/ui/VerificationChecklist.jsx`**: Hardcoded `w-72 flex-shrink-0`. This forces horizontal overflow on viewports < ~320px. Fix: Use fluid width (`w-full sm:w-72`) or `flex-1`.
+- **`src/components/ui/JobCard.jsx`**: `w-24`, `w-16`, `w-10` fixed widths used heavily for layout columns instead of flex proportions. This risks text overlap or breaking the flex layout on narrow mobile screens.
+- **`src/components/ui/Modal.jsx`**: Uses `max-w-md` without mobile padding checks, and `overflow-y-auto` masks issues instead of preventing them.
+- **`src/components/ui/Toast.jsx`**: Fixed positioning/layout needs validation on small screens.
+- **`src/components/ui/NewVobModal.jsx`**: Layout grid inside modal might break horizontally on very small screens.
+
+#### Phase 12 — AdminDashboard.jsx
+- **Problem**: Table layout uses fixed percentage widths (`w-2/5`, `w-1/4`, `w-1/6`) and relies on `overflow-x-auto` to allow horizontal scrolling on overflow.
+- **Fix**: Convert the table to a responsive stacked card layout for mobile, or ensure the scroll UX is intentional, preserving table headers properly.
+
+#### Phase 13 — Dashboard.jsx
+- **Problem**: The stat cards use a hardcoded `grid-cols-4` which crushes text horizontally on mobile.
+- **Fix**: Convert to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`.
+
+#### Phase 14 — History.jsx
+- **Problem**: The tab bar relies on horizontal space, and the empty state uses fixed margins.
+- **Fix**: Check `overflow-x-auto` on the tab bar for mobile, ensuring it doesn't break layout width.
+
+#### Phase 15 — LiveView.jsx
+- **Problem**: Split screen (`flex gap-4 flex-1`) assumes wide viewport. `VerificationChecklist` and `LiveFeed` side-by-side will break on mobile. The header layout (`justify-between` with multiple flex items) will wrap messily.
+- **Fix**: Stack checklist and live feed vertically on mobile (`flex-col md:flex-row`). Adjust header to wrap cleanly.
+
+#### Phase 16 — Auth & Splash Screens
+- **`src/components/auth/Auth.jsx`**: Uses `max-w-[520px]`, `w-1/2`, and absolute positioning which hides the left pane on mobile.
+- **`src/components/layout/SplashScreen.jsx`**: Uses `max-w-lg`. Needs validation that SVGs scale correctly without clipping.
+- **`src/components/layout/StatusScreens.jsx`**: Hardcoded `max-w-md`.

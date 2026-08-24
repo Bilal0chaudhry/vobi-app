@@ -39,8 +39,9 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
         <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-brand-500 to-violet-500 rounded-l-xl" />
       )}
 
-      <div className="px-5 py-4 flex items-center gap-4">
-        {/* Source Icon */}
+      <div className="px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        {/* Top/Left section: Source Icon + Patient Info */}
+        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 ${
           job.source === 'portal'
             ? 'bg-sky-50 text-sky-600'
@@ -70,10 +71,14 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
           <p className="text-xs text-gray-500 truncate">
             {job.insurance} · {job.memberId}
           </p>
+          </div>
         </div>
 
+        {/* Bottom/Right section: Status, CPT, Time, Actions */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-gray-100 pl-14 sm:pl-0">
+
         {/* CPT Codes */}
-        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+        <div className="hidden md:flex items-center gap-1.5 shrink-0">
           {(job.cptCodes || []).slice(0, 3).map((c) => (
             <CptBadge key={c} code={c} />
           ))}
@@ -83,7 +88,7 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
         </div>
 
         {/* Time */}
-        <div className="text-xs text-gray-400 font-medium shrink-0 w-16 text-right">
+        <div className="text-xs text-gray-400 font-medium shrink-0 hidden sm:block sm:w-16 sm:text-right">
           {timeAgo(job.createdAt)}
         </div>
 
@@ -93,7 +98,7 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
         </div>
 
         {/* Actions */}
-        <div className="relative shrink-0 w-24 h-10 flex items-center justify-end">
+        <div className="relative shrink-0 flex items-center justify-end sm:w-24 h-10">
           {onDelete && (
             <div 
               className={`absolute right-0 flex items-center gap-1 transition-all duration-300 transform
@@ -143,5 +148,6 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
         </div>
       </div>
     </div>
+  </div>
   );
 }

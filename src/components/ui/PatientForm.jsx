@@ -65,12 +65,12 @@ export default function PatientForm({
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <InputField id="input-firstName" label="Patient first name" value={formData.firstName || ''} onChange={(val) => updateField('firstName', val)} />
         <InputField id="input-lastName" label="Patient last name" value={formData.lastName || ''} onChange={(val) => updateField('lastName', val)} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <InputField id="input-dob" label="Date of birth" type="date" value={formData.dob || ''} onChange={(val) => updateField('dob', val)} max="9999-12-31" />
           {!isDobValid && <p className="text-[10px] text-red-500 mt-1">Must be a valid date.</p>}
@@ -78,7 +78,7 @@ export default function PatientForm({
         <InputField id="input-memberId" label="Member ID" value={formData.memberId || ''} onChange={(val) => updateField('memberId', val)} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select
           id="input-payer"
           label="Payer"
@@ -89,7 +89,7 @@ export default function PatientForm({
         <InputField id="input-groupNumber" label="Group Number (Optional)" value={formData.groupNumber || ''} onChange={(val) => updateField('groupNumber', val)} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <InputField id="input-providerOrgName" label="Provider Org Name" value={formData.providerOrgName || ''} onChange={(val) => updateField('providerOrgName', val)} placeholder="e.g. Vobi Healthcare LLC" />
         <div>
           <InputField id="input-npi" label="Provider NPI" value={formData.npi || ''} onChange={(val) => updateField('npi', val)} placeholder="10-digit NPI" />
