@@ -14,12 +14,12 @@ import {
 import { timeAgo } from '../../utils/formatters';
 
 // Inline label/value cell — keeps the eye moving left-to-right fast
-function StatCell({ label, value, accent }) {
+function StatCell({ label, value, accent, wide }) {
   if (value == null || value === '') return null;
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className={`flex flex-col gap-0.5 ${wide ? 'col-span-2' : ''}`}>
       <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide">{label}</span>
-      <span className={`text-sm font-semibold ${accent ?? 'text-text-primary'}`}>{value}</span>
+      <span className={`text-sm font-semibold break-words ${accent ?? 'text-text-primary'}`}>{value}</span>
     </div>
   );
 }
@@ -129,7 +129,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
           {/*   Right: coverage financials                                  */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Patient & request info */}
-            <Card>
+          <Card>
               <CardHeader icon={<IconUser />} title="Patient" />
               <div className="px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-3">
                 <StatCell
@@ -146,7 +146,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
                 )}
                 <StatCell label="Gender" value={patient.gender} />
                 <StatCell label="Payer" value={job.insurance} />
-                <StatCell label="Provider" value={job.providerOrgName} />
+                <StatCell label="Provider" value={job.providerOrgName} wide />
                 <StatCell label="NPI" value={job.npi} />
               </div>
             </Card>
@@ -249,7 +249,7 @@ function BenefitCell({ benefit, outOfNetwork }) {
           : 'border-border-subtle bg-surface'
       }`}
     >
-      <p className="text-xs font-semibold text-text-primary mb-1 leading-tight">
+      <p className="text-xs font-semibold text-text-primary mb-1 leading-snug break-words">
         {benefit.name || 'Benefit'}
       </p>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5">
@@ -263,7 +263,7 @@ function BenefitCell({ benefit, outOfNetwork }) {
           <span className="text-[11px] text-text-tertiary">{benefit.level}</span>
         )}
         {benefit.serviceTypes && (
-          <span className="text-[11px] text-text-tertiary truncate max-w-full">{benefit.serviceTypes}</span>
+          <span className="text-[11px] text-text-tertiary break-words w-full">{benefit.serviceTypes}</span>
         )}
         {!hasValue && (
           <span className="text-[11px] text-text-tertiary">—</span>
