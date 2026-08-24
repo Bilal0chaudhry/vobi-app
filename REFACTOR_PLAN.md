@@ -153,6 +153,9 @@ ALTER POLICY "Admins can update all profiles" ON profiles
 **Fix:** Route these through the existing `setToast` system.
 
 **Status:** ✅ Executed.
+- **Verification 1 (Error Leak):** `err.message` in `App.jsx` contained raw Supabase client errors (e.g., `duplicate key value violates unique constraint 'jobs_pkey'`), which leaked schema details. This was fixed by logging `err` to `console.error` and replacing the toast text with a generic `"Failed to create verification request. Please try again later."`
+- **Verification 2 (Build):** `npm run build` ran successfully (`120 modules transformed, built in 1.88s`), confirming no unresolved imports or syntax errors were introduced during Phases 5-9.
+- **Verification 3 (Timer Leak):** `useGlobalTimer.js` correctly unregisters components via `subscribers.delete(setTick)` in its cleanup function and immediately clears the global `setInterval` when `subscribers.size === 0`, ensuring no memory/CPU leak occurs when zero `JobCard`s exist.
 
 ---
 
