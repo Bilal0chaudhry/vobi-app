@@ -127,11 +127,11 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
           {/* ── Two-column main grid ─────────────────────────────────── */}
           {/*   Left: patient + request meta                               */}
           {/*   Right: coverage financials                                  */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {/* Patient & request info */}
           <Card>
               <CardHeader icon={<IconUser />} title="Patient" />
-              <div className="px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-3">
+              <div className="px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-3 items-start">
                 <StatCell
                   label="Name"
                   value={patient.name || `${job.patientFirstName || ''} ${job.patientLastName || ''}`.trim()}
@@ -154,7 +154,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
             {/* Coverage financials */}
             <Card>
               <CardHeader icon={<IconShield />} title="Coverage" />
-              <div className="px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-3">
+              <div className="px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-3 items-start">
                 <StatCell label="Plan Type" value={coverage.planType} />
                 <StatCell
                   label="Co-Pay"
@@ -212,7 +212,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
               />
               <div className="px-4 py-3">
                 {/* Benefits render as a responsive grid — 1 col mobile, 2 col sm+, 3 col lg+ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-start">
                   {(inNetworkBenefits.length > 0 ? inNetworkBenefits : benefits).map((b, i) => (
                     <BenefitCell key={i} benefit={b} />
                   ))}
@@ -222,7 +222,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
                     <p className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wide mt-4 mb-2">
                       Out-of-Network
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-start">
                       {outNetworkBenefits.map((b, i) => (
                         <BenefitCell key={i} benefit={b} outOfNetwork />
                       ))}
