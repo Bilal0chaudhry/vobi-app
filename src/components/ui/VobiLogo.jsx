@@ -14,7 +14,7 @@ export default function VobiLogo({ size = 'md', className = '' }) {
       <img
         src={vobiLogo}
         alt="VOBI Logo"
-        className={`${logoHeights[size]} w-auto object-contain transition-transform duration-300 hover:scale-105`}
+        className={`${logoHeights[size]} w-auto object-contain transition-transform duration-300 hover:scale-105 dark:brightness-0 dark:invert`}
       />
     </div>
   );

@@ -18,8 +18,8 @@ function StatCell({ label, value, accent }) {
   if (value == null || value === '') return null;
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wide">{label}</span>
-      <span className={`text-sm font-semibold ${accent ?? 'text-gray-900'}`}>{value}</span>
+      <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide">{label}</span>
+      <span className={`text-sm font-semibold ${accent ?? 'text-text-primary'}`}>{value}</span>
     </div>
   );
 }
@@ -27,7 +27,7 @@ function StatCell({ label, value, accent }) {
 // A card shell that matches the app's existing Section/Dashboard card look
 function Card({ children, className = '' }) {
   return (
-    <div className={`bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden ${className}`}>
+    <div className={`bg-surface rounded-xl border border-border shadow-sm overflow-hidden ${className}`}>
       {children}
     </div>
   );
@@ -35,9 +35,9 @@ function Card({ children, className = '' }) {
 
 function CardHeader({ icon, title }) {
   return (
-    <div className="flex items-center gap-2.5 px-4 py-3 bg-gray-50 border-b border-gray-100">
-      <span className="text-brand-600">{icon}</span>
-      <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+    <div className="flex items-center gap-2.5 px-4 py-3 bg-surface-inset border-b border-border-subtle">
+      <span className="text-accent">{icon}</span>
+      <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
     </div>
   );
 }
@@ -64,20 +64,20 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
       <div className="flex items-start gap-3 mb-6">
         <button
           onClick={onBack}
-          className="mt-1 w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors shrink-0"
+          className="mt-1 w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-surface-hover transition-colors shrink-0"
           title="Back to History"
         >
           <IconChevronLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-0.5">
-            <h1 className="text-lg font-bold text-gray-900">
+            <h1 className="text-lg font-bold text-text-primary">
               {job.patientFirstName} {job.patientLastName}
             </h1>
             <SourceBadge source="portal" />
             <JobBadge status={job.status} />
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-text-secondary">
             {job.insurance} · Member #{job.memberId} · NPI {job.npi} · {timeAgo(job.createdAt)}
           </p>
         </div>
@@ -85,11 +85,11 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
 
       {/* ── Error state ──────────────────────────────────────────────── */}
       {isError ? (
-        <div className="flex items-start gap-3 p-5 bg-red-50 border border-red-200 rounded-xl">
-          <IconAlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 p-5 bg-status-danger border border-[var(--color-danger-bg)] rounded-xl">
+          <IconAlertCircle className="w-5 h-5 text-status-danger-text shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-red-700 mb-1">Portal Lookup Failed</p>
-            <p className="text-xs text-red-600 mb-3">
+            <p className="text-sm font-semibold text-status-danger-text mb-1">Portal Lookup Failed</p>
+            <p className="text-xs text-status-danger-text opacity-90 mb-3">
               The electronic clearinghouse (Stedi) could not complete the verification. This might
               be due to mismatched patient details or payer downtime.
             </p>
@@ -100,26 +100,26 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
           </div>
         </div>
       ) : !hasResult ? (
-        <div className="p-12 text-center bg-gray-50 rounded-xl border border-gray-200">
-          <p className="text-sm text-gray-500">No portal results available for this request.</p>
+        <div className="p-12 text-center bg-surface-inset rounded-xl border border-border">
+          <p className="text-sm text-text-secondary">No portal results available for this request.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {/* ── Hero status banner ──────────────────────────────────── */}
-          <div className="flex items-center gap-3 px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm">
-            <IconCheckCircleSolid className="w-6 h-6 text-emerald-600 shrink-0" />
+          <div className="flex items-center gap-3 px-5 py-4 bg-status-success border border-[var(--color-success-bg)] rounded-xl shadow-sm">
+            <IconCheckCircleSolid className="w-6 h-6 text-status-success-text shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-base font-bold text-emerald-800">
+              <p className="text-base font-bold text-status-success-text">
                 {coverage.status || 'Active Coverage Confirmed'}
               </p>
               {coverage.planType && (
-                <p className="text-xs font-medium text-emerald-600 mt-0.5">{coverage.planType}</p>
+                <p className="text-xs font-medium text-status-success-text opacity-90 mt-0.5">{coverage.planType}</p>
               )}
             </div>
             {coverage.effectiveDate && (
               <div className="text-right shrink-0">
-                <span className="text-[11px] font-medium text-emerald-600 uppercase tracking-wide block">Effective</span>
-                <span className="text-sm font-semibold text-emerald-800">{coverage.effectiveDate}</span>
+                <span className="text-[11px] font-medium text-status-success-text opacity-90 uppercase tracking-wide block">Effective</span>
+                <span className="text-sm font-semibold text-status-success-text">{coverage.effectiveDate}</span>
               </div>
             )}
           </div>
@@ -159,7 +159,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
                 <StatCell
                   label="Co-Pay"
                   value={coverage.copay != null ? `$${coverage.copay}` : undefined}
-                  accent="text-brand-700"
+                  accent="text-accent"
                 />
                 <StatCell
                   label="Deductible (Ind.)"
@@ -180,7 +180,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
                 <StatCell
                   label="Coinsurance"
                   value={coverage.coinsurance != null ? `${coverage.coinsurance}%` : undefined}
-                  accent="text-brand-700"
+                  accent="text-accent"
                 />
               </div>
             </Card>
@@ -194,7 +194,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
                 {job.cptCodes.map((code) => (
                   <span
                     key={code}
-                    className="inline-flex items-center px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-xs font-semibold border border-brand-100"
+                    className="inline-flex items-center px-2.5 py-1 bg-accent-subtle text-accent rounded-lg text-xs font-semibold border border-[var(--color-accent-subtle)]"
                   >
                     {code}
                   </span>
@@ -219,7 +219,7 @@ export default function PortalResultPage({ job, onBack, onRetry }) {
                 </div>
                 {outNetworkBenefits.length > 0 && (
                   <>
-                    <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mt-4 mb-2">
+                    <p className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wide mt-4 mb-2">
                       Out-of-Network
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -245,28 +245,28 @@ function BenefitCell({ benefit, outOfNetwork }) {
     <div
       className={`rounded-lg border px-3 py-2.5 ${
         outOfNetwork
-          ? 'border-gray-200 bg-gray-50'
-          : 'border-gray-100 bg-white'
+          ? 'border-border bg-surface-inset'
+          : 'border-border-subtle bg-surface'
       }`}
     >
-      <p className="text-xs font-semibold text-gray-800 mb-1 leading-tight">
+      <p className="text-xs font-semibold text-text-primary mb-1 leading-tight">
         {benefit.name || 'Benefit'}
       </p>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5">
         {benefit.amount != null && (
-          <span className="text-[11px] text-brand-700 font-semibold">${benefit.amount}</span>
+          <span className="text-[11px] text-accent font-semibold">${benefit.amount}</span>
         )}
         {benefit.percent != null && (
-          <span className="text-[11px] text-brand-700 font-semibold">{benefit.percent}%</span>
+          <span className="text-[11px] text-accent font-semibold">{benefit.percent}%</span>
         )}
         {benefit.level && (
-          <span className="text-[11px] text-gray-400">{benefit.level}</span>
+          <span className="text-[11px] text-text-tertiary">{benefit.level}</span>
         )}
         {benefit.serviceTypes && (
-          <span className="text-[11px] text-gray-400 truncate max-w-full">{benefit.serviceTypes}</span>
+          <span className="text-[11px] text-text-tertiary truncate max-w-full">{benefit.serviceTypes}</span>
         )}
         {!hasValue && (
-          <span className="text-[11px] text-gray-400">—</span>
+          <span className="text-[11px] text-text-tertiary">—</span>
         )}
       </div>
     </div>

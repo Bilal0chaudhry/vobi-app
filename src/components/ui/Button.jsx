@@ -21,17 +21,17 @@ export default function Button({
 
   const variantClasses = {
     primary: disabled
-      ? 'bg-gray-200 text-gray-400 cursor-not-allowed active:scale-100'
-      : 'bg-brand-600 text-white shadow-md shadow-brand-600/25 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30',
+      ? 'bg-surface-inset text-text-tertiary cursor-not-allowed active:scale-100'
+      : 'bg-accent text-accent-on-accent shadow-md shadow-accent/25 hover:bg-accent-hover hover:shadow-lg hover:shadow-accent/30',
     secondary: disabled
-      ? 'bg-gray-100 text-gray-400 cursor-not-allowed active:scale-100'
-      : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+      ? 'bg-surface-inset text-text-tertiary cursor-not-allowed active:scale-100'
+      : 'bg-surface-inset text-text-primary hover:bg-surface-hover',
     danger: disabled
-      ? 'bg-red-50 text-red-200 cursor-not-allowed active:scale-100'
-      : 'bg-red-50 text-red-600 hover:bg-red-100',
+      ? 'bg-surface-inset text-text-tertiary cursor-not-allowed active:scale-100'
+      : 'bg-status-danger text-status-danger-text hover:opacity-80',
     ghost: disabled
-      ? 'text-gray-400 cursor-not-allowed active:scale-100'
-      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100',
+      ? 'text-text-tertiary cursor-not-allowed active:scale-100'
+      : 'text-text-secondary hover:text-text-primary hover:bg-surface-inset',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';

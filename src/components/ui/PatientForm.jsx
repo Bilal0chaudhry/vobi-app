@@ -59,7 +59,7 @@ export default function PatientForm({
         <button
           type="button"
           onClick={fillDemoData}
-          className="text-xs text-brand-600 font-semibold hover:text-brand-800 transition-colors"
+          className="text-xs text-accent font-semibold hover:text-accent-hover transition-colors"
         >
           Fill Demo Data
         </button>
@@ -73,7 +73,7 @@ export default function PatientForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <InputField id="input-dob" label="Date of birth" type="date" value={formData.dob || ''} onChange={(val) => updateField('dob', val)} max="9999-12-31" />
-          {!isDobValid && <p className="text-[10px] text-red-500 mt-1">Must be a valid date.</p>}
+          {!isDobValid && <p className="text-[10px] text-status-danger-text mt-1">Must be a valid date.</p>}
         </div>
         <InputField id="input-memberId" label="Member ID" value={formData.memberId || ''} onChange={(val) => updateField('memberId', val)} />
       </div>
@@ -93,30 +93,30 @@ export default function PatientForm({
         <InputField id="input-providerOrgName" label="Provider Org Name" value={formData.providerOrgName || ''} onChange={(val) => updateField('providerOrgName', val)} placeholder="e.g. Vobi Healthcare LLC" />
         <div>
           <InputField id="input-npi" label="Provider NPI" value={formData.npi || ''} onChange={(val) => updateField('npi', val)} placeholder="10-digit NPI" />
-          {!isNpiValid && formData.npi && <p className="text-[10px] text-red-500 mt-1">NPI must be exactly 10 digits.</p>}
+          {!isNpiValid && formData.npi && <p className="text-[10px] text-status-danger-text mt-1">NPI must be exactly 10 digits.</p>}
         </div>
       </div>
 
       {showCptCodes && (
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-medium text-gray-600">CPT codes</label>
-            <span className="text-[10px] text-gray-400">Press Enter to add</span>
+            <label className="text-xs font-medium text-text-secondary">CPT codes</label>
+            <span className="text-[10px] text-text-tertiary">Press Enter to add</span>
           </div>
           <div
-            className="flex flex-wrap items-center gap-1.5 min-h-[44px] px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-400 transition-all cursor-text"
+            className="flex flex-wrap items-center gap-1.5 min-h-[44px] px-3 py-2 bg-surface-inset border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent-subtle focus-within:border-accent transition-all cursor-text"
             onClick={() => cptRef.current?.focus()}
           >
             {(formData.cptCodes || []).map((code) => (
               <span
                 key={code}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-100 text-brand-700 rounded text-xs font-medium"
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-subtle text-accent rounded text-xs font-medium"
               >
                 {code}
                 <button
                   type="button"
                   onClick={() => handleRemoveCpt(code)}
-                  className="text-brand-400 hover:text-brand-700 transition-colors"
+                  className="text-accent-hover hover:text-accent transition-colors"
                 >
                   <IconX className="w-3 h-3" />
                 </button>
@@ -130,7 +130,7 @@ export default function PatientForm({
               onChange={(e) => setCptInput(e.target.value)}
               onKeyDown={handleAddCpt}
               placeholder={(formData.cptCodes || []).length === 0 ? 'e.g. 99214' : ''}
-              className="flex-1 min-w-[60px] bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+              className="flex-1 min-w-[60px] bg-transparent text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none"
             />
           </div>
         </div>

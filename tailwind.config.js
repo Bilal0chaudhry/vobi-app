@@ -23,6 +23,47 @@ module.exports = {
           900: '#312e81',
           950: '#1e1b4b',
         },
+        page: 'var(--color-page-bg)',
+        surface: {
+          DEFAULT: 'var(--color-surface)',
+          hover: 'var(--color-surface-hover)',
+          inset: 'var(--color-surface-inset)',
+        },
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-tertiary': 'var(--color-text-tertiary)',
+        border: {
+          DEFAULT: 'var(--color-border)',
+          subtle: 'var(--color-border-subtle)',
+        },
+        accent: {
+          DEFAULT: 'var(--color-accent)',
+          hover: 'var(--color-accent-hover)',
+          subtle: 'var(--color-accent-subtle)',
+          'on-accent': 'var(--color-accent-on-accent)',
+        },
+        status: {
+          success: {
+            DEFAULT: 'var(--color-success-bg)',
+            text: 'var(--color-success-text)',
+          },
+          warning: {
+            DEFAULT: 'var(--color-warning-bg)',
+            text: 'var(--color-warning-text)',
+          },
+          danger: {
+            DEFAULT: 'var(--color-danger-bg)',
+            text: 'var(--color-danger-text)',
+          },
+          info: {
+            DEFAULT: 'var(--color-info-bg)',
+            text: 'var(--color-info-text)',
+          },
+          violet: {
+            DEFAULT: 'var(--color-violet-bg)',
+            text: 'var(--color-violet-text)',
+          },
+        },
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

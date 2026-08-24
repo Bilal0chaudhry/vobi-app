@@ -159,7 +159,7 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white animate-fade-in relative">
+    <div className="min-h-screen w-full flex bg-surface animate-fade-in relative">
       {toast.show && (
         <Toast 
           type={toast.type} 
@@ -197,7 +197,7 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
         
         <div className="relative z-10 flex flex-col">
           <div className="flex flex-col items-start mb-16 xl:mb-20">
-            <img src={vobiLogoLight} alt="Vobi Logo" className="w-[160px] lg:w-[180px] xl:w-[220px] h-auto object-contain -ml-2" />
+            <img src={vobiLogoLight} alt="Vobi Logo" className="w-[160px] lg:w-[180px] xl:w-[220px] h-auto object-contain -ml-2 brightness-0 invert" />
             <span className="text-[11px] lg:text-xs tracking-[0.25em] font-bold uppercase mt-1.5 ml-1 bg-clip-text text-transparent animate-text-flow drop-shadow-sm">
               Autonomous VOB Agent
             </span>
@@ -248,32 +248,32 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
         </div>
       </div>
 
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 sm:p-8 bg-white z-20 shrink-0">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 sm:p-8 bg-surface z-20 shrink-0">
         <div className="w-full max-w-[380px]">
           <div className="mb-8 flex flex-col items-start text-left">
-            <h2 className="text-[28px] font-semibold text-gray-900 tracking-tight mb-2">
+            <h2 className="text-[28px] font-semibold text-text-primary tracking-tight mb-2">
               {isSignUp ? 'Create your workspace' : 'Welcome back'}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-secondary">
               {isSignUp ? 'Start verifying benefits in minutes.' : 'Sign in to pick up where you left off.'}
             </p>
           </div>
 
-          <div className="flex bg-[#f3f4f6] p-1 rounded-full mb-6 relative shadow-inner">
+          <div className="flex bg-surface-inset p-1 rounded-full mb-6 relative shadow-inner">
             <div 
-              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] transition-transform duration-300 ease-out`}
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-surface rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] transition-transform duration-300 ease-out`}
               style={{ transform: isSignUp ? 'translateX(100%)' : 'translateX(0)' }}
             />
             
             <button
               onClick={() => setIsSignUp(false)}
-              className={`flex-1 py-2 text-[13px] font-medium rounded-lg z-10 transition-colors duration-200 ${!isSignUp ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 py-2 text-[13px] font-medium rounded-lg z-10 transition-colors duration-200 ${!isSignUp ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
             >
               Sign in
             </button>
             <button
               onClick={() => setIsSignUp(true)}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 ${isSignUp ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 ${isSignUp ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
             >
               Sign up
             </button>
@@ -282,16 +282,16 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
           <button 
             onClick={handleGoogleLogin}
             type="button"
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-[#f1f5f9] rounded-full text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-all mb-6 shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)] active:scale-[0.99]"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-surface border border-border rounded-full text-[13px] font-medium text-text-primary hover:bg-surface-hover transition-all mb-6 shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)] active:scale-[0.99]"
           >
             <IconGoogle />
             Continue with Google
           </button>
 
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-[#e5e7eb]"></div>
-            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">OR</span>
-            <div className="flex-1 h-px bg-[#e5e7eb]"></div>
+            <div className="flex-1 h-px bg-border-subtle"></div>
+            <span className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest">OR</span>
+            <div className="flex-1 h-px bg-border-subtle"></div>
           </div>
 
 
@@ -299,9 +299,9 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
           <div className="relative">
             <form onSubmit={handleSubmit} className={`space-y-4 transition-all duration-300 ${!isSignUp ? 'opacity-100 z-10 relative' : 'opacity-0 z-0 absolute inset-0 pointer-events-none'}`}>
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-gray-700 ml-1">Work email</label>
+                <label className="text-[13px] font-medium text-text-secondary ml-1">Work email</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-tertiary">
                     <IconEnvelope className="w-4 h-4" />
                   </div>
                   <input
@@ -310,18 +310,18 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@clinic.com"
-                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.email ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
+                    className={`w-full pl-11 pr-4 py-3 bg-surface-inset border ${errors.email ? 'border-status-danger ring-1 ring-status-danger' : 'border-border'} rounded-full text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent-subtle focus:border-accent transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
-                {errors.email && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.email}</p>}
+                {errors.email && <p className="text-status-danger-text text-[11px] ml-4 mt-1">{errors.email}</p>}
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between ml-1 pr-1">
-                  <label className="text-[13px] font-medium text-gray-700">Password</label>
-                  <button type="button" onClick={handleForgotPassword} className="text-[13px] font-medium text-brand-600 hover:text-brand-700">Forgot?</button>
+                  <label className="text-[13px] font-medium text-text-secondary">Password</label>
+                  <button type="button" onClick={handleForgotPassword} className="text-[13px] font-medium text-accent hover:text-accent-hover">Forgot?</button>
                 </div>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-tertiary">
                     <IconLock className="w-4 h-4" />
                   </div>
                   <input
@@ -330,29 +330,29 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.password ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
+                    className={`w-full pl-11 pr-4 py-3 bg-surface-inset border ${errors.password ? 'border-status-danger ring-1 ring-status-danger' : 'border-border'} rounded-full text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent-subtle focus:border-accent transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
-                {errors.password && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.password}</p>}
+                {errors.password && <p className="text-status-danger-text text-[11px] ml-4 mt-1">{errors.password}</p>}
               </div>
               <button
                 type="submit"
                 disabled={loading || Object.keys(errors).length > 0}
-                className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-3 px-4 bg-accent hover:bg-accent-hover text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in...' : 'Sign in'} <span className="font-sans font-light">&rarr;</span>
               </button>
-              <p className="text-center text-[13px] text-gray-500 pt-3">
-                New to Vobi? <button type="button" onClick={() => setIsSignUp(true)} className="text-brand-600 font-medium hover:underline">Create an account</button>
+              <p className="text-center text-[13px] text-text-secondary pt-3">
+                New to Vobi? <button type="button" onClick={() => setIsSignUp(true)} className="text-accent font-medium hover:underline">Create an account</button>
               </p>
             </form>
 
             <form onSubmit={handleSubmit} className={`space-y-4 transition-all duration-300 ${isSignUp ? 'opacity-100 z-10 relative' : 'opacity-0 z-0 absolute inset-0 pointer-events-none'}`}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-gray-700 ml-1">Full name</label>
+                  <label className="text-[13px] font-medium text-text-secondary ml-1">Full name</label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-tertiary">
                       <IconUser className="w-4 h-4" />
                     </div>
                     <input
@@ -361,15 +361,15 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Alicia Reyes"
-                      className={`w-full pl-9 pr-3 py-3 bg-white border ${errors.fullName ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
+                      className={`w-full pl-9 pr-3 py-3 bg-surface-inset border ${errors.fullName ? 'border-status-danger ring-1 ring-status-danger' : 'border-border'} rounded-full text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent-subtle focus:border-accent transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                     />
                   </div>
-                  {errors.fullName && <p className="text-red-500 text-[11px] ml-3 mt-1">{errors.fullName}</p>}
+                  {errors.fullName && <p className="text-status-danger-text text-[11px] ml-3 mt-1">{errors.fullName}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-gray-700 ml-1">Organization</label>
+                  <label className="text-[13px] font-medium text-text-secondary ml-1">Organization</label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-tertiary">
                       <IconBuilding className="w-4 h-4" />
                     </div>
                     <input
@@ -378,16 +378,16 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
                       placeholder="Northside..."
-                      className={`w-full pl-9 pr-3 py-3 bg-white border ${errors.organization ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
+                      className={`w-full pl-9 pr-3 py-3 bg-surface-inset border ${errors.organization ? 'border-status-danger ring-1 ring-status-danger' : 'border-border'} rounded-full text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent-subtle focus:border-accent transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                     />
                   </div>
-                  {errors.organization && <p className="text-red-500 text-[11px] ml-3 mt-1">{errors.organization}</p>}
+                  {errors.organization && <p className="text-status-danger-text text-[11px] ml-3 mt-1">{errors.organization}</p>}
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-gray-700 ml-1">Work email</label>
+                <label className="text-[13px] font-medium text-text-secondary ml-1">Work email</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-tertiary">
                     <IconEnvelope className="w-4 h-4" />
                   </div>
                   <input
@@ -396,15 +396,15 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@clinic.com"
-                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.email ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
+                    className={`w-full pl-11 pr-4 py-3 bg-surface-inset border ${errors.email ? 'border-status-danger ring-1 ring-status-danger' : 'border-border'} rounded-full text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent-subtle focus:border-accent transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
-                {errors.email && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.email}</p>}
+                {errors.email && <p className="text-status-danger-text text-[11px] ml-4 mt-1">{errors.email}</p>}
               </div>
               <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-gray-700 ml-1">Password</label>
+                <label className="text-[13px] font-medium text-text-secondary ml-1">Password</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-tertiary">
                     <IconLock className="w-4 h-4" />
                   </div>
                   <input
@@ -413,19 +413,19 @@ export default function Auth({ initialBackendStatus, onBackendChange }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className={`w-full pl-11 pr-4 py-3 bg-white border ${errors.password ? 'border-red-300 ring-1 ring-red-300' : 'border-[#f1f5f9]'} rounded-full text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
+                    className={`w-full pl-11 pr-4 py-3 bg-surface-inset border ${errors.password ? 'border-status-danger ring-1 ring-status-danger' : 'border-border'} rounded-full text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent-subtle focus:border-accent transition-all shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]`}
                   />
                 </div>
-                {errors.password && <p className="text-red-500 text-[11px] ml-4 mt-1">{errors.password}</p>}
+                {errors.password && <p className="text-status-danger-text text-[11px] ml-4 mt-1">{errors.password}</p>}
               </div>
               <button
                 type="submit"
                 disabled={loading || Object.keys(errors).length > 0}
-                className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-3 px-4 bg-accent hover:bg-accent-hover text-white rounded-full text-sm font-medium shadow-[0_4px_12px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating account...' : 'Create account'} <span className="font-sans font-light">&rarr;</span>
               </button>
-              <p className="text-center text-[11px] text-gray-400 pt-3">
+              <p className="text-center text-[11px] text-text-tertiary pt-3">
                 By continuing you agree to our terms and privacy policy.
               </p>
             </form>

@@ -26,12 +26,12 @@ function ToggleRow({ id, label, description, checked, onChange }) {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-gray-900">{label}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+          <p className="text-sm font-semibold text-text-primary">{label}</p>
+          <p className="text-xs text-text-secondary mt-0.5">{description}</p>
         </div>
         <Toggle id={id} checked={checked} onChange={onChange} />
       </div>
-      <div className="border-t border-gray-100" />
+      <div className="border-t border-border-subtle" />
     </>
   );
 }
@@ -168,10 +168,10 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div className="xl:col-span-8 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <div className="border-b border-gray-100 pb-4 mb-6">
-              <h2 className="text-base font-bold text-gray-900">Practice Profile</h2>
-              <p className="text-sm text-gray-500 mt-1">Manage your personal and organization details.</p>
+          <div className="bg-surface rounded-xl border border-border p-6 shadow-sm">
+            <div className="border-b border-border-subtle pb-4 mb-6">
+              <h2 className="text-base font-bold text-text-primary">Practice Profile</h2>
+              <p className="text-sm text-text-secondary mt-1">Manage your personal and organization details.</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -187,10 +187,10 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
         </div>
 
         <div className="xl:col-span-4 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <div className="border-b border-gray-100 pb-4 mb-5">
-              <h2 className="text-base font-bold text-gray-900">Agent Behavior</h2>
-              <p className="text-sm text-gray-500 mt-1">Control how Vobi handles calls.</p>
+          <div className="bg-surface rounded-xl border border-border p-6 shadow-sm">
+            <div className="border-b border-border-subtle pb-4 mb-5">
+              <h2 className="text-base font-bold text-text-primary">Agent Behavior</h2>
+              <p className="text-sm text-text-secondary mt-1">Control how Vobi handles calls.</p>
             </div>
             <div className="space-y-5">
               <ToggleRow 
@@ -202,8 +202,8 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
               />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Call recordings</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Store audio alongside transcripts.</p>
+                  <p className="text-sm font-semibold text-text-primary">Call recordings</p>
+                  <p className="text-xs text-text-secondary mt-0.5">Store audio alongside transcripts.</p>
                 </div>
                 <Toggle 
                   id="toggle-recordings" 
@@ -214,9 +214,9 @@ export default function Settings({ profile, settings, onProfileUpdate, onSetting
             </div>
           </div>
 
-          <div className="bg-brand-50 rounded-xl border border-brand-100 p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-brand-900 mb-2">Unsaved Changes</h2>
-            <p className="text-sm text-brand-700 mb-5">
+          <div className="bg-accent-subtle rounded-xl border border-[var(--color-accent-subtle)] p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-text-primary mb-2">Unsaved Changes</h2>
+            <p className="text-sm text-text-secondary mb-5">
               {canSave 
                 ? "You have modified your settings. Review and save them to apply." 
                 : (!isValid 

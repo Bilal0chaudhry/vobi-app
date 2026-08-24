@@ -30,12 +30,12 @@ export default function CallResultPage({ job, onBack }) {
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-gray-900">
+              <h1 className="text-lg font-bold text-text-primary">
                 {job.patientFirstName} {job.patientLastName}
               </h1>
               <SourceBadge source="call" />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-text-secondary">
               {job.insurance} · {job.memberId} · {timeAgo(job.createdAt)}
             </p>
           </div>
@@ -44,17 +44,17 @@ export default function CallResultPage({ job, onBack }) {
         <div className="flex items-center gap-3">
           <JobBadge status={job.status} />
           {isCompleted && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <IconCheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-xs font-semibold text-emerald-700">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-status-success border border-[var(--color-success-bg)] rounded-lg">
+              <IconCheckCircle className="w-3.5 h-3.5 text-status-success-text" />
+              <span className="text-xs font-semibold text-status-success-text">
                 {completedCount}/{totalCount} verified
               </span>
             </div>
           )}
           {isError && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg">
-              <IconAlertCircle className="w-3.5 h-3.5 text-red-500" />
-              <span className="text-xs font-semibold text-red-700">Call ended with error</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-status-danger border border-[var(--color-danger-bg)] rounded-lg">
+              <IconAlertCircle className="w-3.5 h-3.5 text-status-danger-text" />
+              <span className="text-xs font-semibold text-status-danger-text">Call ended with error</span>
             </div>
           )}
         </div>

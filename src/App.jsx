@@ -18,6 +18,7 @@ import { IconMenu } from './components/ui/icons';
 import { supabase } from './utils/supabase';
 import { fetchJobsList, fetchJobById, createJob, updateJob, deleteJob, fetchSettings, fetchProfiles } from './utils/db';
 import { checkHealth } from './utils/api';
+import useTheme from './hooks/useTheme';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -38,6 +39,7 @@ export default function App() {
   const [showCapacityToast, setShowCapacityToast] = useState(false);
   const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { theme, updateTheme } = useTheme(profile);
 
   const activeJobsCount = jobs.filter(j => !['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'].includes(j.status)).length;
 
@@ -360,7 +362,7 @@ export default function App() {
       )}
 
       {(isAuthenticated && isFullyLoaded && profile?.status === 'approved') && (
-        <div className="flex min-h-screen bg-slate-50 flex-col md:flex-row">
+        <div className="flex min-h-screen bg-page flex-col md:flex-row">
           <Sidebar 
             currentView={currentView} 
             onNavigate={handleNavigate} 
@@ -369,18 +371,20 @@ export default function App() {
             profile={profile}
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
+            theme={theme}
+            onThemeChange={updateTheme}
           />
 
           <main className="flex-1 flex flex-col min-w-0">
             {/* Mobile Header (Hidden on md+) */}
-            <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 shrink-0">
+            <div className="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border shrink-0">
               <div className="flex items-center gap-1.5">
                 <VobiLogo size="sm" />
-                <span className="text-sm font-bold text-gray-900 tracking-tight">Vobi</span>
+                <span className="text-sm font-bold text-text-primary tracking-tight">Vobi</span>
               </div>
               <button 
                 onClick={() => setIsSidebarOpen(true)}
-                className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors -mr-2"
+                className="w-10 h-10 rounded-xl bg-surface-inset flex items-center justify-center text-text-secondary hover:bg-surface-hover transition-colors -mr-2"
               >
                 <IconMenu />
               </button>
@@ -418,17 +422,17 @@ export default function App() {
           {/* Capacity Toast Notification */}
           {showCapacityToast && (
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
-              <div className="bg-gray-900 text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3">
-                <div className="bg-amber-500/20 text-amber-500 p-1.5 rounded-lg">
+              <div className="bg-surface border border-border text-text-primary px-5 py-3.5 rounded-xl shadow-lg flex items-center gap-3">
+                <div className="bg-status-warning text-status-warning-text p-1.5 rounded-lg">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold">Queue is full</h4>
-                  <p className="text-xs text-gray-300 mt-0.5">You must wait for an active request to complete before making a new one.</p>
+                  <h4 className="text-sm font-bold text-text-primary">Queue is full</h4>
+                  <p className="text-xs text-text-secondary mt-0.5">You must wait for an active request to complete before making a new one.</p>
                 </div>
-                <button onClick={() => setShowCapacityToast(false)} className="ml-4 text-gray-400 hover:text-white transition-colors">
+                <button onClick={() => setShowCapacityToast(false)} className="ml-4 text-text-tertiary hover:text-text-primary transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>

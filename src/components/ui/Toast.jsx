@@ -12,12 +12,12 @@ export default function Toast({ type, message, duration = 4000, onClose }) {
   }, [duration, onClose]);
 
   const isError = type === 'error';
-  const textColor = isError ? 'text-red-600' : 'text-emerald-600';
-  const barColor = isError ? 'bg-red-500' : 'bg-emerald-500';
+  const textColor = isError ? 'text-status-danger-text' : 'text-status-success-text';
+  const barColor = isError ? 'bg-[var(--color-danger-text)]' : 'bg-[var(--color-success-text)]';
 
   return (
     <div 
-      className={`fixed top-4 left-4 right-4 md:top-6 md:left-auto md:right-6 md:w-[320px] z-50 flex flex-col bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 ${isExiting ? 'toast-exit' : 'toast-enter'}`}
+      className={`fixed top-4 left-4 right-4 md:top-6 md:left-auto md:right-6 md:w-[320px] z-50 flex flex-col bg-surface rounded-xl shadow-xl overflow-hidden border border-border ${isExiting ? 'toast-exit' : 'toast-enter'}`}
     >
       <div className="flex items-center gap-3 px-5 py-4">
         {isError ? (
@@ -32,7 +32,7 @@ export default function Toast({ type, message, duration = 4000, onClose }) {
         <span className={`text-sm font-bold ${textColor}`}>{message}</span>
       </div>
       
-      <div className="h-1 w-full bg-gray-50">
+      <div className="h-1 w-full bg-surface-inset">
         <div 
           className={`h-full ${barColor} toast-progress`} 
           style={{ animationDuration: `${duration}ms` }} 

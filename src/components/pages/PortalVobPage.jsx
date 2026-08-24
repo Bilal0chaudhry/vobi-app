@@ -48,17 +48,17 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
         <button
           id="btn-portal-back"
           onClick={onBack}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-surface-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           disabled={isLoading}
           title="Back"
         >
           <IconChevronLeft className="w-4 h-4" />
         </button>
         <div className="flex-1">
-          <h1 className="text-lg font-bold text-gray-900">
+          <h1 className="text-lg font-bold text-text-primary">
             Portal Verification — {job.patientFirstName} {job.patientLastName}
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-text-secondary">
             {job.insurance} · Member #{job.memberId} · NPI {job.npi}
           </p>
         </div>
@@ -66,9 +66,9 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
 
       {isLoading && (
         <div>
-          <div className="flex items-center gap-3 mb-5 p-4 bg-brand-50 border border-brand-200 rounded-xl">
-            <span className="w-4 h-4 rounded-full border-2 border-brand-600 border-t-transparent animate-spin shrink-0" />
-            <p className="text-sm font-medium text-brand-700">
+          <div className="flex items-center gap-3 mb-5 p-4 bg-accent-subtle border border-[var(--color-accent-subtle)] rounded-xl">
+            <span className="w-4 h-4 rounded-full border-2 border-accent border-t-transparent animate-spin shrink-0" />
+            <p className="text-sm font-medium text-accent">
               Querying Stedi eligibility portal…
             </p>
           </div>
@@ -78,11 +78,11 @@ export default function PortalVobPage({ job, onBack, onJobUpdate, onComplete }) 
 
       {!isLoading && error && (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <IconAlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-status-danger border border-[var(--color-danger-bg)] rounded-xl">
+            <IconAlertCircle className="w-5 h-5 text-status-danger-text shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-red-700 mb-0.5">Portal lookup failed</p>
-              <p className="text-xs text-red-600">{error}</p>
+              <p className="text-sm font-semibold text-status-danger-text mb-0.5">Portal lookup failed</p>
+              <p className="text-xs text-status-danger-text opacity-90">{error}</p>
             </div>
           </div>
           <div className="flex gap-3">

@@ -1,15 +1,15 @@
 import React from 'react';
 
 const jobConfig = {
-  'Pending':         { bg: 'bg-gray-50',    text: 'text-gray-600',    dot: 'bg-gray-400',    animate: false },
-  'Agent on Call':   { bg: 'bg-violet-50',  text: 'text-violet-700',  dot: 'bg-violet-500',  animate: true  },
-  'On Hold':         { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-500',   animate: true  },
-  'Portal Lookup':   { bg: 'bg-sky-50',     text: 'text-sky-700',     dot: 'bg-sky-500',     animate: true  },
-  'API Fast-Path':   { bg: 'bg-blue-50',    text: 'text-blue-700',    dot: 'bg-blue-500',    animate: false },
-  'Completed':       { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', animate: false },
-  'Verified (Portal)': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', animate: false },
-  'Portal Error':    { bg: 'bg-red-50',     text: 'text-red-700',     dot: 'bg-red-500',     animate: false },
-  'Call Error':      { bg: 'bg-red-50',     text: 'text-red-700',     dot: 'bg-red-500',     animate: false },
+  'Pending':           { bg: 'bg-surface-inset',   text: 'text-text-secondary',      dot: 'bg-text-tertiary',             animate: false },
+  'Agent on Call':     { bg: 'bg-status-violet',   text: 'text-status-violet-text',  dot: 'bg-[var(--color-violet-text)]', animate: true  },
+  'On Hold':           { bg: 'bg-status-warning',  text: 'text-status-warning-text', dot: 'bg-[var(--color-warning-text)]', animate: true  },
+  'Portal Lookup':     { bg: 'bg-status-info',     text: 'text-status-info-text',    dot: 'bg-[var(--color-info-text)]',    animate: true  },
+  'API Fast-Path':     { bg: 'bg-status-info',     text: 'text-status-info-text',    dot: 'bg-[var(--color-info-text)]',    animate: false },
+  'Completed':         { bg: 'bg-status-success',  text: 'text-status-success-text', dot: 'bg-[var(--color-success-text)]', animate: false },
+  'Verified (Portal)': { bg: 'bg-status-success',  text: 'text-status-success-text', dot: 'bg-[var(--color-success-text)]', animate: false },
+  'Portal Error':      { bg: 'bg-status-danger',   text: 'text-status-danger-text',  dot: 'bg-[var(--color-danger-text)]',  animate: false },
+  'Call Error':        { bg: 'bg-status-danger',   text: 'text-status-danger-text',  dot: 'bg-[var(--color-danger-text)]',  animate: false },
 };
 
 export function JobBadge({ status }) {
@@ -23,14 +23,14 @@ export function JobBadge({ status }) {
 }
 
 const profileConfig = {
-  'approved': 'bg-emerald-100 text-emerald-800',
-  'pending': 'bg-amber-100 text-amber-800',
-  'rejected': 'bg-red-100 text-red-800',
-  'admin': 'bg-purple-100 text-purple-800',
+  'approved': 'bg-status-success text-status-success-text',
+  'pending': 'bg-status-warning text-status-warning-text',
+  'rejected': 'bg-status-danger text-status-danger-text',
+  'admin': 'bg-status-violet text-status-violet-text',
 };
 
 export function ProfileBadge({ status, role = false }) {
-  const colorClass = profileConfig[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  const colorClass = profileConfig[status?.toLowerCase()] || 'bg-surface-inset text-text-secondary';
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${colorClass}`}>
       {role ? 'Admin' : status}
@@ -41,9 +41,9 @@ export function ProfileBadge({ status, role = false }) {
 const sourceConfig = {
   call: {
     label: 'Call',
-    bg: 'bg-violet-50',
-    text: 'text-violet-700',
-    border: 'border-violet-200',
+    bg: 'bg-status-violet',
+    text: 'text-status-violet-text',
+    border: 'border-border-subtle',
     icon: (
       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.5 10.43a19.79 19.79 0 01-3.07-8.67A2 2 0 012.41 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.27-.76a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
@@ -52,9 +52,9 @@ const sourceConfig = {
   },
   portal: {
     label: 'Portal',
-    bg: 'bg-sky-50',
-    text: 'text-sky-700',
-    border: 'border-sky-200',
+    bg: 'bg-status-info',
+    text: 'text-status-info-text',
+    border: 'border-border-subtle',
     icon: (
       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />

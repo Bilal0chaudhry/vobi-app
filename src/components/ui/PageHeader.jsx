@@ -6,8 +6,8 @@ export default function PageHeader({ title, subtitle, onNewVerification, buttonI
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-        {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        <h1 className="text-xl font-bold text-text-primary">{title}</h1>
+        {subtitle && <p className="text-sm text-text-secondary mt-0.5">{subtitle}</p>}
       </div>
       {onNewVerification && (
         <div title={isAtCapacity ? "Maximum of 10 active requests reached. Please wait for one to complete." : ""}>

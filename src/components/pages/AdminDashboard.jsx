@@ -80,36 +80,36 @@ export default function AdminDashboard({ onLogout, profiles }) {
           title="Admin Dashboard"
           subtitle="Manage user access and approvals"
         />
-        <button onClick={onLogout} className="text-sm font-medium text-gray-600 hover:text-gray-900 mt-2">
+        <button onClick={onLogout} className="text-sm font-medium text-text-secondary hover:text-text-primary mt-2">
           Sign out
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" ref={tableRef}>
+      <div className="bg-surface rounded-xl border border-border overflow-hidden" ref={tableRef}>
         <div className="overflow-x-auto relative">
           <table className="w-full text-left text-sm table-fixed">
-            <thead className="bg-gray-50 border-b border-gray-200 relative z-20">
+            <thead className="bg-surface-inset border-b border-border relative z-20">
               <tr>
-                <th className="w-2/5 px-6 py-4 font-semibold text-gray-900">User</th>
-                <th className="w-1/4 px-6 py-4 font-semibold text-gray-900">Organization</th>
-                <th className="w-1/6 px-6 py-4 font-semibold text-gray-900">Status</th>
-                <th className="w-1/6 px-6 py-4 font-semibold text-gray-900">Actions</th>
+                <th className="w-2/5 px-6 py-4 font-semibold text-text-primary">User</th>
+                <th className="w-1/4 px-6 py-4 font-semibold text-text-primary">Organization</th>
+                <th className="w-1/6 px-6 py-4 font-semibold text-text-primary">Status</th>
+                <th className="w-1/6 px-6 py-4 font-semibold text-text-primary">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border-subtle">
               {profiles.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500">No users found.</td>
+                  <td colSpan="4" className="px-6 py-8 text-center text-text-secondary">No users found.</td>
                 </tr>
               ) : (
                 profiles.map(profile => (
-                  <tr key={profile.id} className="hover:bg-gray-50 relative group transition-colors">
+                  <tr key={profile.id} className="hover:bg-surface-hover relative group transition-colors">
                     
                     <td className="px-6 py-4 truncate">
-                      <div className="font-medium text-gray-900 truncate">{profile.full_name || 'No Name Provided'}</div>
-                      <div className="text-gray-500 truncate">{profile.email}</div>
+                      <div className="font-medium text-text-primary truncate">{profile.full_name || 'No Name Provided'}</div>
+                      <div className="text-text-secondary truncate">{profile.email}</div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600 truncate">
+                    <td className="px-6 py-4 text-text-secondary truncate">
                       {profile.organization || '-'}
                     </td>
                     <td className="px-6 py-4">
@@ -122,13 +122,13 @@ export default function AdminDashboard({ onLogout, profiles }) {
                           <>
                             <button
                               onClick={() => handleApprove(profile.id)}
-                              className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+                              className="px-3 py-1.5 bg-[var(--color-success-text)] text-white rounded-lg text-xs font-medium hover:opacity-90 transition-opacity shadow-sm"
                             >
                               Approve
                             </button>
                             <button
                               onClick={() => handleReject(profile.id)}
-                              className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors shadow-sm"
+                              className="px-3 py-1.5 bg-status-danger border border-[var(--color-danger-bg)] text-status-danger-text rounded-lg text-xs font-medium hover:opacity-80 transition-opacity shadow-sm"
                             >
                               Reject
                             </button>
@@ -146,7 +146,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                             >
                               <button 
                                 onClick={() => setDeletingId(profile.id)} 
-                                className="text-gray-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 outline-none transition-colors"
+                                className="text-text-tertiary hover:text-status-danger-text p-2 rounded-lg hover:bg-status-danger outline-none transition-colors"
                                 title="Delete Account"
                               >
                                 <IconTrash />
@@ -160,7 +160,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                               <button 
                                 disabled={isDeleting}
                                 onClick={() => confirmDelete(profile.id)} 
-                                className={`w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 ${deletingId === profile.id ? 'animate-pop-in-1' : ''}`}
+                                className={`w-9 h-9 rounded-full bg-status-danger text-status-danger-text border border-[var(--color-danger-bg)] flex items-center justify-center hover:bg-[var(--color-danger-text)] hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 ${deletingId === profile.id ? 'animate-pop-in-1' : ''}`}
                                 title="Confirm Delete"
                               >
                                 <IconCheck />
@@ -168,7 +168,7 @@ export default function AdminDashboard({ onLogout, profiles }) {
                               <button 
                                 disabled={isDeleting}
                                 onClick={() => setDeletingId(null)} 
-                                className={`w-9 h-9 rounded-full bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 ${deletingId === profile.id ? 'animate-pop-in-2' : ''}`}
+                                className={`w-9 h-9 rounded-full bg-surface-inset text-text-secondary border border-border flex items-center justify-center hover:bg-surface-hover transition-all shadow-sm active:scale-95 disabled:opacity-50 ${deletingId === profile.id ? 'animate-pop-in-2' : ''}`}
                                 title="Cancel"
                               >
                                 <IconX />

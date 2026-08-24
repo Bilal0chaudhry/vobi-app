@@ -21,11 +21,11 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
   return (
     <div
       ref={cardRef}
-      className={`group relative bg-white rounded-xl border overflow-hidden transition-all duration-300 animate-slide-up ${
-        isConfirmingDelete ? 'cursor-default border-red-200 shadow-md shadow-red-500/5 bg-red-50/10' : 'cursor-pointer'
+      className={`group relative bg-surface rounded-xl border overflow-hidden transition-all duration-300 animate-slide-up ${
+        isConfirmingDelete ? 'cursor-default border-status-danger shadow-md shadow-[var(--color-danger-bg)] bg-status-danger' : 'cursor-pointer'
       } ${!isConfirmingDelete && isActive
-          ? 'border-brand-200 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-500/5'
-          : !isConfirmingDelete ? 'border-gray-200 hover:border-gray-300 hover:shadow-md' : ''
+          ? 'border-accent hover:border-accent-hover hover:shadow-lg shadow-[var(--color-accent-subtle)]'
+          : !isConfirmingDelete ? 'border-border hover:border-border-subtle hover:shadow-md' : ''
         }`}
       style={{ animationDelay: `${index * 40}ms` }}
       onClick={(e) => {
@@ -36,7 +36,7 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
     >
       {/* Active indicator strip */}
       {isActive && (
-        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-brand-500 to-violet-500 rounded-l-xl" />
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-accent to-status-violet rounded-l-xl" />
       )}
 
       <div className="px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -44,8 +44,8 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
         <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 ${
           job.source === 'portal'
-            ? 'bg-sky-50 text-sky-600'
-            : 'bg-violet-50 text-violet-600'
+            ? 'bg-status-info text-status-info-text'
+            : 'bg-status-violet text-status-violet-text'
         }`}>
           {job.source === 'portal' ? (
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -63,19 +63,19 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
         {/* Patient Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-sm font-bold text-gray-900 truncate">
+            <p className="text-sm font-bold text-text-primary truncate">
               {job.patientFirstName} {job.patientLastName}
             </p>
             <SourceBadge source={job.source} />
           </div>
-          <p className="text-xs text-gray-500 truncate">
+          <p className="text-xs text-text-secondary truncate">
             {job.insurance} · {job.memberId}
           </p>
           </div>
         </div>
 
         {/* Bottom/Right section: Status, CPT, Time, Actions */}
-        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-gray-100 pl-14 sm:pl-0">
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-border-subtle pl-14 sm:pl-0">
 
         {/* CPT Codes */}
         <div className="hidden md:flex items-center gap-1.5 shrink-0">
@@ -83,12 +83,12 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
             <CptBadge key={c} code={c} />
           ))}
           {(job.cptCodes || []).length > 3 && (
-            <span className="text-[10px] text-gray-400 font-medium">+{job.cptCodes.length - 3}</span>
+            <span className="text-[10px] text-text-tertiary font-medium">+{job.cptCodes.length - 3}</span>
           )}
         </div>
 
         {/* Time */}
-        <div className="text-xs text-gray-400 font-medium shrink-0 hidden sm:block sm:w-16 sm:text-right">
+        <div className="text-xs text-text-tertiary font-medium shrink-0 hidden sm:block sm:w-16 sm:text-right">
           {timeAgo(job.createdAt)}
         </div>
 
@@ -112,7 +112,7 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
                   e.stopPropagation();
                   setIsConfirmingDelete(true);
                 }}
-                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors outline-none"
+                className="p-1.5 text-text-tertiary hover:text-status-danger-text hover:bg-status-danger rounded-lg transition-colors outline-none"
                 title="Delete request"
               >
                 <IconTrash className="w-4 h-4" />
@@ -131,15 +131,15 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
                 setIsDeleting(true);
                 await onDelete(job.id);
               }} 
-              className={`w-8 h-8 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50 ${isConfirmingDelete ? 'animate-pop-in-1' : ''}`}
+              className={`w-8 h-8 rounded-full bg-status-danger text-status-danger-text border border-[var(--color-danger-bg)] flex items-center justify-center hover:opacity-80 transition-all shadow-sm active:scale-95 disabled:opacity-50 ${isConfirmingDelete ? 'animate-pop-in-1' : ''}`}
               title="Confirm Delete"
             >
-              {isDeleting ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <IconCheck className="w-3.5 h-3.5" />}
+              {isDeleting ? <span className="w-3 h-3 border-2 border-status-danger-text border-t-transparent rounded-full animate-spin" /> : <IconCheck className="w-3.5 h-3.5" />}
             </button>
             <button 
               disabled={isDeleting}
               onClick={() => setIsConfirmingDelete(false)} 
-              className={`w-8 h-8 rounded-full bg-gray-50 text-gray-400 border border-gray-200 flex items-center justify-center hover:bg-gray-100 hover:text-gray-600 transition-all shadow-sm active:scale-95 disabled:opacity-50 ${isConfirmingDelete ? 'animate-pop-in-2' : ''}`}
+              className={`w-8 h-8 rounded-full bg-surface-inset text-text-secondary border border-border flex items-center justify-center hover:bg-surface-hover hover:text-text-primary transition-all shadow-sm active:scale-95 disabled:opacity-50 ${isConfirmingDelete ? 'animate-pop-in-2' : ''}`}
               title="Cancel"
             >
               <IconX className="w-3.5 h-3.5" />

@@ -234,10 +234,10 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
             Back
           </Button>
           <div>
-            <h1 className="text-lg font-bold text-gray-900">
+            <h1 className="text-lg font-bold text-text-primary">
               {job.patientFirstName} {job.patientLastName}
             </h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-text-secondary">
               {job.insurance} · {job.memberId}
             </p>
           </div>
@@ -248,9 +248,9 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
             End Call
           </Button>
           <JobBadge status={callStatus} />
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg">
-            <IconClock className="w-3.5 h-3.5 text-gray-500" />
-            <span className="text-sm font-mono font-semibold text-gray-700">{formatTime(elapsed)}</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-inset rounded-lg">
+            <IconClock className="w-3.5 h-3.5 text-text-secondary" />
+            <span className="text-sm font-mono font-semibold text-text-primary">{formatTime(elapsed)}</span>
           </div>
         </div>
       </div>
@@ -261,8 +261,8 @@ export default function LiveView({ job, onBack, onJobComplete, onJobUpdate }) {
       </div>
 
       {showToast && (
-        <div className="fixed bottom-6 right-6 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg shadow-gray-900/20 flex items-center gap-3 animate-fade-in z-50">
-          <IconCheckCircle className="w-5 h-5 text-emerald-400" />
+        <div className="fixed bottom-6 right-6 bg-surface border border-border text-text-primary px-6 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-fade-in z-50">
+          <IconCheckCircle className="w-5 h-5 text-status-success-text" />
           <span className="text-sm font-semibold">Call completed successfully</span>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import useClickOutside from '../../hooks/useClickOutside';
-import { IconDashboard, IconCallHistory, IconSettings, IconShield, IconX } from '../ui/icons';
+import { IconDashboard, IconCallHistory, IconSettings, IconShield, IconX, IconSun, IconMonitor, IconMoon } from '../ui/icons';
 import VobiLogo from '../ui/VobiLogo';
 
 const NAV_ITEMS = [
@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { key: 'settings', label: 'Settings', Icon: IconSettings },
 ];
 
-export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, profile, isOpen, onClose }) {
+export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, profile, isOpen, onClose, theme, onThemeChange }) {
   const [showSignOut, setShowSignOut] = useState(false);
   const menuRef = useRef(null);
   const sidebarRef = useRef(null);
@@ -52,27 +52,27 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
       {/* Sidebar Panel */}
       <aside 
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-screen w-[240px] md:w-[200px] bg-white border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${
+        className={`fixed top-0 left-0 h-screen w-[240px] md:w-[200px] bg-surface border-r border-border flex flex-col z-50 transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${
           isOpen ? 'translate-x-0 shadow-2xl md:shadow-none' : '-translate-x-full'
         }`}
       >
-      <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-0.5">
+      <div className="px-4 pt-4 pb-3 border-b border-border-subtle flex items-center justify-between gap-0.5">
         <div className="flex flex-col items-start gap-0.5">
           <VobiLogo size="md" />
-          <p className="text-[10px] font-semibold text-brand-600 tracking-wider uppercase pl-0.5">
+          <p className="text-[10px] font-semibold text-accent tracking-wider uppercase pl-0.5">
             Autonomous VOB Agent
           </p>
         </div>
         <button 
           onClick={onClose} 
-          className="md:hidden w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+          className="md:hidden w-8 h-8 rounded-lg bg-surface-inset flex items-center justify-center text-text-secondary hover:bg-surface-hover transition-colors"
         >
           <IconX className="w-4 h-4" />
         </button>
       </div>
 
       <div className="px-5 pt-4 pb-2">
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Workspace</p>
+        <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Workspace</p>
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
@@ -84,8 +84,8 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
               id={`nav-${key}`}
               onClick={() => onNavigate(key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive
-                ? 'bg-brand-50 text-brand-700'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-accent-subtle text-accent'
+                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
                 }`}
             >
               <Icon />
@@ -95,7 +95,7 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
         })}
       </nav>
 
-      <div className="px-5 py-4 border-t border-gray-100 relative" ref={menuRef}>
+      <div className="px-5 py-4 border-t border-border-subtle relative flex flex-col gap-3" ref={menuRef}>
         {showSignOut && (
           <div 
             className="absolute bottom-[calc(100%+12px)] left-4 w-[calc(100%-32px)] z-50 animate-fade-in origin-bottom rounded-2xl overflow-hidden"
@@ -110,8 +110,8 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
               borderBottom: '1px solid rgba(255,255,255,0.2)',
             }}
           >
-            <div className="px-4 py-3 border-b border-slate-200/40 bg-slate-50/30">
-               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Signed in as</p>
+            <div className="px-4 py-3 border-b border-border-subtle bg-surface-inset">
+               <p className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest mb-0.5">Signed in as</p>
                <div 
                  className="relative w-full overflow-hidden cursor-default transition-all duration-[800ms]"
                  style={{ WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)' }}
@@ -130,7 +130,7 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
                    p.style.transform = 'translateX(0)';
                  }}
                >
-                 <p className="text-xs font-semibold text-slate-700 whitespace-nowrap block transition-transform duration-[800ms] ease-out">
+                 <p className="text-xs font-semibold text-text-primary whitespace-nowrap block transition-transform duration-[800ms] ease-out">
                    {profile?.email || 'admin@vobi.com'}
                  </p>
                </div>
@@ -140,7 +140,7 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
                 setShowSignOut(false);
                 onLogout();
               }}
-              className="w-full flex items-center justify-between px-4 py-3.5 text-[13px] font-bold text-red-600 hover:bg-red-50/50 hover:text-red-700 transition-all duration-200 group"
+              className="w-full flex items-center justify-between px-4 py-3.5 text-[13px] font-bold text-status-danger-text hover:bg-status-danger transition-all duration-200 group"
             >
               <span>Sign out</span>
               <span className="opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all duration-300 ease-out">
@@ -150,22 +150,59 @@ export default function Sidebar({ currentView, onNavigate, isAdmin, onLogout, pr
           </div>
         )}
         
+        {theme && (
+          <div className="flex bg-surface-inset p-1 rounded-full relative shadow-inner mb-2 -mx-2">
+            <div 
+              className={`absolute top-1 bottom-1 w-[calc(33.33%-4px)] bg-surface rounded-full shadow-sm transition-transform duration-300 ease-out`}
+              style={{ transform: theme === 'light' ? 'translateX(0)' : theme === 'system' ? 'translateX(100%)' : 'translateX(200%)' }}
+            />
+            
+            <button
+              onClick={() => onThemeChange('light')}
+              title="Light Mode"
+              aria-label="Light Mode"
+              aria-pressed={theme === 'light'}
+              className={`flex-1 py-1.5 flex items-center justify-center z-10 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset transition-colors duration-200 ${theme === 'light' ? 'text-text-primary' : 'text-text-tertiary hover:text-text-primary'}`}
+            >
+              <IconSun className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onThemeChange('system')}
+              title="System Theme"
+              aria-label="System Theme"
+              aria-pressed={theme === 'system'}
+              className={`flex-1 py-1.5 flex items-center justify-center z-10 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset transition-colors duration-200 ${theme === 'system' ? 'text-text-primary' : 'text-text-tertiary hover:text-text-primary'}`}
+            >
+              <IconMonitor className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onThemeChange('dark')}
+              title="Dark Mode"
+              aria-label="Dark Mode"
+              aria-pressed={theme === 'dark'}
+              className={`flex-1 py-1.5 flex items-center justify-center z-10 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset transition-colors duration-200 ${theme === 'dark' ? 'text-text-primary' : 'text-text-tertiary hover:text-text-primary'}`}
+            >
+              <IconMoon className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         <button 
           onClick={() => setShowSignOut(!showSignOut)}
-          className={`w-full flex items-center gap-3 p-2 -mx-2 rounded-xl transition-all duration-300 group ${showSignOut ? 'bg-slate-100 shadow-inner' : 'hover:bg-slate-50'}`}
+          className={`w-full flex items-center gap-3 p-2 -mx-2 rounded-xl transition-all duration-300 group ${showSignOut ? 'bg-surface-inset shadow-inner' : 'hover:bg-surface-hover'}`}
         >
           <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all duration-500 ${
             showSignOut 
-              ? 'bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)] scale-105' 
-              : 'bg-brand-100 text-brand-700 group-hover:bg-brand-200 group-hover:scale-105'
+              ? 'bg-gradient-to-br from-accent to-accent-hover text-accent-on-accent shadow-[0_0_15px_rgba(79,70,229,0.4)] scale-105' 
+              : 'bg-accent-subtle text-accent group-hover:bg-accent-subtle group-hover:scale-105'
           }`}>
             {initials}
           </div>
           <div className="min-w-0 text-left flex-1 transition-opacity duration-300">
-            <p className="text-[13px] font-bold text-slate-800 truncate leading-tight">{fullName}</p>
-            <p className="text-[11px] font-medium text-slate-500 truncate mt-0.5">{org}</p>
+            <p className="text-[13px] font-bold text-text-primary truncate leading-tight">{fullName}</p>
+            <p className="text-[11px] font-medium text-text-secondary truncate mt-0.5">{org}</p>
           </div>
-          <div className={`shrink-0 text-slate-400 transition-transform duration-300 mr-1 ${showSignOut ? 'rotate-180 text-brand-500' : 'group-hover:translate-y-[-2px]'}`}>
+          <div className={`shrink-0 text-text-tertiary transition-transform duration-300 mr-1 ${showSignOut ? 'rotate-180 text-accent' : 'group-hover:translate-y-[-2px]'}`}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 15l-6-6-6 6"/>
             </svg>
