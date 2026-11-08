@@ -1,4 +1,4 @@
-pipecat-ai[deepgram,openai,fish,silero,local]
+pipecat-ai[deepgram,openai,fish,silero,local]>=1.15.0
 python-dotenv
 fastapi
 uvicorn

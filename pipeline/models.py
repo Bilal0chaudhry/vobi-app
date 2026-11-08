@@ -23,7 +23,15 @@ class PatientData(BaseModel):
     
     # Cap the array at 20 CPT codes max to prevent memory bloat
     cptCodes: List[CptCode] = Field(..., max_length=20)
-    
+
+    # Optional practice/provider/encounter fields for spoken prompt placeholders
+    providerOrgName: str | None = Field("", max_length=100, strip_whitespace=True)
+    providerName: str | None = Field("", max_length=100, strip_whitespace=True)
+    taxId: str | None = Field("", max_length=20, strip_whitespace=True)
+    callbackNumber: str | None = Field("", max_length=30, strip_whitespace=True)
+    dos: str | None = Field("", max_length=20, strip_whitespace=True)
+    dxCode: str | None = Field("", max_length=20, strip_whitespace=True)
+
     submitted: str = Field("", max_length=30)
     status: str = Field("", max_length=30)
 
@@ -37,3 +45,21 @@ class PortalRequest(BaseModel):
     
     npi: str = Field(..., pattern=r"^\d{10}$", max_length=10)
     providerOrgName: str = Field(..., max_length=100, strip_whitespace=True)
+
+
+class TranscriptTurn(BaseModel):
+    source: str = Field("", max_length=20)
+    message: str = Field("", max_length=4000)
+
+
+class SummaryRequest(BaseModel):
+    patientFirstName: str = Field("", max_length=50)
+    patientLastName: str = Field("", max_length=50)
+    insurance: str = Field("", max_length=100)
+    memberId: str = Field("", max_length=50)
+    dob: str = Field("", max_length=20)
+    providerOrgName: str = Field("", max_length=100)
+    npi: str = Field("", max_length=20)
+    cptCodes: List[str] = Field(default_factory=list, max_length=20)
+    logs: List[TranscriptTurn] = Field(default_factory=list, max_length=500)
+    regenerate: bool = Field(False)

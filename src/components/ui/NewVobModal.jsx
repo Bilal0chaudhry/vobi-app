@@ -38,7 +38,7 @@ function SourceToggle({ value, onChange }) {
   );
 }
 
-export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile }) {
+export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile, settings }) {
   const [source, setSource] = useState('call');
   const [formData, setFormData] = useState({
     firstName: '',
@@ -47,8 +47,13 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile
     payer: 'Cigna',
     memberId: '',
     groupNumber: '',
-    providerOrgName: '',
-    npi: profile?.npi || '',
+    providerOrgName: profile?.organization || '',
+    providerName: profile?.full_name || '',
+    npi: settings?.npi || profile?.npi || '',
+    taxId: settings?.tax_id || '',
+    callbackNumber: settings?.callback_number || '',
+    dos: '',
+    dxCode: '',
     cptCodes: [],
   });
   
@@ -63,10 +68,10 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile
       !formData.memberId || 
       !formData.dob || 
       !formData.npi || 
-      (source === 'portal' && !formData.providerOrgName) ||
+      !formData.providerOrgName ||
       (source === 'call' && formData.cptCodes.length === 0)
     ) {
-      setError("Please fill out all required fields (DOB, NPI, etc).");
+      setError("Please fill out all required fields (Patient, Practice Name, DOB, NPI, etc).");
       return;
     }
 
@@ -78,7 +83,12 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile
       insurance: formData.payer,
       memberId: formData.memberId,
       groupNumber: formData.groupNumber,
-      providerOrgName: formData.providerOrgName,
+      providerOrgName: formData.providerOrgName || profile?.organization || '',
+      providerName: formData.providerName || profile?.full_name || '',
+      taxId: formData.taxId || settings?.tax_id || '',
+      callbackNumber: formData.callbackNumber || settings?.callback_number || '',
+      dos: formData.dos || '',
+      dxCode: formData.dxCode || '',
       npi: formData.npi,
       cptCodes: formData.cptCodes,
       submitted: 'Just now',
@@ -101,7 +111,7 @@ export default function NewVobModal({ onClose, onSubmit, onPortalSubmit, profile
     formData.memberId && 
     formData.dob && 
     formData.npi && 
-    (source === 'call' || formData.providerOrgName) &&
+    formData.providerOrgName &&
     (source === 'portal' || formData.cptCodes.length > 0)
   );
 

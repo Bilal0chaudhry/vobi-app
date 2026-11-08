@@ -3,6 +3,7 @@ import InputField from './InputField';
 import Select from './Select';
 import { IconX } from './icons';
 import { PAYERS } from '../../utils/constants';
+import { formatTaxId, formatPhone } from '../../utils/validation';
 
 export default function PatientForm({ 
   formData, 
@@ -46,10 +47,15 @@ export default function PatientForm({
       dob: '1991-02-02',
       payer: 'Cigna',
       memberId: '23456789100',
-      npi: '1999999984',
-      providerOrgName: 'Vobi Healthcare LLC',
+      npi: formData.npi || '1999999984',
+      providerOrgName: formData.providerOrgName || 'Vobi Healthcare LLC',
+      providerName: formData.providerName || 'Dr. Sarah Smith',
+      taxId: formData.taxId || '12-3456789',
+      callbackNumber: formData.callbackNumber || '(555) 234-5678',
       groupNumber: '00123874',
-      cptCodes: formData.cptCodes || []
+      dos: formData.dos || '2026-11-20',
+      dxCode: formData.dxCode || 'M17.11',
+      cptCodes: (formData.cptCodes && formData.cptCodes.length > 0) ? formData.cptCodes : ['J7323', '20610'],
     });
   };
 
@@ -98,42 +104,86 @@ export default function PatientForm({
       </div>
 
       {showCptCodes && (
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-medium text-text-secondary">CPT codes</label>
-            <span className="text-[10px] text-text-tertiary">Press Enter to add</span>
-          </div>
-          <div
-            className="flex flex-wrap items-center gap-1.5 min-h-[44px] px-3 py-2 bg-surface-inset border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent-subtle focus-within:border-accent transition-all cursor-text"
-            onClick={() => cptRef.current?.focus()}
-          >
-            {(formData.cptCodes || []).map((code) => (
-              <span
-                key={code}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-subtle text-accent rounded text-xs font-medium"
-              >
-                {code}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveCpt(code)}
-                  className="text-accent-hover hover:text-accent transition-colors"
-                >
-                  <IconX className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-            <input
-              ref={cptRef}
-              id="input-cpt"
-              type="text"
-              value={cptInput}
-              onChange={(e) => setCptInput(e.target.value)}
-              onKeyDown={handleAddCpt}
-              placeholder={(formData.cptCodes || []).length === 0 ? 'e.g. 99214' : ''}
-              className="flex-1 min-w-[60px] bg-transparent text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none"
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <InputField
+              id="input-providerName"
+              label="Treating Provider"
+              value={formData.providerName || ''}
+              onChange={(val) => updateField('providerName', val)}
+              placeholder="e.g. Dr. Sarah Smith"
+            />
+            <InputField
+              id="input-taxId"
+              label="Tax ID / TIN"
+              value={formData.taxId || ''}
+              onChange={(val) => updateField('taxId', formatTaxId(val))}
+              placeholder="XX-XXXXXXX"
+            />
+            <InputField
+              id="input-callbackNumber"
+              label="Callback Number"
+              value={formData.callbackNumber || ''}
+              onChange={(val) => updateField('callbackNumber', formatPhone(val))}
+              placeholder="(555) 234-5678"
             />
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InputField
+              id="input-dos"
+              label="Date of service"
+              type="date"
+              value={formData.dos || ''}
+              onChange={(val) => updateField('dos', val)}
+              max="9999-12-31"
+            />
+            <InputField
+              id="input-dxCode"
+              label="Diagnosis / ICD-10"
+              value={formData.dxCode || ''}
+              onChange={(val) => updateField('dxCode', val)}
+              placeholder="e.g. M17.11"
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-medium text-text-secondary">CPT codes</label>
+              <span className="text-[10px] text-text-tertiary">Press Enter to add</span>
+            </div>
+            <div
+              className="flex flex-wrap items-center gap-1.5 min-h-[44px] px-3 py-2 bg-surface-inset border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent-subtle focus-within:border-accent transition-all cursor-text"
+              onClick={() => cptRef.current?.focus()}
+            >
+              {(formData.cptCodes || []).map((code) => (
+                <span
+                  key={code}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-subtle text-accent rounded text-xs font-medium"
+                >
+                  {code}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCpt(code)}
+                    className="text-accent-hover hover:text-accent transition-colors"
+                  >
+                    <IconX className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              <input
+                ref={cptRef}
+                id="input-cpt"
+                type="text"
+                value={cptInput}
+                onChange={(e) => setCptInput(e.target.value)}
+                onKeyDown={handleAddCpt}
+                placeholder={(formData.cptCodes || []).length === 0 ? 'e.g. 99214' : ''}
+                className="flex-1 min-w-[60px] bg-transparent text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none"
+              />
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

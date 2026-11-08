@@ -9,6 +9,7 @@ import SplashScreen from './components/layout/SplashScreen';
 import PortalVobPage from './components/pages/PortalVobPage';
 import PortalResultPage from './components/pages/PortalResultPage';
 import CallResultPage from './components/pages/CallResultPage';
+import CallSummaryPage from './components/pages/CallSummaryPage';
 import Auth from './components/auth/Auth';
 import AdminDashboard from './components/pages/AdminDashboard';
 import { PendingScreen, RejectedScreen } from './components/layout/StatusScreens';
@@ -30,7 +31,7 @@ export default function App() {
   const [showNewVobModal, setShowNewVobModal] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [activeJob, setActiveJob] = useState(null);
-  const [backgroundCallJob, setBackgroundCallJob] = useState(null);
+  const [activeCallJobs, setActiveCallJobs] = useState([]);
   const [adminProfiles, setAdminProfiles] = useState([]);
   const [backendStatus, setBackendStatus] = useState(null);
   const [jobsLoaded, setJobsLoaded] = useState(false);
@@ -127,7 +128,7 @@ export default function App() {
 
     const channel = supabase
       .channel('public:jobs')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs', filter: `user_id=eq.${session.user.id}` }, payload => {
         loadJobs();
       })
       .subscribe();
@@ -161,15 +162,17 @@ export default function App() {
     return () => supabase.removeChannel(adminChannel);
   }, [profile?.is_admin]);
 
+  const pruneFinishedCallJobs = () => {
+    setActiveCallJobs((prev) =>
+      prev.filter((cj) => {
+        const latest = jobs.find((j) => j.id === cj.id) || cj;
+        return !['Completed', 'Call Error'].includes(latest.status);
+      })
+    );
+  };
+
   const handleNavigate = (view) => {
-    // If there's an active call in LiveView, keep it running in background
-    if (currentView === 'liveView' && activeJob) {
-      const currentJobData = jobs.find(j => j.id === activeJob.id) || activeJob;
-      const isCallActive = currentJobData.status === 'Agent on Call' || currentJobData.status === 'On Hold';
-      if (isCallActive) {
-        setBackgroundCallJob(currentJobData);
-      }
-    }
+    pruneFinishedCallJobs();
     setCurrentView(view);
     setActiveJob(null);
     setIsSidebarOpen(false); // Close sidebar on mobile navigation
@@ -178,7 +181,21 @@ export default function App() {
   const handleSubmitNewVob = async (newJobData) => {
     try {
       const newJob = await createJob(newJobData, session.user.id);
-      setActiveJob({ ...newJob, isNewCall: newJobData.isNewCall });
+      const enrichedJob = {
+        ...newJob,
+        providerOrgName: newJob.providerOrgName || newJobData.providerOrgName || profile?.organization || '',
+        providerName: newJobData.providerName || profile?.full_name || '',
+        taxId: newJobData.taxId || userSettings?.tax_id || '',
+        callbackNumber: newJobData.callbackNumber || userSettings?.callback_number || '',
+        dos: newJobData.dos || '',
+        dxCode: newJobData.dxCode || '',
+        isNewCall: newJobData.isNewCall,
+      };
+      setActiveCallJobs((prev) => [
+        ...prev.filter((cj) => cj.id !== enrichedJob.id),
+        enrichedJob,
+      ]);
+      setActiveJob(enrichedJob);
       setCurrentView('liveView');
       setShowNewVobModal(false);
     } catch (err) {
@@ -201,11 +218,16 @@ export default function App() {
     }
   };
 
-  const handleOpenJob = async (job) => {
-    // If this job is already running in background, promote it to foreground
-    if (backgroundCallJob && backgroundCallJob.id === job.id) {
-      setBackgroundCallJob(null);
+  const handleOpenJob = async (job, viewMode = 'summary') => {
+    // If this call is already mounted and running in activeCallJobs, switch directly
+    // to it so its live state (timer, cursor, logs, checklist) is shown immediately.
+    const existingLive = activeCallJobs.find((cj) => cj.id === job.id);
+    if (existingLive && !['Completed', 'Call Error'].includes(job.status) && job.source !== 'portal') {
+      setActiveJob(existingLive);
+      setCurrentView('liveView');
+      return;
     }
+
     // Fetch full job detail (including call_logs, checklist, availity_result)
     const fullJob = await fetchJobById(job.id);
     const resolved = fullJob || job;
@@ -215,15 +237,19 @@ export default function App() {
       // Always show the read-only result page when opening from history/dashboard
       setCurrentView('portalResult');
     } else if (['Completed', 'Call Error'].includes(resolved.status)) {
-      // Completed/errored calls → read-only transcript page
-      setCurrentView('callResult');
+      // Completed/errored calls → structured summary or transcript based on user choice
+      setCurrentView(viewMode === 'transcript' ? 'callResult' : 'callSummary');
     } else {
-      // Active calls → live view with polling
+      // Active calls → ensure mounted in activeCallJobs and show in liveView
+      setActiveCallJobs((prev) =>
+        prev.some((cj) => cj.id === resolved.id) ? prev : [...prev, resolved]
+      );
       setCurrentView('liveView');
     }
   };
 
   const handleBackToHistory = () => {
+    pruneFinishedCallJobs();
     setActiveJob(null);
     setCurrentView('callHistory');
   };
@@ -235,33 +261,55 @@ export default function App() {
   };
 
   const handleBackToDashboard = () => {
-    // If call is still active, keep LiveView running in background
-    if (activeJob) {
-      const currentJobData = jobs.find(j => j.id === activeJob.id) || activeJob;
-      const isCallActive = currentJobData.status === 'Agent on Call' || currentJobData.status === 'On Hold';
-      if (isCallActive && currentJobData.source === 'call') {
-        setBackgroundCallJob(currentJobData);
-      }
-    }
+    pruneFinishedCallJobs();
     setActiveJob(null);
     setCurrentView('dashboard');
   };
 
-  const handleBackgroundCallComplete = (jobId) => {
-    setBackgroundCallJob(null);
+  const handleJobComplete = async (jobId, finalSummary = null) => {
+    const extra = finalSummary ? { summary: finalSummary } : {};
+    setActiveCallJobs((prev) =>
+      prev
+        .map((cj) => (cj.id === jobId ? { ...cj, status: 'Completed', isNewCall: false, ...extra } : cj))
+        .filter((cj) => cj.id !== jobId || (currentView === 'liveView' && activeJob?.id === jobId))
+    );
+    setActiveJob((prev) =>
+      prev && prev.id === jobId ? { ...prev, status: 'Completed', isNewCall: false, ...extra } : prev
+    );
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: 'Completed', ...extra } : j)));
+    await updateJob(jobId, { status: 'Completed', ...extra });
   };
 
-  const handleJobComplete = async (jobId) => {
-    await updateJob(jobId, { status: 'Completed' });
+  const handleViewSummaryFromLive = async (jobId, liveSummary = null) => {
+    const fullJob = await fetchJobById(jobId);
+    const base = fullJob || activeJob || jobs.find((j) => j.id === jobId);
+    if (base) {
+      setActiveJob({
+        ...base,
+        status: 'Completed',
+        summary: liveSummary || base.summary || null,
+      });
+    }
+    setActiveCallJobs((prev) => prev.filter((cj) => cj.id !== jobId));
+    setCurrentView('callSummary');
   };
 
   const handleJobUpdate = async (jobId, updates) => {
+    const isFinished = updates.status === 'Completed' || updates.status === 'Call Error';
+    setActiveCallJobs((prev) =>
+      prev
+        .map((cj) => (cj.id === jobId ? { ...cj, ...updates, isNewCall: false } : cj))
+        .filter((cj) => !isFinished || cj.id !== jobId || (currentView === 'liveView' && activeJob?.id === jobId))
+    );
+    setActiveJob((prev) => (prev && prev.id === jobId ? { ...prev, ...updates, isNewCall: false } : prev));
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...updates } : j)));
     await updateJob(jobId, updates);
   };
 
   const handleDeleteJob = async (jobId) => {
     try {
       await deleteJob(jobId);
+      setActiveCallJobs((prev) => prev.filter((cj) => cj.id !== jobId));
       setJobs(prev => prev.filter(j => j.id !== jobId));
       setToast({ show: true, type: 'success', message: 'Request deleted successfully' });
     } catch (err) {
@@ -292,9 +340,11 @@ export default function App() {
           onSettingsUpdate={(s) => setUserSettings(s)} 
         />;
       case 'liveView':
-        return activeJob
-          ? <LiveView key={activeJob.id} job={jobs.find(j => j.id === activeJob.id) || activeJob} onBack={handleBackToDashboard} onJobComplete={handleJobComplete} onJobUpdate={handleJobUpdate} />
-          : <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
+        if (!activeJob) {
+          return <Dashboard jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} />;
+        }
+        // Active calls in activeCallJobs are rendered persistently in <main> below
+        return null;
       case 'portalVob':
         return activeJob
           ? <PortalVobPage
@@ -319,12 +369,23 @@ export default function App() {
               onRetry={handleRetryPortal}
             />
           : <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} onDeleteJob={handleDeleteJob} />;
+      case 'callSummary':
+        return activeJob
+          ? <CallSummaryPage
+              key={activeJob.id}
+              job={activeJob}
+              onBack={handleBackToHistory}
+              onSwitchToTranscript={() => setCurrentView('callResult')}
+              onJobUpdate={handleJobUpdate}
+            />
+          : <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} onDeleteJob={handleDeleteJob} />;
       case 'callResult':
         return activeJob
           ? <CallResultPage
               key={activeJob.id}
               job={activeJob}
               onBack={handleBackToHistory}
+              onSwitchToSummary={() => setCurrentView('callSummary')}
             />
           : <History jobs={jobs} onOpenJob={handleOpenJob} onNewVerification={handleNewVerificationClick} onDeleteJob={handleDeleteJob} />;
       default:
@@ -392,23 +453,31 @@ export default function App() {
 
             <div className="p-4 sm:p-6 flex-1">
               {renderView()}
+              {activeCallJobs.map((callJob) => {
+                const isForeground = currentView === 'liveView' && activeJob?.id === callJob.id;
+                const mergedJob = {
+                  ...callJob,
+                  ...(jobs.find((j) => j.id === callJob.id) || {}),
+                  isNewCall: callJob.isNewCall,
+                };
+                return (
+                  <div
+                    key={callJob.id}
+                    className={isForeground ? "block" : "hidden"}
+                  >
+                    <LiveView
+                      job={mergedJob}
+                      isVisible={isForeground}
+                      onBack={handleBackToDashboard}
+                      onJobComplete={handleJobComplete}
+                      onJobUpdate={handleJobUpdate}
+                      onViewSummary={handleViewSummaryFromLive}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </main>
-
-          {/* Keep LiveView alive in background for active calls */}
-          {backgroundCallJob && currentView !== 'liveView' && (
-            <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
-              <LiveView
-                job={jobs.find(j => j.id === backgroundCallJob.id) || backgroundCallJob}
-                onBack={() => {}}
-                onJobComplete={(jobId) => {
-                  handleJobComplete(jobId);
-                  handleBackgroundCallComplete(jobId);
-                }}
-                onJobUpdate={handleJobUpdate}
-              />
-            </div>
-          )}
 
           {showNewVobModal && (
             <NewVobModal
@@ -416,6 +485,7 @@ export default function App() {
               onSubmit={handleSubmitNewVob}
               onPortalSubmit={handlePortalSubmit}
               profile={profile}
+              settings={userSettings}
             />
           )}
 

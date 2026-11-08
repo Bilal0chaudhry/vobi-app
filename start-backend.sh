@@ -4,22 +4,29 @@ echo ""
 echo "  🚀 Starting Vobi..."
 echo ""
 
-# Clean up any zombie processes from previous interrupted runs
+# Clean up any zombie processes from previous interrupted runs and free port 8000
 killall cloudflared 2>/dev/null
-killall python 2>/dev/null
-pkill -f server.py 2>/dev/null
+pkill -9 -f "[s]erver\.py" 2>/dev/null
+fuser -k -9 8000/tcp >/dev/null 2>&1
+sleep 0.5
 
-API_KEY=$(openssl rand -hex 32)
-export VOBI_API_KEY="$API_KEY"
-
-echo "  🔑 API key generated"
+# Fail fast if the Python environment is broken (e.g. after an OS/Python upgrade)
+# instead of deploying a frontend that points at a backend that can't start.
+echo "  🐍 Checking backend environment..."
+if ! (cd pipeline && .venv/bin/python -c "import server" 2>/tmp/vobi_import_error.log); then
+  echo "  ❌ Backend failed to import. Details:"
+  tail -5 /tmp/vobi_import_error.log | sed 's/^/     /'
+  echo "  💡 Rebuild it: cd pipeline && rm -rf .venv && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt"
+  exit 1
+fi
+echo "  ✅ Backend environment OK"
 
 rm -f cloudflared.log
 ./cloudflared tunnel --url http://localhost:8000 2>cloudflared.log &
 TUNNEL_PID=$!
 
-# Ensure tunnel is killed if user presses Ctrl+C at any point
-trap "echo -e '\n  ✋ Shutting down...'; kill $TUNNEL_PID 2>/dev/null; exit" INT
+# Ensure tunnel is killed on Ctrl+C or any script exit
+trap "echo -e '\n  ✋ Shutting down...'; kill $TUNNEL_PID 2>/dev/null" INT TERM EXIT
 
 echo "  🌐 Starting tunnel..."
 while true; do

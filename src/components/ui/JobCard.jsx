@@ -12,9 +12,20 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
   useGlobalTimer();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isChoosingView, setIsChoosingView] = useState(false);
   const cardRef = useRef(null);
 
-  useClickOutside(cardRef, () => setIsConfirmingDelete(false), isConfirmingDelete);
+  const isCompletedCall =
+    job.source !== 'portal' && ['Completed', 'Call Error'].includes(job.status);
+
+  useClickOutside(
+    cardRef,
+    () => {
+      setIsConfirmingDelete(false);
+      setIsChoosingView(false);
+    },
+    isConfirmingDelete || isChoosingView
+  );
 
   const isActive = isJobActive(job);
 
@@ -22,16 +33,23 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
     <div
       ref={cardRef}
       className={`group relative bg-surface rounded-xl border overflow-hidden transition-all duration-300 animate-slide-up ${
-        isConfirmingDelete ? 'cursor-default border-status-danger shadow-md shadow-[var(--color-danger-bg)] bg-status-danger' : 'cursor-pointer'
-      } ${!isConfirmingDelete && isActive
+        isConfirmingDelete
+          ? 'cursor-default border-status-danger shadow-md shadow-[var(--color-danger-bg)] bg-status-danger'
+          : isChoosingView
+          ? 'cursor-default border-accent shadow-md shadow-[var(--color-accent-subtle)]'
+          : 'cursor-pointer'
+      } ${!isConfirmingDelete && !isChoosingView && isActive
           ? 'border-accent hover:border-accent-hover hover:shadow-lg shadow-[var(--color-accent-subtle)]'
-          : !isConfirmingDelete ? 'border-border hover:border-border-subtle hover:shadow-md' : ''
+          : !isConfirmingDelete && !isChoosingView ? 'border-border hover:border-border-subtle hover:shadow-md' : ''
         }`}
       style={{ animationDelay: `${index * 40}ms` }}
       onClick={(e) => {
-        if (!isConfirmingDelete) {
-          onOpen(job);
+        if (isConfirmingDelete) return;
+        if (isCompletedCall) {
+          setIsChoosingView((prev) => !prev);
+          return;
         }
+        onOpen(job);
       }}
     >
       {/* Active indicator strip */}
@@ -97,12 +115,41 @@ export default function JobCard({ job, onOpen, onDelete, index = 0 }) {
           <JobBadge status={job.status} />
         </div>
 
+        {/* Inline Summary | Transcript chooser for completed calls */}
+        {isCompletedCall && isChoosingView && !isConfirmingDelete && (
+          <div
+            className="flex items-center gap-1.5 animate-fade-in shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setIsChoosingView(false);
+                onOpen(job, 'summary');
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent text-white hover:bg-accent-hover shadow-sm transition-all active:scale-95"
+            >
+              Summary
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsChoosingView(false);
+                onOpen(job, 'transcript');
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-inset text-text-primary border border-border hover:bg-surface-hover transition-all active:scale-95"
+            >
+              Transcript
+            </button>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="relative shrink-0 flex items-center justify-end sm:w-24 h-10">
           {onDelete && (
             <div 
               className={`absolute right-0 flex items-center gap-1 transition-all duration-300 transform
-                ${!isConfirmingDelete 
+                ${!isConfirmingDelete && !isChoosingView
                   ? 'opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0' 
                   : 'opacity-0 translate-x-4 pointer-events-none'
                 }`}

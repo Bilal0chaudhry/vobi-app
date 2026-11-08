@@ -22,7 +22,10 @@ async function fetchWithConfig(endpoint, options = {}) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Server returned ${res.status}`);
+    const detail = Array.isArray(err.detail)
+      ? err.detail.map((d) => d.msg).join('; ')
+      : err.detail;
+    throw new Error(detail || `Server returned ${res.status}`);
   }
 
   return res.json();
@@ -50,12 +53,37 @@ export function startCall(patientData) {
   });
 }
 
-export function endCall() {
-  return fetchWithConfig("/end-call", { method: "POST" });
+export function endCall(jobId) {
+  const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
+  return fetchWithConfig(`/end-call${query}`, { method: "POST" });
 }
 
-export function pollMessages(since = 0) {
-  return fetchWithConfig(`/messages?since=${since}`);
+export function pollMessages(jobId, since = 0) {
+  return fetchWithConfig(`/messages?job_id=${encodeURIComponent(jobId)}&since=${since}`);
+}
+
+export function generateCallSummary(jobId, job = {}, regenerate = false) {
+  const logs = Array.isArray(job.logs)
+    ? job.logs
+        .filter((l) => l && (l.source === "VOBI" || l.source === "REP") && l.message)
+        .map((l) => ({ source: String(l.source), message: String(l.message) }))
+    : [];
+
+  return fetchWithConfig(`/calls/${encodeURIComponent(jobId)}/summary`, {
+    method: "POST",
+    body: JSON.stringify({
+      patientFirstName: job.patientFirstName || "",
+      patientLastName: job.patientLastName || "",
+      insurance: job.insurance || "",
+      memberId: job.memberId || "",
+      dob: job.dob || "",
+      providerOrgName: job.providerOrgName || "",
+      npi: job.npi || "",
+      cptCodes: Array.isArray(job.cptCodes) ? job.cptCodes : [],
+      logs,
+      regenerate: Boolean(regenerate),
+    }),
+  });
 }
 
 export function checkHealth() {

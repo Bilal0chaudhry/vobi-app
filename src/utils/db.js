@@ -3,6 +3,8 @@ import { supabase } from './supabase';
 function mapJobToFrontend(j) {
   const cd = Array.isArray(j.call_data) ? j.call_data[0] : j.call_data;
   const pd = Array.isArray(j.portal_data) ? j.portal_data[0] : j.portal_data;
+  const rawChecklist = cd?.checklist || j.checklist || {};
+  const { _summary, ...cleanChecklist } = rawChecklist;
 
   return {
     id: j.id,
@@ -17,7 +19,8 @@ function mapJobToFrontend(j) {
     status: j.status,
     stediResult: pd?.stedi_result ?? j.stedi_result ?? null,
     logs: cd?.call_logs || j.call_logs || [],
-    checklist: cd?.checklist || j.checklist || {},
+    checklist: cleanChecklist,
+    summary: _summary || j.summary || null,
     source: j.source,
     createdAt: j.created_at,
   };
@@ -109,7 +112,22 @@ export async function updateJob(jobId, updates) {
 
   const callUpdates = {};
   if (updates.logs !== undefined) callUpdates.call_logs = updates.logs;
-  if (updates.checklist !== undefined) callUpdates.checklist = updates.checklist;
+  if (updates.checklist !== undefined || updates.summary !== undefined) {
+    let baseChecklist = updates.checklist;
+    if (baseChecklist === undefined) {
+      const { data: existing } = await supabase
+        .from('call_data')
+        .select('checklist')
+        .eq('job_id', jobId)
+        .maybeSingle();
+      baseChecklist = existing?.checklist || {};
+    }
+    const mergedChecklist = { ...baseChecklist };
+    if (updates.summary !== undefined && updates.summary !== null) {
+      mergedChecklist._summary = updates.summary;
+    }
+    callUpdates.checklist = mergedChecklist;
+  }
 
   if (Object.keys(callUpdates).length > 0) {
     promises.push(

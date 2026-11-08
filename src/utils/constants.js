@@ -7,15 +7,6 @@ export const PAYERS = [
   'UnitedHealthcare',
 ];
 
-export const PAYER_PHONES = {
-  'Aetna': '1-800-624-0756',
-  'Blue Cross Blue Shield': '1-800-676-2583',
-  'Cigna': '1-800-244-6224',
-  'Humana': '1-800-448-6262',
-  'Medicare': '1-800-633-4227',
-  'UnitedHealthcare': '1-800-842-2656',
-};
-
 export const COMPLETED_STATUSES = ['Completed', 'Verified (Portal)', 'Portal Error', 'Call Error'];
 
 export const isJobActive = (job) => {
@@ -35,4 +26,5 @@ export const buildChecklistItems = (job) => [
   { key: 'priorAuth', label: 'Prior Authorization' },
   { key: 'referral', label: 'PCP Referral' },
   { key: 'formulary', label: 'Formulary / Preferred Drug' },
+  { key: 'referenceNumber', label: 'Call Reference #' },
 ];

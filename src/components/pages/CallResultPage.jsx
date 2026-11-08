@@ -7,7 +7,7 @@ import { IconArrowLeft, IconCheckCircle, IconAlertCircle } from '../ui/icons';
 import { timeAgo } from '../../utils/formatters';
 import { buildChecklistItems } from '../../utils/constants';
 
-export default function CallResultPage({ job, onBack }) {
+export default function CallResultPage({ job, onBack, onSwitchToSummary }) {
   const feedRef = useRef(null);
   const logs = job.logs || [];
   const checklist = job.checklist || {};
@@ -22,7 +22,7 @@ export default function CallResultPage({ job, onBack }) {
   return (
     <div className="animate-fade-in h-[calc(100vh-32px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 flex-shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 flex-shrink-0">
         <div className="flex items-center gap-4">
           <Button id="btn-back-history" onClick={onBack} variant="ghost">
             <IconArrowLeft />
@@ -41,7 +41,24 @@ export default function CallResultPage({ job, onBack }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {onSwitchToSummary && (
+            <div className="inline-flex items-center bg-surface-inset p-1 rounded-xl border border-border-subtle">
+              <button
+                type="button"
+                onClick={onSwitchToSummary}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-text-secondary hover:text-text-primary transition-all"
+              >
+                Summary
+              </button>
+              <button
+                type="button"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-surface text-text-primary shadow-sm transition-all"
+              >
+                Transcript
+              </button>
+            </div>
+          )}
           <JobBadge status={job.status} />
           {isCompleted && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-status-success border border-[var(--color-success-bg)] rounded-lg">
